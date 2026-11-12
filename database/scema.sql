@@ -1,14 +1,13 @@
 -- phpMyAdmin SQL Dump
--- version 4.9.0.1
+-- version 5.2.3-3.fc45
 -- https://www.phpmyadmin.net/
 --
--- Host: sql309.infinityfree.com
--- Generation Time: Nov 07, 2026 at 12:47 AM
--- Server version: 11.4.13-MariaDB
--- PHP Version: 7.2.22
+-- Host: localhost
+-- Generation Time: Nov 12, 2026 at 01:26 PM
+-- Server version: 12.3.2-MariaDB
+-- PHP Version: 8.5.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
-SET AUTOCOMMIT = 0;
 START TRANSACTION;
 SET time_zone = "+00:00";
 
@@ -19,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `if0_43255048_reps_db`
+-- Database: `reps_db`
 --
 
 -- --------------------------------------------------------
@@ -30,7 +29,7 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `categories` (
   `id` int(11) NOT NULL,
-  `name` varchar(100) NOT NULL
+  `name` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
@@ -38,11 +37,12 @@ CREATE TABLE `categories` (
 --
 
 INSERT INTO `categories` (`id`, `name`) VALUES
-(5, 'เกี่ยวคอมพิวเตอร์'),
-(8, 'ลงโปรแกรม'),
-(9, 'ลงWindows'),
-(10, 'ซ่อมเครื่องพิมพ์'),
-(11, 'ปัญหาการเชื่อมต่อ WiFi');
+(1, 'คอมพิวเตอร์และฮาร์ดแวร์'),
+(5, 'งานแอดมิน / ระบบ'),
+(2, 'ระบบปฏิบัติการและซอฟต์แวร์'),
+(4, 'อินเทอร์เน็ต / เครือข่าย'),
+(6, 'อื่นๆ'),
+(3, 'อุปกรณ์ต่อพ่วงและเครื่องพิมพ์');
 
 -- --------------------------------------------------------
 
@@ -60,18 +60,80 @@ CREATE TABLE `department` (
 --
 
 INSERT INTO `department` (`d_id`, `name`) VALUES
-(1, 'ช่างไฟฟ้ากำลัง'),
-(2, 'ช่างยนต์'),
-(3, 'ช่างกลโรงงาน'),
-(4, 'ช่างเชื่อมโลหะ'),
-(5, 'ช่างก่อสร้าง'),
-(6, 'อิเล็กทรอนิกส์และหุ่นยนต์'),
-(7, 'ช่างเทคนิคอุตสาหกรรม'),
-(8, 'เทคโนโลยีสารสนเทศ'),
-(9, 'เทคโนโลยีธุรกิจดิจิทัล'),
-(10, 'การบัญชี'),
-(11, 'ช่างเทคนิคคอมพิวเตอร์'),
-(12, 'บุคลากร');
+(3, 'การบัญชี'),
+(8, 'ช่างกลโรงงาน'),
+(10, 'ช่างก่อสร้าง'),
+(7, 'ช่างยนต์'),
+(9, 'ช่างเชื่อมโลหะ'),
+(13, 'ช่างเทคนิคคอมพิวเตอร์'),
+(12, 'ช่างเทคนิคอุตสาหกรรม'),
+(6, 'ช่างไฟฟ้ากำลัง'),
+(5, 'บุคลากร'),
+(11, 'อิเล็กทรอนิกส์และหุ่นยนต์'),
+(1, 'เทคโนโลยีธุรกิจดิจิทัล'),
+(2, 'เทคโนโลยีสารสนเทศ');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `email_logs`
+--
+
+CREATE TABLE `email_logs` (
+  `id` int(11) NOT NULL,
+  `ticket_id` int(11) DEFAULT NULL COMMENT 'ใบงานที่เกี่ยวข้อง (NULL ได้ถ้าลบใบงานแล้ว)',
+  `to_email` varchar(255) NOT NULL COMMENT 'อีเมลผู้รับ',
+  `status` enum('pending','sent','failed') NOT NULL DEFAULT 'pending' COMMENT 'ผลการส่ง',
+  `error` text DEFAULT NULL COMMENT 'ข้อความ error กรณีส่งไม่สำเร็จ',
+  `sent_at` datetime DEFAULT NULL COMMENT 'เวลาที่ส่งสำเร็จ',
+  `created_at` datetime NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `inventory_items`
+--
+
+CREATE TABLE `inventory_items` (
+  `id` int(11) NOT NULL,
+  `item_code` varchar(50) DEFAULT NULL COMMENT 'รหัสวัสดุ/อะไหล่',
+  `name` varchar(255) NOT NULL,
+  `unit` varchar(50) NOT NULL DEFAULT 'ชิ้น',
+  `stock_qty` int(11) NOT NULL DEFAULT 0,
+  `min_stock` int(11) NOT NULL DEFAULT 5 COMMENT 'จุดแจ้งเตือนของใกล้หมด',
+  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `inventory_items`
+--
+
+INSERT INTO `inventory_items` (`id`, `item_code`, `name`, `unit`, `stock_qty`, `min_stock`, `updated_at`) VALUES
+(1, 'MAT-001', 'หัวแลน RJ45 Cat6', 'หัว', 100, 20, '2026-11-12 14:02:49'),
+(2, 'MAT-002', 'สายแลน Cat6', 'เมตร', 300, 50, '2026-11-12 14:02:49'),
+(3, 'MAT-003', 'เมาส์ USB มาตรฐาน', 'ตัว', 15, 5, '2026-11-12 14:02:49'),
+(4, 'MAT-004', 'คีย์บอร์ด USB มาตรฐาน', 'ตัว', 15, 5, '2026-11-12 14:02:49'),
+(5, 'MAT-005', 'ถ่านไบออส CR2032', 'ก้อน', 20, 5, '2026-11-12 14:02:49');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `inventory_movements`
+--
+
+CREATE TABLE `inventory_movements` (
+  `id` int(11) NOT NULL,
+  `item_id` int(11) NOT NULL,
+  `movement_type` enum('receive','withdraw','adjust') NOT NULL COMMENT 'receive=รับเข้า, withdraw=เบิกออก, adjust=ปรับยอด',
+  `qty_change` int(11) NOT NULL COMMENT 'จำนวนที่เปลี่ยน (บวก=เพิ่ม, ลบ=ลด)',
+  `stock_before` int(11) NOT NULL COMMENT 'ยอดคงเหลือก่อนทำรายการ',
+  `stock_after` int(11) NOT NULL COMMENT 'ยอดคงเหลือหลังทำรายการ',
+  `ticket_id` int(11) DEFAULT NULL COMMENT 'ใบงานที่เบิกวัสดุ (ถ้ามี)',
+  `action_by` int(11) DEFAULT NULL COMMENT 'ผู้ทำรายการ (NULL = ระบบ)',
+  `note` varchar(255) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -80,21 +142,65 @@ INSERT INTO `department` (`d_id`, `name`) VALUES
 --
 
 CREATE TABLE `password_reset_tokens` (
-  `id` bigint(20) UNSIGNED NOT NULL,
+  `id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
-  `token_hash` char(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
-  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
+  `token_hash` char(64) NOT NULL,
   `expires_at` datetime NOT NULL,
-  `used_at` datetime DEFAULT NULL
+  `used_at` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `score_logs`
+--
+
+CREATE TABLE `score_logs` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL COMMENT 'สตาฟที่ถูกหัก/เพิ่มคะแนน',
+  `ticket_id` int(11) DEFAULT NULL,
+  `points_change` int(11) NOT NULL COMMENT 'จำนวนคะแนนที่เปลี่ยน เช่น -5, +2',
+  `reason` varchar(255) NOT NULL,
+  `action_by` int(11) DEFAULT NULL COMMENT 'NULL = ระบบหักอัตโนมัติ',
+  `created_at` datetime NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `system_settings`
+--
+
+CREATE TABLE `system_settings` (
+  `setting_key` varchar(100) NOT NULL,
+  `setting_value` text DEFAULT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Dumping data for table `password_reset_tokens`
+-- Dumping data for table `system_settings`
 --
 
-INSERT INTO `password_reset_tokens` (`id`, `user_id`, `token_hash`, `created_at`, `expires_at`, `used_at`) VALUES
-(1, 1, 'd30df6b90a9354035670fa31d866ca635fdc28c0278e2857609b012bbbbd7cdd', '2026-11-01 13:49:10', '2026-11-01 14:49:10', NULL),
-(2, 10, '77854fc58cf1b6bdc9ef11851fb4bf69a39ff4d96e6d9d16e7e84205d0caa61b', '2026-11-01 13:52:16', '2026-11-01 14:52:16', '2026-11-01 13:55:42');
+INSERT INTO `system_settings` (`setting_key`, `setting_value`, `description`, `updated_at`) VALUES
+('academic_year_start_month', '5', 'เดือนที่เริ่มต้นปีการศึกษา (5 = พฤษภาคม)', '2026-11-12 14:02:49'),
+('donate_enabled', '0', 'เปิดปุ่มสนับสนุนค่ากาแฟ (1=เปิด, 0=ปิด)', '2026-11-12 20:20:48'),
+('donate_message', '', 'ข้อความขอบคุณ/รายละเอียดหน้าสนับสนุน (ข้อความล้วน)', '2026-11-12 20:20:48'),
+('donate_qr_path', '', 'path รูป QR พร้อมเพย์ (โฟลเดอร์อัปโหลดที่ปลอดภัย)', '2026-11-12 20:20:48'),
+('footer_text', '', 'ข้อความ footer (ข้อความล้วน)', '2026-11-12 20:20:48'),
+('homepage_announcement', '', 'ประกาศบนหน้าแรก (ข้อความล้วน)', '2026-11-12 20:20:48'),
+('homepage_intro', '', 'ข้อความต้อนรับ/แนะนำบนหน้าแรก (ข้อความล้วน)', '2026-11-12 20:20:48'),
+('homepage_show_announcement', '0', 'แสดงประกาศหน้าแรก (1=แสดง, 0=ซ่อน)', '2026-11-12 20:20:48'),
+('homepage_show_faq', '1', 'แสดง FAQ หน้าแรก (1=แสดง, 0=ซ่อน)', '2026-11-12 20:20:48'),
+('homepage_show_steps', '1', 'แสดงขั้นตอนการแจ้งซ่อมหน้าแรก (1=แสดง, 0=ซ่อน)', '2026-11-12 20:20:48'),
+('primary_color', '', 'สีหลักแบบกำหนดเอง (hex) ถ้าว่างให้ใช้ theme_color', '2026-11-12 20:20:48'),
+('queue_dispatch_mode', 'auto', 'โหมดจ่ายงาน: auto=ตามคิวอัตโนมัติ, manual=admin เลือกสตาฟเอง', '2026-11-12 20:20:48'),
+('queue_penalty_points', '5', 'จำนวนคะแนนที่หักเมื่อไม่รับงานตามคิว', '2026-11-12 14:02:49'),
+('queue_timeout_minutes', '30', 'เวลาที่สตาฟต้องกดรับงานตามคิว (นาที)', '2026-11-12 14:02:49'),
+('site_logo_path', '', 'path ไฟล์โลโก้เว็บ (โฟลเดอร์อัปโหลดที่ปลอดภัย)', '2026-11-12 20:20:48'),
+('site_name', 'REPS - ระบบแจ้งซ่อมอุปกรณ์คอมพิวเตอร์', 'ชื่อเว็บไซต์ที่แสดงบน Header และ Title', '2026-11-12 14:02:49'),
+('theme_color', 'default', 'ธีมสีหลักของเว็บไซต์ (default, blue, emerald, rose, amber)', '2026-11-12 14:02:49');
 
 -- --------------------------------------------------------
 
@@ -104,38 +210,33 @@ INSERT INTO `password_reset_tokens` (`id`, `user_id`, `token_hash`, `created_at`
 
 CREATE TABLE `tickets` (
   `id` int(11) NOT NULL,
-  `ticket_no` varchar(50) NOT NULL,
-  `requester_id` int(11) NOT NULL,
-  `category_id` int(11) NOT NULL,
-  `location_note` varchar(255) DEFAULT NULL,
-  `symptom` text NOT NULL,
-  `urgency` enum('urgent','normal','low') NOT NULL DEFAULT 'normal',
-  `status` enum('pending','in_progress','completed','cancelled') NOT NULL DEFAULT 'pending',
-  `assigned_to` int(11) DEFAULT NULL,
-  `resolution_summary` text DEFAULT NULL,
-  `cancel_reason` varchar(255) DEFAULT NULL,
-  `created_at` datetime DEFAULT current_timestamp(),
-  `accepted_at` datetime DEFAULT NULL,
-  `completed_at` datetime DEFAULT NULL
-) ;
-
---
--- Dumping data for table `tickets`
---
-
-INSERT INTO `tickets` (`id`, `ticket_no`, `requester_id`, `category_id`, `location_note`, `symptom`, `urgency`, `status`, `assigned_to`, `resolution_summary`, `cancel_reason`, `created_at`, `accepted_at`, `completed_at`) VALUES
-(1, 'LB-2026-DC7C69DF', 7, 5, 'ทดสอบระบบจริง', 'ทดสอบระบบจริง', 'urgent', 'pending', NULL, NULL, NULL, '2026-11-01 12:17:48', NULL, NULL),
-(2, 'LB-2026-520AF6FA', 7, 10, 'ทดสอบระบบจริง', 'ทดสอบแจ้งเตือนline', 'urgent', 'pending', NULL, NULL, NULL, '2026-11-01 12:20:33', NULL, NULL),
-(3, 'LB-2026-B5754EC4', 7, 11, 'ทดสอบระบบจริง', 'ระบบแจ้งเตือน', 'normal', 'pending', NULL, NULL, NULL, '2026-11-01 12:37:55', NULL, NULL),
-(4, 'LB-2026-4D8FD319', 7, 9, 'ทดสอบแจ้งเตือน', 'ทดสอบแจ้งเตือน', 'low', 'pending', NULL, NULL, NULL, '2026-11-01 12:43:07', NULL, NULL),
-(5, 'LB-2026-16816C12', 9, 5, 'อาคาร5ชั้น3 ห้องสมุด', 'อาการย่อย: ลูปหน้าwindows เข้าไม่ได้\n\nรายละเอียด: มาดูสิห้ามถาม', 'urgent', 'in_progress', 9, NULL, NULL, '2026-11-01 13:07:10', '2026-11-01 13:17:44', NULL),
-(6, 'LB-2026-60E03DD5', 8, 9, 'asdf', 'fadsf', 'urgent', 'pending', NULL, NULL, NULL, '2026-11-01 13:42:00', NULL, NULL),
-(7, 'LB-2026-96A0F8B1', 10, 5, 'ตึกอำนวยการ', 'ยกคอมช่วยครูหน่อย100 เครื่อง', 'urgent', 'in_progress', 1, NULL, NULL, '2026-11-01 13:58:40', '2026-11-02 17:28:29', NULL),
-(8, 'LB-2026-31030F6F', 8, 11, 'ห้องสมุด', 'เน็ตเสีย', 'urgent', 'in_progress', 1, NULL, NULL, '2026-11-01 14:01:09', '2026-11-02 17:28:07', NULL),
-(9, 'LB-2026-37C75BBA', 10, 11, 'ตึกคอม ห้อง224', 'เชื่อมเน็ตไม่ได้', 'urgent', 'completed', 1, 'เสร็จสิ้นภารกิจ', NULL, '2026-11-02 09:07:35', '2026-11-02 09:08:45', '2026-11-02 09:09:52'),
-(10, 'LB-2026-45A1CD77', 11, 10, '224', 'อาการย่อย: ปวดหัว\n\nรายละเอียด: พิมพ์ตัวเล็กมากๆ', 'urgent', 'in_progress', 1, NULL, NULL, '2026-11-02 13:38:37', '2026-11-02 13:41:08', NULL),
-(11, 'LB-2026-D3DF0FB3', 10, 8, '221', 'แอนตี้', 'low', 'pending', NULL, NULL, NULL, '2026-11-02 13:52:49', NULL, NULL),
-(12, 'LB-2026-6EAB86C8', 8, 5, 'sdf', 'asdf', 'normal', 'completed', 1, 'jlkj', NULL, '2026-11-02 17:16:50', '2026-11-02 17:17:32', '2026-11-02 17:18:42');
+  `ticket_no` varchar(30) NOT NULL COMMENT 'เลขที่ใบงาน เช่น LB-2026-XXXX',
+  `requester_id` int(11) NOT NULL COMMENT 'ผู้แจ้งซ่อม',
+  `category_id` int(11) DEFAULT NULL,
+  `custom_category` varchar(255) DEFAULT NULL COMMENT 'ระบุหมวดหมู่เองเมื่อเลือก อื่นๆ',
+  `device_detail` text DEFAULT NULL COMMENT 'รายละเอียดอุปกรณ์: ชนิด ยี่ห้อ รุ่น รหัสครุภัณฑ์',
+  `quantity` int(11) NOT NULL DEFAULT 1 COMMENT 'จำนวนอุปกรณ์ที่ชำรุด',
+  `location_note` varchar(255) NOT NULL COMMENT 'สถานที่ / ห้อง / เลขเครื่อง',
+  `contact_person` varchar(255) DEFAULT NULL COMMENT 'ผู้ที่ติดต่อได้หน้างาน',
+  `coordinator_teacher` varchar(255) DEFAULT NULL COMMENT 'ครูผู้ประสานงาน',
+  `coordinator_phone` varchar(20) DEFAULT NULL COMMENT 'เบอร์โทรครูผู้ประสานงาน',
+  `room_caretaker` varchar(255) DEFAULT NULL COMMENT 'ครูผู้ดูแลห้อง',
+  `room_caretaker_phone` varchar(20) DEFAULT NULL COMMENT 'เบอร์โทรครูผู้ดูแลห้อง',
+  `symptom` text NOT NULL COMMENT 'อาการเสียที่พบ',
+  `urgency` enum('urgent','normal') NOT NULL DEFAULT 'normal' COMMENT 'ความเร่งด่วน: urgent=ด่วน (ต้องแก้ภายในวันนี้), normal=ปกติ',
+  `urgency_reason` varchar(500) DEFAULT NULL COMMENT 'เหตุผลที่ต้องดำเนินการด่วน',
+  `status` enum('pending','in_progress','awaiting_signoff','completed','cancelled') NOT NULL DEFAULT 'pending' COMMENT 'สถานะงาน: pending=รอรับ, in_progress=กำลังซ่อม, awaiting_signoff=รอครูรับรอง, completed=เสร็จสมบูรณ์, cancelled=ยกเลิก',
+  `assigned_to` int(11) DEFAULT NULL COMMENT 'สตาฟ/ช่างผู้รับผิดชอบงาน',
+  `queue_assigned_to` int(11) DEFAULT NULL COMMENT 'ID สตาฟที่ถึงคิวรับงานนี้',
+  `queue_expires_at` datetime DEFAULT NULL COMMENT 'เวลาหมดเขตรับงานตามคิว',
+  `resolution_summary` text DEFAULT NULL COMMENT 'สรุปผลการซ่อม / หมายเหตุปิดงาน',
+  `repair_method` text DEFAULT NULL COMMENT 'วิธีดำเนินการ / สิ่งที่ซ่อมไปบ้าง',
+  `completion_image` varchar(255) DEFAULT NULL COMMENT 'Path รูปหลักฐานตอนปิดงาน',
+  `cancel_reason` varchar(255) DEFAULT NULL COMMENT 'เหตุผลการยกเลิก',
+  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
+  `accepted_at` datetime DEFAULT NULL COMMENT 'วันที่/เวลาที่กดรับงาน',
+  `completed_at` datetime DEFAULT NULL COMMENT 'วันที่/เวลาที่ปิดงานเสร็จสิ้น'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -147,21 +248,8 @@ CREATE TABLE `ticket_attachments` (
   `id` int(11) NOT NULL,
   `ticket_id` int(11) NOT NULL,
   `file_path` varchar(255) NOT NULL,
-  `created_at` datetime DEFAULT current_timestamp()
+  `uploaded_at` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `ticket_attachments`
---
-
-INSERT INTO `ticket_attachments` (`id`, `ticket_id`, `file_path`, `created_at`) VALUES
-(1, 1, 'ticket-private/tk_30de424b6ca4f8d263177ee5bc42619e.png', '2026-11-01 12:17:48'),
-(2, 5, 'ticket-private/tk_ef7514b0a53574f4a0fa64f5823ed031.jpg', '2026-11-01 13:07:10'),
-(3, 7, 'ticket-private/tk_ac3c4111f07b77a2698d08f8e3d77a65.jpg', '2026-11-01 13:58:40'),
-(4, 8, 'ticket-private/tk_f33069d6b5ab6fea31adbeda5cfadda4.jpg', '2026-11-01 14:01:09'),
-(5, 9, 'ticket-private/tk_452af396f48c4b7ea0ac4d287ae5736b.png', '2026-11-02 09:07:35'),
-(6, 10, 'ticket-private/tk_08665b9c5688fc93fc9c3e0575c026cd.jpg', '2026-11-02 13:38:37'),
-(7, 11, 'ticket-private/tk_270e65f55b6932a770903277a149c826.jpg', '2026-11-02 13:52:49');
 
 -- --------------------------------------------------------
 
@@ -172,38 +260,44 @@ INSERT INTO `ticket_attachments` (`id`, `ticket_id`, `file_path`, `created_at`) 
 CREATE TABLE `ticket_logs` (
   `id` int(11) NOT NULL,
   `ticket_id` int(11) NOT NULL,
-  `old_status` varchar(50) DEFAULT NULL,
-  `new_status` varchar(50) NOT NULL,
-  `action_by` int(11) NOT NULL,
-  `created_at` datetime DEFAULT current_timestamp(),
-  `source` varchar(10) NOT NULL DEFAULT 'web'
+  `old_status` varchar(30) DEFAULT NULL,
+  `new_status` varchar(30) NOT NULL,
+  `action_by` int(11) DEFAULT NULL,
+  `source` varchar(30) NOT NULL DEFAULT 'web',
+  `created_at` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- --------------------------------------------------------
+
 --
--- Dumping data for table `ticket_logs`
+-- Table structure for table `ticket_materials`
 --
 
-INSERT INTO `ticket_logs` (`id`, `ticket_id`, `old_status`, `new_status`, `action_by`, `created_at`, `source`) VALUES
-(1, 1, NULL, 'pending', 7, '2026-11-01 12:17:48', 'web'),
-(2, 2, NULL, 'pending', 7, '2026-11-01 12:20:33', 'web'),
-(3, 3, NULL, 'pending', 7, '2026-11-01 12:37:55', 'web'),
-(4, 4, NULL, 'pending', 7, '2026-11-01 12:43:07', 'web'),
-(5, 5, NULL, 'pending', 9, '2026-11-01 13:07:10', 'web'),
-(6, 5, 'pending', 'in_progress', 9, '2026-11-01 13:17:44', 'web'),
-(7, 6, NULL, 'pending', 8, '2026-11-01 13:42:00', 'web'),
-(8, 7, NULL, 'pending', 10, '2026-11-01 13:58:40', 'web'),
-(9, 8, NULL, 'pending', 8, '2026-11-01 14:01:09', 'web'),
-(10, 9, NULL, 'pending', 10, '2026-11-02 09:07:35', 'web'),
-(11, 9, 'pending', 'in_progress', 1, '2026-11-02 09:08:45', 'web'),
-(12, 9, 'in_progress', 'completed', 1, '2026-11-02 09:09:52', 'web'),
-(13, 10, NULL, 'pending', 11, '2026-11-02 13:38:37', 'web'),
-(14, 10, 'pending', 'in_progress', 1, '2026-11-02 13:41:08', 'web'),
-(15, 11, NULL, 'pending', 10, '2026-11-02 13:52:49', 'web'),
-(16, 12, NULL, 'pending', 8, '2026-11-02 17:16:50', 'web'),
-(17, 12, 'pending', 'in_progress', 1, '2026-11-02 17:17:32', 'web'),
-(18, 12, 'in_progress', 'completed', 1, '2026-11-02 17:18:42', 'web'),
-(19, 8, 'pending', 'in_progress', 1, '2026-11-02 17:28:07', 'web'),
-(20, 7, 'pending', 'in_progress', 1, '2026-11-02 17:28:29', 'web');
+CREATE TABLE `ticket_materials` (
+  `id` int(11) NOT NULL,
+  `ticket_id` int(11) NOT NULL,
+  `item_id` int(11) NOT NULL,
+  `qty_used` int(11) NOT NULL,
+  `withdrawn_by` int(11) NOT NULL COMMENT 'ผู้เบิก (user_id)',
+  `note` varchar(255) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `ticket_signoffs`
+--
+
+CREATE TABLE `ticket_signoffs` (
+  `id` int(11) NOT NULL,
+  `ticket_id` int(11) NOT NULL,
+  `signed_by` int(11) NOT NULL COMMENT 'admin (ครู) ผู้รับรองงาน',
+  `signature_image` varchar(255) DEFAULT NULL COMMENT 'path รูปลายเซ็น (private storage)',
+  `signed_at` datetime NOT NULL DEFAULT current_timestamp() COMMENT 'เวลาที่ลงนาม',
+  `ip` varchar(45) NOT NULL COMMENT 'IP ของผู้ลงนาม (รองรับ IPv6)',
+  `note` varchar(255) DEFAULT NULL COMMENT 'หมายเหตุการรับรอง'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -213,30 +307,50 @@ INSERT INTO `ticket_logs` (`id`, `ticket_id`, `old_status`, `new_status`, `actio
 
 CREATE TABLE `users` (
   `user_id` int(11) NOT NULL,
-  `id_number` varchar(20) DEFAULT NULL,
-  `user_type` enum('student','teacher','staff') NOT NULL,
+  `id_number` varchar(20) NOT NULL COMMENT 'รหัสนักศึกษา / รหัสบุคลากร',
   `first_name` varchar(100) NOT NULL,
   `last_name` varchar(100) NOT NULL,
+  `user_type` enum('student','teacher','staff') NOT NULL DEFAULT 'student' COMMENT 'สถานภาพบุคคล',
+  `department_id` int(11) DEFAULT NULL,
   `phone_number` varchar(20) NOT NULL,
-  `email` varchar(150) NOT NULL,
+  `email` varchar(255) NOT NULL,
   `password` varchar(255) NOT NULL,
-  `role` enum('requester','admin') NOT NULL DEFAULT 'requester',
-  `status` enum('active','disabled') NOT NULL DEFAULT 'active',
-  `created_at` datetime DEFAULT current_timestamp(),
-  `department_id` int(11) NOT NULL
+  `role` enum('admin','staff','user') NOT NULL DEFAULT 'user' COMMENT 'สิทธิ์ในระบบ: admin (ครู) > staff > user',
+  `status` enum('active','disabled','pending','rejected') NOT NULL DEFAULT 'pending' COMMENT 'สถานะบัญชี: pending=รออนุมัติ, active=ใช้งาน, disabled=ระงับ, rejected=ปฏิเสธ',
+  `approved_by` int(11) DEFAULT NULL COMMENT 'admin ผู้พิจารณาอนุมัติ/ปฏิเสธ',
+  `approved_at` datetime DEFAULT NULL COMMENT 'เวลาที่อนุมัติหรือปฏิเสธ',
+  `reject_reason` varchar(255) DEFAULT NULL COMMENT 'เหตุผลที่ปฏิเสธการสมัคร',
+  `score` int(11) NOT NULL DEFAULT 100 COMMENT 'คะแนนสะสมของสตาฟฝ่ายซ่อม',
+  `queue_order` int(11) DEFAULT NULL COMMENT 'ลำดับคิวรับงาน (NULL = ไม่อยู่ในคิว)',
+  `is_active_queue` tinyint(1) NOT NULL DEFAULT 0 COMMENT '1 = เปิดรับงานในคิวปัจจุบัน',
+  `created_at` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`user_id`, `id_number`, `user_type`, `first_name`, `last_name`, `phone_number`, `email`, `password`, `role`, `status`, `created_at`, `department_id`) VALUES
-(1, '68319100009', 'student', 'พงศธร', 'ศรีสมัย', '0811024898', 'pongsathorn.cat@gmail.com', '$2y$12$R/MGjC9ZDwBAJtHrfoIk1eFtrPDI0GnZ/iaxGvK/RlhfPwcCIh.Oy', 'admin', 'active', '2026-10-31 21:38:27', 9),
-(7, '68319100017', 'student', 'สุทธิรักษ์', 'ภูธร', '0812761358', 'phuthorn2006@gmail.com', '$2y$12$CXuY1qR3r4BfOvwbKK8OqOCjMhRekrBT5OWLGSeZquet3Dvb8iVEW', 'requester', 'active', '2026-11-01 12:14:00', 9),
-(8, '1234', 'staff', 'wendy', 'wisteria', '0987654321', 'wendy@mail.com', '$2y$12$4ZdU2H1CGEYQW.YKs1rIR.YeTPWKxngQVTdFaoxsl/BhiDC.l3242', 'requester', 'active', '2026-11-01 13:00:13', 1),
-(9, '12341234', 'student', 'นานา', 'ลัลน์ลัลน์', '0123456789', 'phuthorn@gmail.com', '$2y$12$TMWT9pdNVrdeYG3gTGzOTegi7oFy7aBZhmknwYgNjiE8UkKPEaPnO', 'admin', 'active', '2026-11-01 13:02:10', 11),
-(10, '123123123', 'student', 'ณาลัลน์', 'อุอิ', '0123456777', 'nalanuuii@gmail.com', '$2y$12$bVnP2P9P6ovosp8DPPlfN.56TBqB3trWEF17ckl4.V6SOTKWTnNz.', 'requester', 'active', '2026-11-01 13:52:00', 7),
-(11, '68319100020', 'student', 'มิค', 'โคตวย', '0890371867', 'mix11999@gmail.com', '$2y$12$HOnmS8PAgo6xKz1A/LbZG.395tONi1v.75u7YdAjcpnZjc1M3vYHK', 'requester', 'active', '2026-11-02 13:35:54', 1);
+INSERT INTO `users` (`user_id`, `id_number`, `first_name`, `last_name`, `user_type`, `department_id`, `phone_number`, `email`, `password`, `role`, `status`, `approved_by`, `approved_at`, `reject_reason`, `score`, `queue_order`, `is_active_queue`, `created_at`) VALUES
+(6, '123123', 'นานา', 'ลลน', 'student', 3, '0987456544', 'ertyrt@gmail.com', '$2y$12$VRfuoApPFvPJKlkVcBOVZued5HEV2SY2X0b5cBE/ITjTrH1szMd7e', 'user', 'active', NULL, NULL, NULL, 100, NULL, 0, '2026-11-12 15:19:11'),
+(7, '123123123', 'นานา', 'ลัลน์ลัลน์', 'student', 3, '0811111111', 'tytyty@gmail.com', '$2y$12$kW1i741lHXeQxRiTdb2Noe6qD5OkwQaIGt3Sfyj.zkD.jzrzzxv.a', 'user', 'active', NULL, NULL, NULL, 100, NULL, 0, '2026-11-12 15:20:09'),
+(8, '1234', 'พงศธร', 'ศรีสมัย', 'teacher', 5, '0811024898', 'pongsathorn.cat@gmail.com', '$2y$12$ZV/CWbhj7dS6YW96gPzud.MuQ1gWJAvOAxplBgWYA7YOYFiv5MZTm', 'admin', 'active', NULL, NULL, NULL, 100, NULL, 0, '2026-11-12 15:29:06'),
+(9, 'staff_nalan', 'สุทธิรรักษ์', 'ภูธร', 'student', 1, '0812761358', 'phuthorn2006@gmail.com', '$2y$12$01YFyc2dy9xKImpGR.ObxOtA3EIsS5mqEG240II7oIWWv9.cpV5kK', 'staff', 'active', NULL, NULL, NULL, 100, NULL, 1, '2026-11-12 16:04:00'),
+(10, 'admin_nalan', 'นานา', 'ลัลน์ลัลน์', 'teacher', 5, '0810028001', 'nalan@gmail.com', '$2y$12$iJawgqthlUSx92Pv3xk3VegMmHMyZeZz91HgTseShEFoewgWimMs.', 'admin', 'active', NULL, NULL, NULL, 100, NULL, 0, '2026-11-12 16:08:15'),
+(11, '12345678', 'got', 'got', 'student', 5, '0123456789', '1922@gmail.com', '$2y$12$WxTNtOZ1S7/PfgokrQiDpOZkl92a.Mi96VxeVbd8WTCp/qsLGJWiC', 'user', 'active', NULL, NULL, NULL, 100, NULL, 0, '2026-11-12 19:22:48');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `user_audit_logs`
+--
+
+CREATE TABLE `user_audit_logs` (
+  `id` int(11) NOT NULL,
+  `target_user_id` int(11) NOT NULL,
+  `changed_by` int(11) NOT NULL,
+  `action_detail` varchar(500) NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Indexes for dumped tables
@@ -246,33 +360,74 @@ INSERT INTO `users` (`user_id`, `id_number`, `user_type`, `first_name`, `last_na
 -- Indexes for table `categories`
 --
 ALTER TABLE `categories`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uk_categories_name` (`name`);
 
 --
 -- Indexes for table `department`
 --
 ALTER TABLE `department`
-  ADD PRIMARY KEY (`d_id`);
+  ADD PRIMARY KEY (`d_id`),
+  ADD UNIQUE KEY `uk_department_name` (`name`);
+
+--
+-- Indexes for table `email_logs`
+--
+ALTER TABLE `email_logs`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_email_ticket` (`ticket_id`),
+  ADD KEY `idx_email_status_created` (`status`,`created_at`);
+
+--
+-- Indexes for table `inventory_items`
+--
+ALTER TABLE `inventory_items`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uk_item_code` (`item_code`);
+
+--
+-- Indexes for table `inventory_movements`
+--
+ALTER TABLE `inventory_movements`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_inv_move_item_created` (`item_id`,`created_at`),
+  ADD KEY `idx_inv_move_ticket` (`ticket_id`),
+  ADD KEY `idx_inv_move_user` (`action_by`);
 
 --
 -- Indexes for table `password_reset_tokens`
 --
 ALTER TABLE `password_reset_tokens`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `uq_password_reset_token_hash` (`token_hash`),
-  ADD KEY `idx_password_reset_user_created` (`user_id`,`created_at`),
-  ADD KEY `idx_password_reset_expiry` (`expires_at`);
+  ADD KEY `idx_prt_user` (`user_id`),
+  ADD KEY `idx_prt_hash` (`token_hash`);
+
+--
+-- Indexes for table `score_logs`
+--
+ALTER TABLE `score_logs`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_score_user` (`user_id`),
+  ADD KEY `idx_score_ticket` (`ticket_id`);
+
+--
+-- Indexes for table `system_settings`
+--
+ALTER TABLE `system_settings`
+  ADD PRIMARY KEY (`setting_key`);
 
 --
 -- Indexes for table `tickets`
 --
 ALTER TABLE `tickets`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `uq_tickets_ticket_no` (`ticket_no`),
+  ADD UNIQUE KEY `uk_tickets_ticket_no` (`ticket_no`),
   ADD KEY `idx_tickets_requester` (`requester_id`),
-  ADD KEY `idx_tickets_category` (`category_id`),
   ADD KEY `idx_tickets_assigned` (`assigned_to`),
-  ADD KEY `idx_tickets_status_created` (`status`,`created_at`);
+  ADD KEY `idx_tickets_status` (`status`),
+  ADD KEY `idx_tickets_created` (`created_at`),
+  ADD KEY `idx_tickets_accepted` (`accepted_at`),
+  ADD KEY `fk_tickets_category` (`category_id`);
 
 --
 -- Indexes for table `ticket_attachments`
@@ -287,16 +442,44 @@ ALTER TABLE `ticket_attachments`
 ALTER TABLE `ticket_logs`
   ADD PRIMARY KEY (`id`),
   ADD KEY `idx_logs_ticket` (`ticket_id`),
-  ADD KEY `idx_logs_user` (`action_by`);
+  ADD KEY `fk_logs_user` (`action_by`);
+
+--
+-- Indexes for table `ticket_materials`
+--
+ALTER TABLE `ticket_materials`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_tm_ticket` (`ticket_id`),
+  ADD KEY `idx_tm_item` (`item_id`),
+  ADD KEY `fk_tm_user` (`withdrawn_by`);
+
+--
+-- Indexes for table `ticket_signoffs`
+--
+ALTER TABLE `ticket_signoffs`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uk_signoff_ticket` (`ticket_id`),
+  ADD KEY `idx_signoff_user` (`signed_by`),
+  ADD KEY `idx_signoff_signed_at` (`signed_at`);
 
 --
 -- Indexes for table `users`
 --
 ALTER TABLE `users`
   ADD PRIMARY KEY (`user_id`),
-  ADD UNIQUE KEY `uq_users_email` (`email`),
-  ADD UNIQUE KEY `uq_users_id_number` (`id_number`),
-  ADD KEY `idx_users_department_id` (`department_id`);
+  ADD UNIQUE KEY `uk_users_id_number` (`id_number`),
+  ADD UNIQUE KEY `uk_users_email` (`email`),
+  ADD KEY `idx_users_department` (`department_id`),
+  ADD KEY `idx_users_role_status` (`role`,`status`),
+  ADD KEY `idx_users_approved_by` (`approved_by`);
+
+--
+-- Indexes for table `user_audit_logs`
+--
+ALTER TABLE `user_audit_logs`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_audit_target` (`target_user_id`),
+  ADD KEY `fk_audit_actor` (`changed_by`);
 
 --
 -- AUTO_INCREMENT for dumped tables
@@ -306,19 +489,43 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `categories`
 --
 ALTER TABLE `categories`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `department`
 --
 ALTER TABLE `department`
-  MODIFY `d_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `d_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+
+--
+-- AUTO_INCREMENT for table `email_logs`
+--
+ALTER TABLE `email_logs`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `inventory_items`
+--
+ALTER TABLE `inventory_items`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT for table `inventory_movements`
+--
+ALTER TABLE `inventory_movements`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `password_reset_tokens`
 --
 ALTER TABLE `password_reset_tokens`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `score_logs`
+--
+ALTER TABLE `score_logs`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `tickets`
@@ -330,13 +537,25 @@ ALTER TABLE `tickets`
 -- AUTO_INCREMENT for table `ticket_attachments`
 --
 ALTER TABLE `ticket_attachments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `ticket_logs`
 --
 ALTER TABLE `ticket_logs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `ticket_materials`
+--
+ALTER TABLE `ticket_materials`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `ticket_signoffs`
+--
+ALTER TABLE `ticket_signoffs`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `users`
@@ -345,21 +564,48 @@ ALTER TABLE `users`
   MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
+-- AUTO_INCREMENT for table `user_audit_logs`
+--
+ALTER TABLE `user_audit_logs`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- Constraints for dumped tables
 --
+
+--
+-- Constraints for table `email_logs`
+--
+ALTER TABLE `email_logs`
+  ADD CONSTRAINT `fk_email_ticket` FOREIGN KEY (`ticket_id`) REFERENCES `tickets` (`id`) ON DELETE SET NULL;
+
+--
+-- Constraints for table `inventory_movements`
+--
+ALTER TABLE `inventory_movements`
+  ADD CONSTRAINT `fk_inv_move_item` FOREIGN KEY (`item_id`) REFERENCES `inventory_items` (`id`),
+  ADD CONSTRAINT `fk_inv_move_ticket` FOREIGN KEY (`ticket_id`) REFERENCES `tickets` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `fk_inv_move_user` FOREIGN KEY (`action_by`) REFERENCES `users` (`user_id`) ON DELETE SET NULL;
 
 --
 -- Constraints for table `password_reset_tokens`
 --
 ALTER TABLE `password_reset_tokens`
-  ADD CONSTRAINT `fk_password_reset_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `fk_prt_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `score_logs`
+--
+ALTER TABLE `score_logs`
+  ADD CONSTRAINT `fk_score_ticket` FOREIGN KEY (`ticket_id`) REFERENCES `tickets` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `fk_score_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `tickets`
 --
 ALTER TABLE `tickets`
-  ADD CONSTRAINT `fk_tickets_assigned` FOREIGN KEY (`assigned_to`) REFERENCES `users` (`user_id`),
-  ADD CONSTRAINT `fk_tickets_category` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`),
+  ADD CONSTRAINT `fk_tickets_assigned` FOREIGN KEY (`assigned_to`) REFERENCES `users` (`user_id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `fk_tickets_category` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE SET NULL,
   ADD CONSTRAINT `fk_tickets_requester` FOREIGN KEY (`requester_id`) REFERENCES `users` (`user_id`);
 
 --
@@ -373,13 +619,36 @@ ALTER TABLE `ticket_attachments`
 --
 ALTER TABLE `ticket_logs`
   ADD CONSTRAINT `fk_logs_ticket` FOREIGN KEY (`ticket_id`) REFERENCES `tickets` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `fk_logs_user` FOREIGN KEY (`action_by`) REFERENCES `users` (`user_id`);
+  ADD CONSTRAINT `fk_logs_user` FOREIGN KEY (`action_by`) REFERENCES `users` (`user_id`) ON DELETE SET NULL;
+
+--
+-- Constraints for table `ticket_materials`
+--
+ALTER TABLE `ticket_materials`
+  ADD CONSTRAINT `fk_tm_item` FOREIGN KEY (`item_id`) REFERENCES `inventory_items` (`id`),
+  ADD CONSTRAINT `fk_tm_ticket` FOREIGN KEY (`ticket_id`) REFERENCES `tickets` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_tm_user` FOREIGN KEY (`withdrawn_by`) REFERENCES `users` (`user_id`);
+
+--
+-- Constraints for table `ticket_signoffs`
+--
+ALTER TABLE `ticket_signoffs`
+  ADD CONSTRAINT `fk_signoff_ticket` FOREIGN KEY (`ticket_id`) REFERENCES `tickets` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_signoff_user` FOREIGN KEY (`signed_by`) REFERENCES `users` (`user_id`);
 
 --
 -- Constraints for table `users`
 --
 ALTER TABLE `users`
-  ADD CONSTRAINT `fk_users_department` FOREIGN KEY (`department_id`) REFERENCES `department` (`d_id`) ON UPDATE CASCADE;
+  ADD CONSTRAINT `fk_users_approved_by` FOREIGN KEY (`approved_by`) REFERENCES `users` (`user_id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `fk_users_department` FOREIGN KEY (`department_id`) REFERENCES `department` (`d_id`) ON DELETE SET NULL;
+
+--
+-- Constraints for table `user_audit_logs`
+--
+ALTER TABLE `user_audit_logs`
+  ADD CONSTRAINT `fk_audit_actor` FOREIGN KEY (`changed_by`) REFERENCES `users` (`user_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_audit_target` FOREIGN KEY (`target_user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
