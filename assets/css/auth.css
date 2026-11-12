@@ -1,0 +1,426 @@
+/* ============================================================================
+   REPS — Auth surfaces (login.php / register.php)
+
+   ยืมโครงเส้นประ (dashed) ของ index.php มาใช้ที่ระดับหน้า เฉพาะส่วนที่เป็น
+   โครงสร้างของหน้า: เส้นแนวตั้งสองเส้นวิ่งตลอดความสูง เส้นคั่นบน/ล่าง
+   และเครื่องหมาย + ที่จุดตัดของเส้น
+
+   ภายในการ์ด (กรอบฟอร์ม ช่องกรอก ปุ่ม) ใช้เส้นทึบมุมโค้งแทน
+   เพื่อไม่ให้เส้นประแย่งสายตากับตัวอักษรในพื้นที่ที่ต้องอ่านจริง
+
+   index.php ใช้พื้นขาว/เส้นเทา — ไฟล์นี้กลับสี: พื้นดำ เส้นขาว
+   ตัวแปรชุดเดียวกัน (--dash / --plus / --rail-w) เพื่อให้สองฝั่งเป็นคู่กัน
+   ========================================================================= */
+
+:root {
+   /* index.php ใช้ --dash: #C4C4C4 บนพื้นขาว / --plus: #737373
+      บนพื้นดำ ต้องกลับค่าความสว่างให้เส้นยังอ่านออกแต่ไม่แผดเสีย */
+   --dash: rgb(255 255 255 / .3);
+   --plus: rgb(255 255 255 / .6);
+   --rail-w: min(36rem, calc(100% - 3rem));
+
+   --ink-bg: #0A0A0A;
+   --ink-fg: #FFFFFF;
+   --ink-fg-soft: rgb(255 255 255 / .66);
+   --ink-fg-dim: rgb(255 255 255 / .45);
+}
+
+body.auth-dark {
+   background: var(--ink-bg);
+   color: var(--ink-fg);
+   font-family: 'Kanit', sans-serif;
+}
+
+::selection {
+   background: #fff;
+   color: #0A0A0A;
+}
+
+/* ---------- เส้นประ: 2 เส้นแนวตั้งวิ่งตลอดความสูงหน้า ---------- */
+.auth-rails {
+   position: absolute;
+   inset: 0;
+   z-index: 0;
+   pointer-events: none;
+}
+
+.auth-rails::before {
+   content: "";
+   position: absolute;
+   top: 0;
+   bottom: 0;
+   left: 50%;
+   width: var(--rail-w);
+   transform: translateX(-50%);
+   border-left: 1px dashed var(--dash);
+   border-right: 1px dashed var(--dash);
+}
+
+/* ---------- เส้นคั่นแนวนอน + เครื่องหมาย + ที่จุดตัด ----------
+   โครงสร้างเดียวกับ .divider ของ index.php: pseudo-element ขนาด 13x13
+   วางทับจุดที่เส้นคั่นตัดเส้นประแนวตั้ง แล้ววาดเป็นกากบาทสองเส้น */
+.auth-divider {
+   position: relative;
+   z-index: 2;
+   height: 0;
+   border-top: 1px dashed var(--dash);
+}
+
+.auth-divider::before,
+.auth-divider::after {
+   content: "";
+   position: absolute;
+   top: -6px;
+   width: 13px;
+   height: 13px;
+   background:
+      linear-gradient(var(--plus), var(--plus)) center / 1px 100% no-repeat,
+      linear-gradient(var(--plus), var(--plus)) center / 100% 1px no-repeat;
+}
+
+.auth-divider::before {
+   left: calc(50% - var(--rail-w) / 2 - 6px);
+}
+
+.auth-divider::after {
+   left: calc(50% + var(--rail-w) / 2 - 7px);
+}
+
+/* ---------- กริดพื้นหลังบาง ๆ (เบากว่า index) ---------- */
+.auth-grid {
+   background-size: 240px 180px;
+   background-image:
+      linear-gradient(to right, rgb(255 255 255 / .045) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(255 255 255 / .045) 1px, transparent 1px);
+}
+
+/* จางเส้นที่ปลายหน้าจอลง ไม่ให้เส้นตัดหัวกับขอบจอ */
+.auth-fade-mask {
+   mask-image:
+      linear-gradient(to bottom, transparent 0%, #000 14%),
+      radial-gradient(ellipse 78% 68% at 50% 46%, #000 26%, transparent 100%);
+   -webkit-mask-image:
+      linear-gradient(to bottom, transparent 0%, #000 14%),
+      radial-gradient(ellipse 78% 68% at 50% 46%, #000 26%, transparent 100%);
+   mask-composite: intersect;
+   -webkit-mask-composite: source-in;
+}
+
+/* ---------- การ์ดฟอร์ม: เส้นประแทนกรอบกลม ---------- */
+.auth-card {
+   position: relative;
+   width: 100%;
+   padding: 28px;
+   border-radius: 10px;
+   background: #424242;
+}
+
+@media (min-width: 640px) {
+   .auth-card {
+      padding: 36px;
+   }
+}
+
+.auth-card-title {
+   margin: 0 0 32px;
+   padding-bottom: 28px;
+   text-align: center;
+}
+
+.auth-card-title h1 {
+   margin: 0;
+   font-family: 'Kanit', sans-serif;
+   font-size: clamp(1.75rem, 5vw, 2.25rem);
+   font-weight: 700;
+   line-height: 1.2;
+   letter-spacing: -.02em;
+   color: var(--ink-fg);
+}
+
+.auth-card-title p {
+   margin: 8px auto 0;
+   max-width: 34ch;
+   font-family: 'Google Sans', 'Kanit', sans-serif;
+   font-size: .875rem;
+   line-height: 1.6;
+   color: var(--ink-fg-soft);
+}
+
+/* ---------- ฟอร์ม ---------- */
+.auth-label {
+   display: block;
+   font-family: 'Google Sans', 'Kanit', sans-serif;
+   font-size: .75rem;
+   font-weight: 500;
+   line-height: 1.5;
+   color: var(--ink-fg);
+}
+
+.auth-field {
+   display: block;
+   width: 100%;
+   min-height: 40px;
+   padding: 10px 12px;
+   border: 1px solid rgb(255 255 255 / .22);
+   border-radius: 8px;
+   background: rgb(255 255 255 / .04);
+   color: var(--ink-fg);
+   font-family: 'Google Sans', 'Kanit', sans-serif;
+   font-size: .875rem;
+   transition: border-color .15s, background-color .15s;
+}
+
+.auth-field::placeholder {
+   color: var(--ink-fg-dim);
+}
+
+.auth-field:hover {
+   border-color: rgb(255 255 255 / .4);
+}
+
+.auth-field:focus {
+   outline: none;
+   border-color: #fff;
+   background: rgb(255 255 255 / .06);
+}
+
+.auth-field:-webkit-autofill {
+   -webkit-text-fill-color: var(--ink-fg);
+   /* ป้องกัน Safari/Chrome เติมพื้นขาวทับธีมมืด */
+   box-shadow: 0 0 0 1000px #141414 inset;
+   caret-color: var(--ink-fg);
+}
+
+select.auth-field {
+   appearance: none;
+   padding-right: 32px;
+   /* ลูกศรเป็นเส้น ให้เข้ากับภาษรวมเส้นประ */
+   background-image:
+      linear-gradient(45deg, transparent 50%, rgb(255 255 255 / .6) 50%),
+      linear-gradient(135deg, rgb(255 255 255 / .6) 50%, transparent 50%);
+   background-position: calc(100% - 16px) 17px, calc(100% - 11px) 17px;
+   background-size: 5px 5px, 5px 5px;
+   background-repeat: no-repeat;
+}
+
+select.auth-field option {
+   background: #141414;
+   color: var(--ink-fg);
+}
+
+.auth-field-pad {
+   padding-right: 40px;
+}
+
+.auth-eye {
+   position: absolute;
+   top: 0;
+   right: 0;
+   display: flex;
+   width: 40px;
+   height: 40px;
+   align-items: center;
+   justify-content: center;
+   border: 0;
+   background: none;
+   color: var(--ink-fg-dim);
+   font-size: 15px;
+   transition: color .15s;
+}
+
+.auth-eye:hover {
+   color: var(--ink-fg);
+}
+
+/* ปุ่มหลัก: พื้นขาว ตัวอักษรดำ (สลับสีจากปุ่มพื้นดำบน index.php) */
+.auth-btn {
+   display: flex;
+   width: 100%;
+   min-height: 40px;
+   align-items: center;
+   justify-content: center;
+   gap: 8px;
+   padding: 10px 20px;
+   border: 0;
+   background: #fff;
+   color: #0A0A0A;
+   font-family: 'Kanit', sans-serif;
+   font-size: .875rem;
+   font-weight: 500;
+   line-height: 1.2;
+   transition: background-color .15s, color .15s, transform .1s;
+}
+
+.auth-btn:hover {
+   background: #E5E5E5;
+}
+
+.auth-btn:active {
+   transform: scale(.99);
+}
+
+.auth-btn:disabled {
+   background: #E5E5E5;
+   color: rgb(10 10 10 / .45);
+   cursor: not-allowed;
+}
+
+.auth-btn-primary {
+   margin-top: 16px;
+}
+
+/* ปุ่มแบบบรรทัด (ใน header) — ไม่กินความกว้างเต็มแบบปุ่มในฟอร์ม */
+.auth-btn-inline {
+   width: auto;
+   min-height: 0;
+   padding: 8px 16px;
+}
+
+/* ---------- กล่องข้อความ ---------- */
+.auth-alert {
+   display: flex;
+   align-items: flex-start;
+   gap: 8px;
+   margin-bottom: 16px;
+   padding: 12px;
+   border: 1px dashed currentColor;
+   font-family: 'Google Sans', 'Kanit', sans-serif;
+   font-size: .75rem;
+   line-height: 1.6;
+}
+
+.auth-alert i {
+   margin-top: 3px;
+}
+
+/* .auth-alert ตั้ง display:flex เอง จึงต้องระบุให้แน่นอนว่า .hidden ซ่อนจริง
+   (คลาส .hidden ของ Tailwind มาจาก app.css ซึ่งโหลดก่อนไฟล์นี้) */
+.auth-alert.hidden {
+   display: none;
+}
+
+/* กล่องที่มีหลายบรรทัด (รายการ error จากเซิร์ฟเวอร์) ต้องซ้อนลงล่าง */
+.auth-alert-stack {
+   flex-direction: column;
+   gap: 6px;
+}
+
+.auth-alert-error {
+   background: rgb(254 226 226 / .1);
+   color: #FCA5A5;
+}
+
+.auth-alert-ok {
+   background: rgb(209 250 229 / .1);
+   color: #6EE7B7;
+}
+
+/* ---------- ส่วนล่างการ์ด ---------- */
+.auth-alt {
+   margin-top: 24px;
+   padding-top: 20px;
+   border-top: 1px dashed var(--dash);
+   font-family: 'Google Sans', 'Kanit', sans-serif;
+   font-size: .75rem;
+   line-height: 1.6;
+   text-align: center;
+   color: var(--ink-fg-soft);
+}
+
+.auth-alt a {
+   color: var(--ink-fg);
+   font-weight: 500;
+   text-underline-offset: 4px;
+}
+
+.auth-alt a:hover {
+   text-decoration: underline;
+}
+
+/* ---------- หัวเว็บและท้ายเว็บ ---------- */
+/* เส้นขอบล่างของ header และเส้นขอบบนของ footer คือเส้นคั่นของกริด
+   จึงใส่เครื่องหมาย + ที่จุดตัดกับเส้นประแนวตั้งทั้งสองข้าง
+   (4 ชั้น gradient = เครื่องหมาย + 2 อัน อันละ 2 เส้น) */
+.auth-header,
+.auth-footer {
+   position: relative;
+}
+
+.auth-header::before,
+.auth-header::after,
+.auth-footer::before,
+.auth-footer::after {
+   content: "";
+   position: absolute;
+   width: 13px;
+   height: 13px;
+   pointer-events: none;
+   background:
+      linear-gradient(var(--plus), var(--plus)) center / 1px 100% no-repeat,
+      linear-gradient(var(--plus), var(--plus)) center / 100% 1px no-repeat;
+}
+
+.auth-header::before,
+.auth-footer::before {
+   left: calc(50% - var(--rail-w) / 2 - 6px);
+}
+
+.auth-header::after,
+.auth-footer::after {
+   left: calc(50% + var(--rail-w) / 2 - 7px);
+}
+
+/* header มีเส้นที่ขอบล่าง, footer มีเส้นที่ขอบบน — กากบาทต้องวางที่ขอบนั้น */
+.auth-header::before,
+.auth-header::after {
+   bottom: -7px;
+}
+
+.auth-footer::before,
+.auth-footer::after {
+   top: -7px;
+}
+
+.auth-header {
+   position: sticky;
+   top: 0;
+   z-index: 50;
+   width: 100%;
+   border-bottom: 1px dashed var(--dash);
+   background: rgb(10 10 10 / .82);
+   backdrop-filter: blur(12px);
+   -webkit-backdrop-filter: blur(12px);
+}
+
+.auth-footer {
+   z-index: 10;
+   width: 100%;
+   border-top: 1px dashed var(--dash);
+   padding: 24px 0;
+   font-family: 'Google Sans', 'Kanit', sans-serif;
+   font-size: .75rem;
+   line-height: 1.6;
+   color: var(--ink-fg-dim);
+}
+
+/* โลโก้เป็น SVG สีดำ (#000) ต้องกลับสีเพื่อให้เห็นบนพื้นดำ */
+.auth-logo {
+   filter: invert(1);
+}
+
+/* โหมดมืด: บังคับสีขาวให้ select/checkbox ของเบราว์เซอร์ */
+@media (prefers-color-scheme: dark) {
+   select.auth-field option {
+      background: #141414;
+      color: var(--ink-fg);
+   }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+   .auth-field,
+   .auth-btn,
+   .auth-eye {
+      transition: none;
+   }
+}
