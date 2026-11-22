@@ -25,7 +25,8 @@ $siteSettings = app_get_settings($conn);
 $siteLogoUrl = app_logo_url($conn);
 $homeLayout = visual_builder_home_layout($siteSettings);
 $showSteps = $homeLayout['how']['visible'];
-$showFaq = $homeLayout['faq']['visible'];
+$homeLayout['faq']['visible'] = true;
+$showFaq = true;
 $showAnnouncement = ($siteSettings['homepage_show_announcement'] ?? '0') === '1' && trim((string)($siteSettings['homepage_announcement'] ?? '')) !== '';
 $homeIntro = trim((string)($siteSettings['homepage_intro'] ?? ''));
 $footerText = trim((string)($siteSettings['footer_text'] ?? ''));
@@ -91,7 +92,6 @@ $assetVersion = static function (string $relativePath): int {
 
    <link rel="preconnect" href="https://fonts.googleapis.com">
    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-   <!-- แยก request: ถ้า family ใดโหลดไม่ได้ จะไม่ลากตัวอื่นล้มไปด้วย -->
    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
 
    <!-- home.css ต้องมาก่อน app.css เพื่อคงลำดับ cascade -->
@@ -118,6 +118,17 @@ $assetVersion = static function (string $relativePath): int {
       .hero-canvas.is-ready {
          opacity: 1;
       }
+
+      /* บังคับให้หัวข้อและกรอบของ section guide อยู่ในแนวเดียวกับ section อื่น ไม่ล้นไปชิดเส้นประ */
+      #guide .section-head {
+         justify-content: flex-start;
+         text-align: left;
+      }
+      #guide .section-eyebrow {
+         justify-content: flex-start;
+         margin-left: 0;
+         margin-right: auto;
+      }
    </style>
    <link rel="stylesheet" href="assets/css/base.css?v=18">
 </head>
@@ -130,7 +141,7 @@ $assetVersion = static function (string $relativePath): int {
    <header class="fixed top-0 inset-x-0 z-50 border-b border-line bg-white/80 backdrop-blur">
       <div class="max-w-6xl mx-auto flex items-center gap-8 px-6 h-16">
 
-         <!-- Logo (ใส่ width/height ตามขนาดจริงของไฟล์ เพื่อกัน layout shift) -->
+         <!-- Logo -->
          <a class="flex items-center shrink-0" href="index.php" aria-label="REPS หน้าหลัก">
             <img<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'home.logo') ?> src="<?= htmlspecialchars($siteLogoUrl, ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars(app_site_name($conn), ENT_QUOTES, 'UTF-8') ?>" class="h-6 sm:h-7 w-auto">
          </a>
@@ -138,8 +149,8 @@ $assetVersion = static function (string $relativePath): int {
          <!-- Navigation Links -->
          <nav data-main-nav aria-label="เมนูหลัก" class="font-kanit hidden lg:flex items-center gap-8 text-sm text-muted whitespace-nowrap">
             <a href="#services" class="nav-link hover:text-ink transition-colors"<?= !$homeLayout['services']['visible'] ? ' hidden' : '' ?>><span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'navigation.services') ?>><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'navigation.services', 'บริการแจ้งซ่อม')) ?></span></a>
-            <a href="#how" class="nav-link hover:text-ink transition-colors"<?= !$showSteps ? ' hidden' : '' ?>><span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'navigation.how') ?>><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'navigation.how', 'ขั้นตอนการให้บริการ')) ?></span></a>
             <a href="#showcase" class="nav-link hover:text-ink transition-colors"<?= !$homeLayout['showcase']['visible'] ? ' hidden' : '' ?>><span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'navigation.features') ?>><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'navigation.features', 'ฟีเจอร์')) ?></span></a>
+            <a href="#guide" class="nav-link hover:text-ink transition-colors"><span>คู่มือผู้แจ้ง</span></a>
             <a href="#faq" class="nav-link hover:text-ink transition-colors"<?= !$showFaq ? ' hidden' : '' ?>><span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'navigation.faq') ?>><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'navigation.faq', 'คำถามที่พบบ่อย')) ?></span></a>
             <a href="#contact" class="nav-link hover:text-ink transition-colors"<?= !$homeLayout['contact']['visible'] ? ' hidden' : '' ?>><span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'navigation.contact') ?>><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'navigation.contact', 'ติดต่อเรา')) ?></span></a>
          </nav>
@@ -170,8 +181,8 @@ $assetVersion = static function (string $relativePath): int {
       <nav id="mobile-menu" aria-label="เมนูหลักบนมือถือ" hidden class="lg:hidden border-t border-line bg-white px-6 py-3">
          <div class="mx-auto flex max-w-6xl flex-col gap-1 font-kanit text-sm text-muted">
             <a href="#services" class="nav-link hover:text-ink transition-colors"<?= !$homeLayout['services']['visible'] ? ' hidden' : '' ?>><span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'navigation.services') ?>><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'navigation.services', 'บริการแจ้งซ่อม')) ?></span></a>
-            <a href="#how" class="nav-link hover:text-ink transition-colors"<?= !$showSteps ? ' hidden' : '' ?>><span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'navigation.how') ?>><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'navigation.how', 'ขั้นตอนการให้บริการ')) ?></span></a>
             <a href="#showcase" class="nav-link hover:text-ink transition-colors"<?= !$homeLayout['showcase']['visible'] ? ' hidden' : '' ?>><span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'navigation.features') ?>><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'navigation.features', 'ฟีเจอร์')) ?></span></a>
+            <a href="#guide" class="nav-link hover:text-ink transition-colors"><span>คู่มือผู้แจ้ง</span></a>
             <a href="#faq" class="nav-link hover:text-ink transition-colors"<?= !$showFaq ? ' hidden' : '' ?>><span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'navigation.faq') ?>><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'navigation.faq', 'คำถามที่พบบ่อย')) ?></span></a>
             <a href="#contact" class="nav-link hover:text-ink transition-colors"<?= !$homeLayout['contact']['visible'] ? ' hidden' : '' ?>><span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'navigation.contact') ?>><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'navigation.contact', 'ติดต่อเรา')) ?></span></a>
             <div class="mt-1 border-t border-line pt-1">
@@ -215,9 +226,9 @@ $assetVersion = static function (string $relativePath): int {
                   class="font-kanit w-full sm:w-48 inline-flex items-center justify-center bg-ink text-white font-medium text-base px-6 py-4 rounded-xl hover:bg-[#262626] hover:shadow-md transition-all duration-150 active:scale-[0.99]">
                   <span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'hero.primary_cta') ?>><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'hero.primary_cta', 'แจ้งซ่อมทันที')) ?></span>
                </a>
-               <a href="#how"
+               <a href="#guide"
                   class="font-kanit w-full sm:w-48 inline-flex items-center justify-center border border-line bg-white text-ink font-medium text-base px-6 py-4 rounded-xl hover:border-ink/50 hover:bg-[#F6F6F4] transition-all duration-150 active:scale-[0.99]">
-                  <span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'hero.secondary_cta') ?>><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'hero.secondary_cta', 'ขั้นตอนการให้บริการ')) ?></span>
+                  คู่มือผู้แจ้ง
                </a>
             </div>
 
@@ -348,16 +359,16 @@ $assetVersion = static function (string $relativePath): int {
 
             <div data-reveal class="section-head">
                <span class="section-eyebrow font-mono font-normal">
-                  03 Features
+                  02 Features
                   <span class="h-px w-8 bg-neutral-300" aria-hidden="true"></span>
                </span>
             </div>
 
             <div data-reveal class="showcase-bento">
                <div class="showcase-bento-intro">
-                  <h2<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'features.title') ?> class="font-kanit text-3xl sm:text-4xl font-normal text-ink leading-[1.25] tracking-tight text-balance"><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'features.title', 'ออกแบบมาเพื่อห้องปฏิบัติการและการติดตามงานที่โปร่งใส')) ?></h2>
+                  <h2<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'features.live.title') ?> class="font-kanit text-3xl sm:text-4xl font-normal text-ink leading-[1.25] tracking-tight text-balance"><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'features.live.title', 'ระบบซ่อมครบวงจร ตั้งแต่รับเรื่องจนส่งมอบงาน')) ?></h2>
                   <p class="mt-2.5 text-sm sm:text-base text-muted leading-relaxed max-w-md whitespace-pre-line">
-                     <span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'features.description') ?>><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'features.description', 'ยกระดับการแจ้งซ่อมอุปกรณ์คอมพิวเตอร์จากกระดาษสู่ระบบออนไลน์ ตรวจสอบสถานะได้ทุกขั้นตอนตั้งแต่วินาทีที่เปิดใบงาน')) ?></span>
+                     <span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'features.live.description') ?>><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'features.live.description', 'รวมคิวงาน การติดตามสถานะ หลักฐานการซ่อม และการลงนามรับส่งไว้ในใบงานเดียว')) ?></span>
                   </p>
                </div>
 
@@ -386,10 +397,10 @@ $assetVersion = static function (string $relativePath): int {
                   </div>
                   <div class="feature-meta">
                      <h3 class="feature-title">
-                        <span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'features.card1.title') ?>><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'features.card1.title', 'ติดตามสถานะทุกขั้นตอน')) ?></span> <span class="feature-arrow"><?= app_icon('arrow-right') ?></span>
+                        <span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'features.live.card1.title') ?>><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'features.live.card1.title', 'เห็นความคืบหน้าทุกช่วง')) ?></span> <span class="feature-arrow"><?= app_icon('arrow-right') ?></span>
                      </h3>
                      <p class="feature-desc whitespace-pre-line">
-                        <span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'features.card1.description') ?>><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'features.card1.description', 'เช็กสถานะได้ตั้งแต่เข้าคิว กำลังซ่อม รอครูรับรอง ไปจนถึงเสร็จสมบูรณ์ พร้อมรูปหลังซ่อม')) ?></span>
+                        <span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'features.live.card1.description') ?>><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'features.live.card1.description', 'ดูสถานะและบันทึกความเคลื่อนไหวของใบงานได้ ตั้งแต่รับเรื่อง ระหว่างซ่อม จนถึงส่งมอบและปิดงาน')) ?></span>
                      </p>
                   </div>
                </article>
@@ -402,7 +413,7 @@ $assetVersion = static function (string $relativePath): int {
                         <div class="ui-window-body">
                            <div class="anim-toast anim-toast-1 flex items-center gap-2 rounded border border-neutral-200 bg-neutral-50 p-1.5">
                               <span class="w-5 h-5 rounded-full bg-neutral-200 flex items-center justify-center text-[10px] text-neutral-600">
-                                 <i class="fa-solid fa-wrench"></i>
+                                 <i class="fa-regular fa-envelope"></i>
                               </span>
                               <div class="flex-1 space-y-1">
                                  <div class="ui-bar w-2/3"></div>
@@ -411,7 +422,7 @@ $assetVersion = static function (string $relativePath): int {
                            </div>
                            <div class="anim-toast anim-toast-2 flex items-center gap-2 rounded border border-neutral-200 bg-white p-1.5 shadow-2xs">
                               <span class="w-5 h-5 rounded-full bg-neutral-100 flex items-center justify-center text-[10px] text-neutral-700 anim-bell transition-transform">
-                                 <i class="fa-solid fa-bell"></i>
+                                 <i class="fa-solid fa-user"></i>
                               </span>
                               <div class="flex-1 space-y-1">
                                  <div class="ui-bar w-3/4 bg-neutral-300"></div>
@@ -423,10 +434,10 @@ $assetVersion = static function (string $relativePath): int {
                   </div>
                   <div class="feature-meta">
                      <h3 class="feature-title">
-                        <span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'features.card2.title') ?>><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'features.card2.title', 'แจ้งเตือนทีมช่างทันที')) ?></span> <span class="feature-arrow"><?= app_icon('arrow-right') ?></span>
+                        <span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'features.live.card2.title') ?>><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'features.live.card2.title', 'อีเมลแจ้งเตือนสำหรับผู้แจ้ง')) ?></span> <span class="feature-arrow"><?= app_icon('arrow-right') ?></span>
                      </h3>
                      <p class="feature-desc whitespace-pre-line">
-                        <span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'features.card2.description') ?>><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'features.card2.description', 'แจ้งเตือนทีมช่างผ่าน LINE ทันทีที่มีใบแจ้งซ่อมใหม่ และส่งอีเมลถึงผู้แจ้งเมื่องานเสร็จ')) ?></span>
+                        <span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'features.live.card2.description') ?>><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'features.live.card2.description', 'รับอีเมลเมื่อช่างรับอุปกรณ์ งานซ่อมเสร็จหรือถึงคิวเซ็นรับคืน และเมื่องานปิด พร้อมลิงก์กลับไปยังใบงาน')) ?></span>
                      </p>
                   </div>
                </article>
@@ -458,10 +469,10 @@ $assetVersion = static function (string $relativePath): int {
                   </div>
                   <div class="feature-meta">
                      <h3 class="feature-title">
-                        <span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'features.card3.title') ?>><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'features.card3.title', 'หน้าจอตามบทบาท')) ?></span> <span class="feature-arrow"><?= app_icon('arrow-right') ?></span>
+                        <span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'features.live.card3.title') ?>><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'features.live.card3.title', 'แดชบอร์ดแยกตามบทบาท')) ?></span> <span class="feature-arrow"><?= app_icon('arrow-right') ?></span>
                      </h3>
                      <p class="feature-desc whitespace-pre-line">
-                        <span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'features.card3.description') ?>><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'features.card3.description', 'แยกหน้าจอสำหรับผู้แจ้ง สตาฟฝ่ายซ่อม และครูผู้ดูแล แต่ละคนเห็นเฉพาะสิ่งที่ต้องทำ')) ?></span>
+                        <span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'features.live.card3.description') ?>><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'features.live.card3.description', 'ผู้แจ้งติดตามใบงาน สตาฟจัดการงานซ่อม และผู้ดูแลตรวจภาพรวมกับงานที่รอรับรอง')) ?></span>
                      </p>
                   </div>
                </article>
@@ -482,10 +493,10 @@ $assetVersion = static function (string $relativePath): int {
                   </div>
                   <div class="feature-meta">
                      <h3 class="feature-title">
-                        <span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'features.card4.title') ?>><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'features.card4.title', 'แนบรูปประกอบ')) ?></span> <span class="feature-arrow"><?= app_icon('arrow-right') ?></span>
+                        <span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'features.live.card4.title') ?>><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'features.live.card4.title', 'หลักฐานก่อนและหลังซ่อม')) ?></span> <span class="feature-arrow"><?= app_icon('arrow-right') ?></span>
                      </h3>
                      <p class="feature-desc whitespace-pre-line">
-                        <span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'features.card4.description') ?>><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'features.card4.description', 'แนบภาพถ่ายอาการเสียหรือหน้าจอ Error เพื่อให้ช่างวิเคราะห์และเตรียมอะไหล่ได้ตรงจุด')) ?></span>
+                        <span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'features.live.card4.description') ?>><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'features.live.card4.description', 'แนบภาพอาการเสียตอนแจ้งงาน และบันทึกรูปหลังซ่อมไว้ตรวจสอบประกอบผลการดำเนินงาน')) ?></span>
                      </p>
                   </div>
                </article>
@@ -497,26 +508,27 @@ $assetVersion = static function (string $relativePath): int {
                         <div class="ui-window-bar"><span></span><span></span><span></span></div>
                         <div class="ui-window-body gap-1.5">
                            <div class="anim-row-1 flex items-center justify-between rounded border border-neutral-200/80 px-2 py-1 transition-all">
-                              <span class="font-mono text-[9px] text-neutral-500">LAB-01 / PC-12</span>
-                              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                              <span class="font-kanit text-[9px] text-neutral-600"><i class="fa-solid fa-user mr-1 text-neutral-400"></i>ผู้แจ้ง · รับทราบ</span>
+                              <i class="fa-solid fa-check text-[9px] text-emerald-600"></i>
                            </div>
                            <div class="anim-row-2 flex items-center justify-between rounded border border-neutral-200 px-2 py-1 transition-all">
-                              <span class="font-mono text-[9px] text-neutral-700 font-medium">LAB-02 / PC-05</span>
-                              <span class="w-1.5 h-1.5 rounded-full bg-sky-500"></span>
+                              <span class="font-kanit text-[9px] text-neutral-700 font-medium"><i class="fa-solid fa-screwdriver-wrench mr-1 text-neutral-400"></i>สตาฟ · ส่งมอบ</span>
+                              <i class="fa-solid fa-check text-[9px] text-emerald-600"></i>
                            </div>
                            <div class="anim-row-3 flex items-center justify-between rounded border border-neutral-200/80 px-2 py-1 transition-all">
-                              <span class="font-mono text-[9px] text-neutral-500">LAB-03 / PRN-01</span>
-                              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                              <span class="font-kanit text-[9px] text-neutral-600"><i class="fa-solid fa-user-check mr-1 text-neutral-400"></i>ผู้ดูแล · รับรอง</span>
+                              <i class="fa-solid fa-check text-[9px] text-emerald-600"></i>
                            </div>
+                           <div class="mt-1 rounded bg-neutral-100 px-2 py-1 text-center font-kanit text-[9px] text-neutral-600"><i class="fa-regular fa-file-lines mr-1"></i>ออกใบรับรองงาน</div>
                         </div>
                      </div>
                   </div>
                   <div class="feature-meta">
                      <h3 class="feature-title">
-                        <span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'features.card5.title') ?>><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'features.card5.title', 'Lab & Asset History')) ?></span> <span class="feature-arrow"><?= app_icon('arrow-right') ?></span>
+                        <span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'features.live.card5.title') ?>><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'features.live.card5.title', 'เช็คลิสต์ ลายเซ็น และใบรับรอง')) ?></span> <span class="feature-arrow"><?= app_icon('arrow-right') ?></span>
                      </h3>
                      <p class="feature-desc whitespace-pre-line">
-                        <span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'features.card5.description') ?>><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'features.card5.description', 'บันทึกประวัติการซ่อมบำรุงรายเครื่องและรายห้องปฏิบัติการ ตรวจสอบย้อนหลังได้แม่นยำ')) ?></span>
+                        <span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'features.live.card5.description') ?>><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'features.live.card5.description', 'บันทึกการตรวจรับและผลซ่อม พร้อมขั้นตอนลงนามรับเข้า ส่งมอบ และรับรองก่อนเปิดใบรับรองงาน')) ?></span>
                      </p>
                   </div>
                </article>
@@ -526,6 +538,43 @@ $assetVersion = static function (string $relativePath): int {
       </section>
       <div class="divider" aria-hidden="true"<?= visual_builder_home_divider_attrs($visualBuilderEditMode, 'showcase') ?> style="<?= visual_builder_home_order_style($homeLayout, 'showcase', 1) ?>"></div>
       <?php endif; ?>
+
+      <!-- SECTION REPORTER GUIDE -->
+      <section id="guide" class="w-full bg-white px-6 py-24 scroll-mt-20" style="order:<?= max(1, ((int)$homeLayout['faq']['order'] * 2) - 2) ?>">
+         <div class="mx-auto max-w-6xl">
+            <div data-reveal class="section-head">
+               <span class="section-eyebrow font-mono font-normal">
+                  03 Reporter Guide
+                  <span class="h-px w-8 bg-neutral-300" aria-hidden="true"></span>
+               </span>
+               <div class="section-head-body max-w-xl px-6">
+                  <h2 class="font-kanit text-3xl sm:text-4xl font-normal leading-[1.25] tracking-tight text-ink">คู่มือการใช้งานระบบสำหรับผู้แจ้ง</h2>
+                  <p class="mt-2.5 text-sm sm:text-base leading-relaxed text-muted">ทำตามขั้นตอนด้านล่างเพื่อเปิดใบแจ้งซ่อมและติดตามงานของคุณ</p>
+               </div>
+            </div>
+
+            <div class="mt-10 px-0 sm:px-6">
+               <ol class="grid list-none grid-cols-1 gap-4 p-0 md:grid-cols-3">
+                  <li data-reveal class="rounded-2xl border border-line bg-[#FAFAF9] p-6">
+                     <span class="mb-5 inline-flex h-10 w-10 items-center justify-center rounded-full border border-line bg-white font-mono text-sm text-ink">01</span>
+                     <h3 class="font-kanit text-lg font-normal text-ink">สมัครสมาชิกและเข้าสู่ระบบ</h3>
+                     <p class="mt-2 text-sm leading-relaxed text-muted">สร้างบัญชีผู้ใช้ก่อนแจ้งซ่อม หากมีบัญชีแล้วให้เข้าสู่ระบบเพื่อเริ่มเปิดใบงาน</p>
+                  </li>
+                  <li data-reveal class="rounded-2xl border border-line bg-[#FAFAF9] p-6">
+                     <span class="mb-5 inline-flex h-10 w-10 items-center justify-center rounded-full border border-line bg-white font-mono text-sm text-ink">02</span>
+                     <h3 class="font-kanit text-lg font-normal text-ink">กรอกข้อมูลและส่งใบงาน</h3>
+                     <p class="mt-2 text-sm leading-relaxed text-muted">เลือกหมวดงาน ระบุห้องหรือสถานที่ เลขเครื่องและอาการที่พบ แนบรูปประกอบได้ไม่เกิน 3 รูป แล้วตรวจสอบข้อมูลก่อนส่ง</p>
+                  </li>
+                  <li data-reveal class="rounded-2xl border border-line bg-[#FAFAF9] p-6">
+                     <span class="mb-5 inline-flex h-10 w-10 items-center justify-center rounded-full border border-line bg-white font-mono text-sm text-ink">03</span>
+                     <h3 class="font-kanit text-lg font-normal text-ink">ติดตามสถานะจากแดชบอร์ด</h3>
+                     <p class="mt-2 text-sm leading-relaxed text-muted">จดเลขที่ใบงานไว้ แล้วเข้าสู่ระบบเพื่อดูความคืบหน้าและรายละเอียดการดำเนินงาน</p>
+                  </li>
+               </ol>
+            </div>
+         </div>
+      </section>
+      <div class="divider" aria-hidden="true" style="order:<?= max(1, ((int)$homeLayout['faq']['order'] * 2) - 1) ?>"></div>
 
       <!-- SECTION FAQ -->
       <?php if ($showFaq || $visualBuilderEditMode): ?>
@@ -539,7 +588,7 @@ $assetVersion = static function (string $relativePath): int {
                <div class="section-head-body max-w-xl px-6">
                   <h2<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'faq.title') ?> class="font-kanit text-3xl sm:text-4xl font-normal text-ink leading-[1.25] tracking-tight text-balance"><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'faq.title', 'คำถามที่พบบ่อย')) ?></h2>
                   <p<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'faq.description') ?> class="mt-2.5 text-muted text-sm sm:text-base leading-relaxed whitespace-pre-line">
-                     <?= visual_builder_escape(visual_builder_home_text($siteSettings, 'faq.description', 'ข้อควรรู้และการเตรียมข้อมูลเบื้องต้นก่อนเปิดใบแจ้งซ่อม เพื่อให้ทีมช่างเข้าแก้ไขได้รวดเร็วที่สุด')) ?>
+                     <?= visual_builder_escape(visual_builder_home_text($siteSettings, 'faq.description', 'คำตอบสำหรับการสมัครสมาชิก แจ้งซ่อม และติดตามสถานะงาน')) ?>
                   </p>
                </div>
             </div>
@@ -549,84 +598,84 @@ $assetVersion = static function (string $relativePath): int {
                   <details class="faq-item" open>
                      <summary>
                         <span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'faq.question1') ?> class="font-kanit text-base font-normal text-ink leading-snug">
-                           <?= visual_builder_escape(visual_builder_home_text($siteSettings, 'faq.question1', 'ก่อนกดแจ้งซ่อม ต้องเตรียมข้อมูลอะไรบ้าง?')) ?>
+                           <?= visual_builder_escape(visual_builder_home_text($siteSettings, 'faq.question1', 'ต้องสมัครสมาชิกก่อนแจ้งซ่อมหรือไม่?')) ?>
                         </span>
                         <span class="faq-icon" aria-hidden="true">
                            <i class="fa-solid fa-plus"></i>
                         </span>
                      </summary>
                      <div class="faq-answer">
-                        โปรดระบุ <strong>หมายเลขห้องปฏิบัติการ</strong>, <strong>หมายเลขเครื่อง (เช่น PC-01) หรือรหัสครุภัณฑ์</strong> และอาการเสียที่พบอย่างชัดเจน หากมีภาพถ่ายหน้าจอ Error สามารถแนบมาพร้อมใบแจ้งซ่อมได้ทันที
+                        ต้องเข้าสู่ระบบก่อนเปิดใบแจ้งซ่อม หากยังไม่มีบัญชีให้เลือก <strong>สมัครสมาชิก</strong> แล้วกรอกข้อมูลให้ครบ เมื่อเข้าสู่ระบบแล้วจึงเริ่มกรอกใบงานได้
                      </div>
                   </details>
 
                   <details class="faq-item" open>
                      <summary>
                         <span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'faq.question2') ?> class="font-kanit text-base font-normal text-ink leading-snug">
-                           <?= visual_builder_escape(visual_builder_home_text($siteSettings, 'faq.question2', 'ใช้เวลานานแค่ไหนในการเข้าตรวจสอบและซ่อมบำรุง?')) ?>
+                           <?= visual_builder_escape(visual_builder_home_text($siteSettings, 'faq.question2', 'ต้องระบุข้อมูลอะไรในใบแจ้งซ่อม?')) ?>
                         </span>
                         <span class="faq-icon" aria-hidden="true">
                            <i class="fa-solid fa-plus"></i>
                         </span>
                      </summary>
                      <div class="faq-answer">
-                        เจ้าหน้าที่จะรับเรื่องภายในวันทำการ (จันทร์ - ศุกร์ 08:30 - 16:30 น.) กรณีปัญหาซอฟต์แวร์หรือเครือข่ายเบื้องต้นจะดำเนินการภายใน 1 วันทำการ ส่วนกรณีรออะไหล่จะมีอัปเดตสถานะแจ้งให้ทราบในระบบ
+                        ระบุ <strong>สถานที่หรือห้อง เลขเครื่อง อาการที่พบ และหมวดหมู่งาน</strong> ให้ชัดเจน แนบรูปประกอบได้ไม่เกิน 3 รูป และหากเลือกแจ้งงานด่วนต้องระบุเหตุผลด้วย
                      </div>
                   </details>
 
                   <details class="faq-item">
                      <summary>
                         <span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'faq.question3') ?> class="font-kanit text-base font-normal text-ink leading-snug">
-                           <?= visual_builder_escape(visual_builder_home_text($siteSettings, 'faq.question3', 'หากเครื่องเปิดไม่ติดหรือจอไม่แสดงผล ควรเช็กอะไรเบื้องต้น?')) ?>
+                           <?= visual_builder_escape(visual_builder_home_text($siteSettings, 'faq.question3', 'ส่งใบแจ้งซ่อมแล้วจะติดตามงานได้ที่ไหน?')) ?>
                         </span>
                         <span class="faq-icon" aria-hidden="true">
                            <i class="fa-solid fa-plus"></i>
                         </span>
                      </summary>
                      <div class="faq-answer">
-                        แนะนำให้ตรวจสอบสวิตช์ปลั๊กไฟพ่วงใต้โต๊ะ สายไฟหลังเคส และสายสัญญาณจอภาพ (HDMI/VGA) ว่าเสียบแน่นดีหรือไม่ หากตรวจสอบแล้วยังใช้งานไม่ได้ สามารถเปิดใบแจ้งซ่อมได้ทันที
+                        เข้าสู่ระบบแล้วเปิดหน้า <strong>แดชบอร์ด</strong> เพื่อดูใบงานและสถานะล่าสุด ระบบจะแสดงความคืบหน้าตั้งแต่รอรับเรื่องจนถึงดำเนินการเสร็จ
                      </div>
                   </details>
 
                   <details class="faq-item">
                      <summary>
                         <span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'faq.question4') ?> class="font-kanit text-base font-normal text-ink leading-snug">
-                           <?= visual_builder_escape(visual_builder_home_text($siteSettings, 'faq.question4', 'อินเทอร์เน็ตใช้งานไม่ได้ทั้งห้อง ต้องแจ้งแยกทีละเครื่องไหม?')) ?>
+                           <?= visual_builder_escape(visual_builder_home_text($siteSettings, 'faq.question4', 'ถ้ามีอุปกรณ์หลายเครื่องที่มีปัญหาเดียวกันต้องทำอย่างไร?')) ?>
                         </span>
                         <span class="faq-icon" aria-hidden="true">
                            <i class="fa-solid fa-plus"></i>
                         </span>
                      </summary>
                      <div class="faq-answer">
-                        ไม่ต้องแจ้งแยกเครื่องครับ สามารถเปิดใบแจ้งซ่อมเพียง 1 รายการในหมวดระบบเครือข่าย แล้วระบุหมายเลขห้องปฏิบัติการและอาการว่าไม่สามารถเชื่อมต่อได้ทั้งห้อง
+                        หากเป็นปัญหาเดียวกันในสถานที่เดียวกัน สามารถระบุจำนวนอุปกรณ์และรายละเอียดให้ครบในใบงานเดียวได้ โดยแบบฟอร์มรองรับจำนวน 1–500 เครื่อง หากเป็นคนละปัญหาหรือคนละสถานที่ ให้แยกรายการเพื่อให้ติดตามงานได้ชัดเจน
                      </div>
                   </details>
 
                   <details class="faq-item">
                      <summary>
                         <span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'faq.question5') ?> class="font-kanit text-base font-normal text-ink leading-snug">
-                           <?= visual_builder_escape(visual_builder_home_text($siteSettings, 'faq.question5', 'ต้องการให้ติดตั้งโปรแกรมสำหรับการเรียนการสอน แจ้งผ่านระบบนี้ได้หรือไม่?')) ?>
+                           <?= visual_builder_escape(visual_builder_home_text($siteSettings, 'faq.question5', 'กรณีใดควรเลือกแจ้งงานด่วน?')) ?>
                         </span>
                         <span class="faq-icon" aria-hidden="true">
                            <i class="fa-solid fa-plus"></i>
                         </span>
                      </summary>
                      <div class="faq-answer">
-                        แจ้งได้ครับ โดยเลือกหมวดหมู่ระบบปฏิบัติการและซอฟต์แวร์ พร้อมระบุชื่อโปรแกรม เวอร์ชันที่ต้องการ และหมายเลขห้องปฏิบัติการล่วงหน้าอย่างน้อย 2-3 วันทำการ
+                        เลือกงานด่วนเมื่อมีเหตุจำเป็นที่ต้องแก้ไขภายในวันนี้ และอธิบายผลกระทบให้ชัดเจน ระบบกำหนดให้กรอกเหตุผลก่อนส่งใบงาน
                      </div>
                   </details>
 
                   <details class="faq-item">
                      <summary>
                         <span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'faq.question6') ?> class="font-kanit text-base font-normal text-ink leading-snug">
-                           <?= visual_builder_escape(visual_builder_home_text($siteSettings, 'faq.question6', 'จะติดตามความคืบหน้าของงานซ่อมที่แจ้งไปแล้วได้จากที่ไหน?')) ?>
+                           <?= visual_builder_escape(visual_builder_home_text($siteSettings, 'faq.question6', 'โดยปกติงานซ่อมใช้เวลานานเท่าไร?')) ?>
                         </span>
                         <span class="faq-icon" aria-hidden="true">
                            <i class="fa-solid fa-plus"></i>
                         </span>
                      </summary>
                      <div class="faq-answer">
-                        สามารถเข้าสู่ระบบแล้วดูที่หน้า <strong>แดชบอร์ด</strong> ของคุณได้ตลอดเวลา ระบบจะแสดงสถานะล่าสุด (รอรับเรื่อง / กำลังดำเนินการ / รอครูรับรอง / เสร็จสมบูรณ์) พร้อมรายละเอียดการแก้ไขจากช่างผู้รับผิดชอบ
+                        ระยะเวลาดำเนินการขึ้นอยู่กับอาการ จำนวนงาน และอะไหล่ที่ต้องใช้ จึงไม่สามารถระบุเวลาเสร็จที่แน่นอนได้ โปรดติดตามสถานะล่าสุดจากแดชบอร์ดของคุณ
                      </div>
                   </details>
                </div>
@@ -805,7 +854,6 @@ $assetVersion = static function (string $relativePath): int {
       }
 
       // ---- Hero 3D: ตาข่ายจุดแบบ perspective ไหลช้าๆ + parallax เบาๆ ตามเมาส์ ----
-      // เบามาก: ~1,000 จุด, หยุดเมื่อพ้นจอ/แท็บถูกซ่อน, ปิดการเคลื่อนไหวเมื่อผู้ใช้ตั้ง reduced-motion
       (() => {
          const canvas = document.getElementById('hero-3d');
          const ctx = canvas && canvas.getContext('2d');
@@ -814,16 +862,15 @@ $assetVersion = static function (string $relativePath): int {
          const hero = canvas.parentElement;
          const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
-         // ค่าที่ปรับแต่งได้
-         const COLS = 41; // จำนวนจุดแนวกว้าง
-         const ROWS = 28; // จำนวนแถวแนวลึก
-         const GAP = 1.5; // ระยะห่างระหว่างจุด
-         const AMP = 0.55; // ความสูงคลื่น (น้อย = เรียบ)
-         const SPEED = 0.35; // ความเร็วไหลเข้าหาผู้ชม
-         const CAM_Y = 5; // ความสูงกล้อง
-         const CAM_Z = 6; // ระยะกล้องถอยหลัง
-         const PITCH = 0.35; // มุมก้มของกล้อง (เรเดียน)
-         const INK = '23, 23, 23'; // สีหมึก (ตรงกับธีมขาว-ดำ)
+         const COLS = 41;
+         const ROWS = 28;
+         const GAP = 1.5;
+         const AMP = 0.55;
+         const SPEED = 0.35;
+         const CAM_Y = 5;
+         const CAM_Z = 6;
+         const PITCH = 0.35;
+         const INK = '23, 23, 23';
 
          let w = 0,
             h = 0,
@@ -833,12 +880,10 @@ $assetVersion = static function (string $relativePath): int {
          let mx = 0,
             my = 0,
             camX = 0,
-            tilt = 0; // เป้าหมายเมาส์ (-1..1) และค่าที่ปรับแบบนุ่มนวล
+            tilt = 0;
          let travel = 0,
             last = 0;
 
-         const sinP = Math.sin(PITCH),
-            cosP = Math.cos(PITCH);
          const wave = (x, z, t) => Math.sin(x * 0.28 + t * 0.55) * AMP + Math.cos(z * 0.24 - t * 0.4) * AMP;
 
          function resize() {
@@ -855,18 +900,17 @@ $assetVersion = static function (string $relativePath): int {
          function draw(t) {
             ctx.clearRect(0, 0, w, h);
 
-            const F = Math.max(h * 0.9, w * 0.6); // focal length
+            const F = Math.max(h * 0.9, w * 0.6);
             const cx = w / 2;
-            const cy = h * 0.72; // ดันตาข่ายไปอยู่ครึ่งล่างของ hero
+            const cy = h * 0.72;
             const offset = travel % GAP;
             const sinT = Math.sin(PITCH + tilt * 0.04),
                cosT = Math.cos(PITCH + tilt * 0.04);
 
             for (let r = 0; r <= ROWS; r++) {
-               const z = r * GAP - offset; // ตำแหน่งแถวบนจอ
-               const zw = z + travel; // ตำแหน่งในโลก (ให้คลื่นเกาะติดตาข่าย)
-               const depth = r / ROWS; // 0 = ใกล้, 1 = ไกล
-               // จางเข้าที่ขอบใกล้/ไกล เพื่อไม่ให้แถวโผล่หรือหายกะทันหัน
+               const z = r * GAP - offset;
+               const zw = z + travel;
+               const depth = r / ROWS;
                const fade = Math.min(1, (z + GAP) / (GAP * 2)) * (1 - depth * depth);
                if (fade <= 0.01) continue;
 
@@ -886,7 +930,6 @@ $assetVersion = static function (string $relativePath): int {
                   pts.push([cx + px * F / zv, cy - yv * F / zv]);
                }
 
-               // เส้นบางมากตามแนวกว้าง
                ctx.beginPath();
                let started = false;
                for (const p of pts) {
@@ -903,7 +946,6 @@ $assetVersion = static function (string $relativePath): int {
                ctx.lineWidth = 1;
                ctx.stroke();
 
-               // จุด: ใกล้ = ใหญ่/เข้มกว่าเล็กน้อย
                ctx.fillStyle = `rgba(${INK}, ${(0.28 * fade).toFixed(3)})`;
                const size = 1.7 - depth * 1.0;
                for (const p of pts) {
@@ -920,7 +962,7 @@ $assetVersion = static function (string $relativePath): int {
             const dt = Math.min((now - last) / 1000, 0.05);
             last = now;
             travel += dt * SPEED;
-            camX += (mx * 3 - camX) * 0.04; // lerp ให้นุ่ม ไม่กระตุก
+            camX += (mx * 3 - camX) * 0.04;
             tilt += (my - tilt) * 0.04;
             draw(now / 1000);
             rafId = requestAnimationFrame(frame);

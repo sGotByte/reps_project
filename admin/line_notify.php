@@ -91,12 +91,14 @@ function lineBuildTicketText(array $ticket): string
    $urgencyLabels = ['urgent' => 'ด่วน', 'normal' => 'ปกติ'];
    $urgency = (string)$ticket['urgency'];
    $requester = trim((string)$ticket['first_name'] . ' ' . (string)$ticket['last_name']);
+   $assignedStaff = trim((string)($ticket['assigned_staff_first_name'] ?? '') . ' ' . (string)($ticket['assigned_staff_last_name'] ?? ''));
    $symptom = lineMainSymptom((string)$ticket['symptom']);
    $text = implode("\n", [
       'REPS · งานซ่อมใหม่',
       'เลขที่ใบงาน: #' . (string)$ticket['ticket_no'],
       'ความเร่งด่วน: ' . ($urgencyLabels[$urgency] ?? $urgency),
       'หมวดหมู่: ' . (string)$ticket['category_name'],
+      'สตาฟที่ได้รับงาน: ' . ($assignedStaff !== '' ? $assignedStaff : 'ยังไม่มีสตาฟรับงาน'),
       'สถานที่: ' . (string)$ticket['location_name'],
       'ผู้แจ้ง: ' . ($requester !== '' ? $requester : '-'),
       'รายละเอียด: ' . $symptom,
@@ -136,6 +138,7 @@ function lineBuildTicketFlex(array $ticket): array
       $symptom = mb_substr($symptom, 0, 237, 'UTF-8') . '...';
    }
    $requester = trim($ticket['first_name'] . ' ' . $ticket['last_name']);
+   $assignedStaff = trim((string)($ticket['assigned_staff_first_name'] ?? '') . ' ' . (string)($ticket['assigned_staff_last_name'] ?? ''));
    $phone = trim((string)($ticket['phone_number'] ?? ''));
 
    $row = static function (string $label, string $value): array {
@@ -193,6 +196,7 @@ function lineBuildTicketFlex(array $ticket): array
          'paddingAll' => 'lg',
          'contents' => [
             $row('หมวดหมู่', (string)$ticket['category_name']),
+            $row('สตาฟที่ได้รับงาน', $assignedStaff !== '' ? $assignedStaff : 'ยังไม่มีสตาฟรับงาน'),
             $row('สถานที่', (string)$ticket['location_name']),
             [
                'type' => 'box',
@@ -235,10 +239,13 @@ function sendRepairNotification(mysqli $conn, int $ticketId): void
    $stmt = $conn->prepare(
       'SELECT t.ticket_no, t.symptom, t.urgency,
               u.first_name, u.last_name, u.phone_number,
+              staff.first_name AS assigned_staff_first_name,
+              staff.last_name AS assigned_staff_last_name,
               c.name AS category_name,
               t.location_note AS location_name
          FROM tickets t
          JOIN users u ON u.user_id = t.requester_id
+         LEFT JOIN users staff ON staff.user_id = t.queue_assigned_to
          JOIN categories c ON c.id = t.category_id
         WHERE t.id = ?
         LIMIT 1'
