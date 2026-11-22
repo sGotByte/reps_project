@@ -1,0 +1,32 @@
+main.vb-home-layout {
+   display: flex;
+   flex-direction: column;
+}
+
+main.vb-home-layout > .rails {
+   order: 0;
+}
+
+main.vb-home-layout > .vb-home-section,
+main.vb-home-layout > .divider {
+   flex: 0 0 auto;
+   width: 100%;
+}
+
+.vb-home-section--hidden {
+   display: none !important;
+}
+
+.vb-home-section.vb-home-size--compact {
+   padding-top: 3rem !important;
+   padding-bottom: 3rem !important;
+}
+
+.vb-home-section.vb-home-size--wide {
+   padding-top: 8rem !important;
+   padding-bottom: 8rem !important;
+}
+
+.vb-home-page {
+   background-color: var(--admin-bg, #fff);
+}

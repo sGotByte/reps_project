@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 /**
  * REPS · includes/permissions.php
-<<<<<<< HEAD
  * ระบบสิทธิ์กลาง ลำดับ: admin (ครูประจำปีการศึกษา) > staff > user
  * users.user_type (student/teacher/staff) คือสถานภาพบุคคล ไม่ใช่สิทธิ์
  */
@@ -35,22 +34,10 @@ const ROLE_CAPABILITIES = [
     'inventory.use'      => ['admin', 'staff'],
     'inventory.manage'   => ['admin'],            // เพิ่ม/แก้ไขวัสดุ รับเข้า ปรับยอด
     'site.customize'     => ['admin'],
-=======
- * ระบบจัดการสิทธิ์กลางตามลำดับ: teacher (สูงสุด) > admin > staff > user
- */
-
-const ROLE_LEVELS = [
-    'teacher'   => 40, // ครู: สิทธิ์สูงสุด ดูรายงานประจำปี เพิ่ม/แก้ไขผู้ใช้ทุกคนได้
-    'admin'     => 30, // แอดมิน: จัดการระบบ คิว สต็อก และภาพรวมทั้งหมด
-    'staff'     => 20, // ฝ่ายซ่อม (Lab Boy): รับงานตามคิว บันทึกซ่อม เบิกของ ปิดงาน
-    'user'      => 10, // ผู้แจ้งซ่อมทั่วไป (นักศึกษา/บุคลากร)
-    'requester' => 10, // รองรับค่าเก่าชั่วคราว
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 ];
 
 function normalize_role(string $role): string
 {
-<<<<<<< HEAD
     // รองรับค่าเก่า 'requester' และ 'teacher' จากโค้ดรุ่นก่อน
     return match ($role) {
         'requester' => 'user',
@@ -62,15 +49,11 @@ function normalize_role(string $role): string
 function is_valid_role(string $role): bool
 {
     return array_key_exists($role, ROLE_LEVELS);
-=======
-    return $role === 'requester' ? 'user' : $role;
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 }
 
 function has_min_role(string $currentRole, string $minRole): bool
 {
     $curr = ROLE_LEVELS[normalize_role($currentRole)] ?? 0;
-<<<<<<< HEAD
     $min  = ROLE_LEVELS[normalize_role($minRole)] ?? PHP_INT_MAX;
     return $curr >= $min;
 }
@@ -92,39 +75,13 @@ function can_edit_user(array $actor, array $targetUser): bool
         return true;
     }
     return (int)($actor['user_id'] ?? 0) === (int)($targetUser['user_id'] ?? -1);
-=======
-    $min  = ROLE_LEVELS[normalize_role($minRole)] ?? 999;
-    return $curr >= $min;
-}
-
-function can_edit_user(array $actor, array $targetUser): bool
-{
-    $actorRole  = normalize_role((string)($actor['role'] ?? 'user'));
-    $targetRole = normalize_role((string)($targetUser['role'] ?? 'user'));
-
-    if ($actorRole === 'teacher') {
-        return true; // ครูสิทธิ์สูงสุด แก้ได้ทุกคน
-    }
-    if ($actorRole === 'admin') {
-        return $targetRole !== 'teacher'; // แอดมินห้ามแก้บัญชีครู
-    }
-    return (int)$actor['user_id'] === (int)$targetUser['user_id'];
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 }
 
 function role_home_url(string $role): string
 {
     return match (normalize_role($role)) {
-<<<<<<< HEAD
         'admin' => 'admin/admin_dashboard.php',
         'staff' => 'staff/staff_dashboard.php',
         default => 'dashboard.php',
     };
 }
-=======
-        'teacher', 'admin' => 'admin/admin_dashboard.php',
-        'staff'            => 'staff/staff_dashboard.php',
-        default            => 'dashboard.php',
-    };
-}
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff

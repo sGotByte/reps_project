@@ -286,8 +286,9 @@ $steps = [
    </style>
    <script>document.documentElement.classList.add('js');</script>
    <link rel="stylesheet" href="assets/css/base.css?v=18">
+   <link rel="stylesheet" href="assets/css/requester-theme.css?v=2">
 </head>
-<body class="min-h-screen flex flex-col antialiased">
+<body class="min-h-screen flex flex-col antialiased<?= current_role() === 'user' ? ' rq-on rq-request-form' : '' ?>">
 
    <header class="sticky top-0 z-30 h-16 border-b border-[#ECEAE6] bg-white/95 backdrop-blur">
       <div class="max-w-6xl mx-auto px-4 sm:px-7 h-full flex items-center justify-between">

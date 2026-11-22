@@ -1,0 +1,108 @@
+/* Requester-only color system. Other roles never receive the rq-on body class. */
+body.rq-on {
+   --rq-accent: #BE2A5A;
+   --rq-accent-hover: #A91F4D;
+   --rq-accent-soft: #FBEAF0;
+   --rq-accent-border: #F0C8D5;
+   --theme-primary: var(--rq-accent);
+   background-color: #FFF8FA;
+}
+
+body.rq-on .admin-topbar {
+   border-color: #F0DDE3 !important;
+}
+
+body.rq-on .rq-top .rq-newbtn {
+   background: var(--rq-accent);
+   color: #fff;
+}
+
+body.rq-on .rq-top .rq-newbtn:hover {
+   background: var(--rq-accent-hover);
+   color: #fff;
+}
+
+body.rq-on .admin-btn:not(.admin-btn-secondary):not(.admin-btn-danger-outline) {
+   border-color: var(--rq-accent);
+   background: var(--rq-accent);
+   color: #fff;
+}
+
+body.rq-on .admin-btn:not(.admin-btn-secondary):not(.admin-btn-danger-outline):hover {
+   border-color: var(--rq-accent-hover);
+   background: var(--rq-accent-hover);
+   color: #fff;
+}
+
+/* Request wizard primary controls only; these pages reuse the admin-btn class. */
+body.rq-on.rq-request-form #nextStep,
+body.rq-on.rq-request-form #requestForm section[data-step="4"] button[type="submit"] {
+   border-color: var(--rq-accent) !important;
+   background-color: var(--rq-accent) !important;
+   color: #fff !important;
+}
+
+body.rq-on.rq-request-form #nextStep:hover,
+body.rq-on.rq-request-form #requestForm section[data-step="4"] button[type="submit"]:hover {
+   border-color: var(--rq-accent-hover) !important;
+   background-color: var(--rq-accent-hover) !important;
+   color: #fff !important;
+}
+
+body.rq-on .admin-btn-secondary:hover {
+   border-color: var(--rq-accent-border);
+   background: var(--rq-accent-soft);
+   color: var(--rq-accent-hover);
+}
+
+body.rq-on .admin-stat-card-wrapper.is-active {
+   border-color: var(--rq-accent-border);
+   box-shadow: 0 0 0 2px var(--rq-accent);
+}
+
+body.rq-on .admin-stat-card-wrapper.is-active .admin-stat-inner {
+   border-color: var(--rq-accent-border);
+}
+
+body.rq-on .stat-dot.dot-black {
+   background-color: var(--rq-accent);
+}
+
+body.rq-on .history-stack-item:hover {
+   border-color: var(--rq-accent-border);
+   box-shadow: 0 10px 25px -5px rgb(190 42 90 / 10%);
+}
+
+body.rq-on .edit-modal-progress-item.is-active {
+   color: var(--rq-accent-hover);
+}
+
+body.rq-on .edit-modal-progress-item.is-active .edit-modal-progress-dot,
+body.rq-on .edit-modal-progress-item.is-active + .edit-modal-progress-line {
+   border-color: var(--rq-accent);
+   background-color: var(--rq-accent);
+}
+
+body.rq-on .form-input:focus,
+body.rq-on main input:focus,
+body.rq-on main select:focus,
+body.rq-on main textarea:focus {
+   border-color: var(--rq-accent) !important;
+   box-shadow: 0 0 0 3px rgb(190 42 90 / 12%) !important;
+}
+
+body.rq-on :is(input, select, textarea, button, a):focus-visible {
+   outline-color: var(--rq-accent) !important;
+}
+
+body.rq-on .stepper li[aria-current="step"] span.dot {
+   border-color: var(--rq-accent);
+   background: var(--rq-accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+   body.rq-on .admin-btn,
+   body.rq-on .history-stack-item {
+      transition: none;
+   }
+}

@@ -8,6 +8,14 @@ if (is_file(__DIR__ . '/includes/site_config.php')) {
     require_once __DIR__ . '/includes/site_config.php';
 }
 
+$visualBuilderPreview = $_SERVER['REQUEST_METHOD'] === 'GET' && ($_GET['visual_builder_preview'] ?? '') === '1';
+if ($visualBuilderPreview) {
+    require_once __DIR__ . '/includes/user_auth.php';
+    app_require_active_user($conn, 'login.php', 'admin');
+}
+require_once __DIR__ . '/includes/visual_builder.php';
+$visualBuilderSettings = app_get_settings($conn);
+
 $siteName = function_exists('app_site_name') ? app_site_name($conn) : 'REPS';$error_msg = '';
 $csrfToken = app_csrf_token();$usernameInput = is_string($_POST['username'] ?? null) ? $_POST['username'] : '';
 
@@ -75,7 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 <!DOCTYPE html>
-<html lang="th">
+<html lang="<?= htmlspecialchars(app_lang(), ENT_QUOTES, 'UTF-8') ?>">
 
 <head>
     <meta charset="UTF-8">
@@ -243,6 +251,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 
 <body class="auth-light antialiased min-h-screen flex flex-col justify-between relative overflow-x-hidden font-sans">
+    <div class="auth-3d-background" data-auth-3d aria-hidden="true">
+        <canvas class="auth-3d-canvas"></canvas>
+    </div>
 
     <header class="auth-header sticky top-0 z-20">
         <div class="auth-header-inner">
@@ -258,8 +269,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="auth-card">
 
                 <div class="auth-card-title">
-                    <h1>เข้าสู่ระบบ</h1>
-                    <p>สำหรับนักศึกษา ครูอาจารย์ ฝ่ายซ่อม และผู้ดูแลระบบ</p>
+                    <h1<?= visual_builder_content_target_attrs($visualBuilderPreview, 'login', 'login.title') ?>><?= htmlspecialchars(visual_builder_content_text($visualBuilderSettings, 'login', 'login.title', tr('เข้าสู่ระบบ', 'Sign in')), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?></h1>
+                    <p<?= visual_builder_content_target_attrs($visualBuilderPreview, 'login', 'login.intro') ?>><?= htmlspecialchars(visual_builder_content_text($visualBuilderSettings, 'login', 'login.intro', tr('สำหรับนักศึกษา ครูอาจารย์ ฝ่ายซ่อม และผู้ดูแลระบบ', 'For students, teachers, repair staff, and administrators')), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?></p>
                 </div>
 
                 <?php if (isset($_GET['registered'])): ?>
@@ -383,6 +394,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (btnText) btnText.disabled = true;
         });
     </script>
+    <script src="assets/js/auth-3d-loader.js?v=1" defer></script>
 </body>
 
 </html>

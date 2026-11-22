@@ -72,13 +72,8 @@ a { color: inherit; text-decoration: none; }
 .text-lg { font-size: 1.125rem; line-height: 1.75rem; }
 .text-2xl { font-size: 1.5rem; line-height: 2rem; }
 .text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
-<<<<<<< HEAD
 .font-mono { font-family: 'Kanit', sans-serif; }
 .text-gray-400 { color: #73706A; }
-=======
-.font-mono { font-family: 'JetBrains Mono', monospace; }
-.text-gray-400 { color: #9a9791; }
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 .text-gray-500 { color: #73706a; }
 .text-gray-600 { color: #5f5c56; }
 .text-gray-700 { color: #4a4843; }
@@ -156,17 +151,10 @@ a { color: inherit; text-decoration: none; }
 .admin-content h1.text-3xl, .admin-content h1.text-2xl { font-weight: 400; letter-spacing: -.02em; }
 .admin-content input:not([type=checkbox]):not([type=radio]), .admin-content select,
 .admin-content textarea { min-height: 38px; border: 1px solid #d9d6d0; border-radius: 9px; background: #fff; color: #161616; padding: .55rem .75rem; outline: none; }
-<<<<<<< HEAD
 .admin-content input:focus, .admin-content select:focus, .admin-content textarea:focus { border-color: #5F5C57; box-shadow: 0 0 0 3px rgba(22,22,22,.07); }
 .admin-content table { width: 100%; border-collapse: separate; border-spacing: 0; }
 .admin-content table thead { background: #f7f6f4; }
 .admin-content table th { color: #6B6862; font: 500 10.5px/1.4 'Kanit', sans-serif; letter-spacing: .06em; text-transform: uppercase; }
-=======
-.admin-content input:focus, .admin-content select:focus, .admin-content textarea:focus { border-color: #77736d; box-shadow: 0 0 0 3px rgba(22,22,22,.07); }
-.admin-content table { width: 100%; border-collapse: separate; border-spacing: 0; }
-.admin-content table thead { background: #f7f6f4; }
-.admin-content table th { color: #8e8b85; font: 500 10.5px/1.4 'JetBrains Mono', monospace; letter-spacing: .06em; text-transform: uppercase; }
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 .admin-content table td, .admin-content table th { vertical-align: top; }
 .admin-content table tbody tr { border-bottom: 1px solid #f1efec; }
 .admin-content table tbody tr:hover { background: #fbfaf8; }
@@ -222,11 +210,7 @@ a { color: inherit; text-decoration: none; }
 .focus\:border-gray-900:focus{border-color:#161616}
 .focus\:border-red-600:focus{border-color:#dc2626}
 .focus\:ring-2:focus{box-shadow:0 0 0 2px var(--tw-ring,#9ca3af)}
-<<<<<<< HEAD
 .focus\:ring-gray-400:focus{--tw-ring:#73706A;}
-=======
-.focus\:ring-gray-400:focus{--tw-ring:#9a9791;}
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 .focus\:ring-gray-900:focus{--tw-ring:#161616;}
 .focus\:ring-gray-900\/10:focus{--tw-ring:rgba(22,22,22,0.1);}
 .focus\:ring-offset-2:focus{outline-offset:2px}
@@ -282,11 +266,7 @@ a { color: inherit; text-decoration: none; }
 .p-4{padding:1rem;}
 .p-5{padding:1.25rem;}
 .placeholder\:font-kanit::placeholder{font-family:'Kanit',sans-serif}
-<<<<<<< HEAD
 .placeholder\:text-gray-400::placeholder{color:#73706A}
-=======
-.placeholder\:text-gray-400::placeholder{color:#9a9791}
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 .px-2{padding-left:.5rem;padding-right:.5rem;}
 .px-2\.5{padding-left:.625rem;padding-right:.625rem;}
 .px-3\.5{padding-left:.875rem;padding-right:.875rem;}
@@ -298,21 +278,12 @@ a { color: inherit; text-decoration: none; }
 .py-3\.5{padding-top:.875rem;padding-bottom:.875rem;}
 .rounded-2xl{border-radius:1rem}
 .shadow-2xl{box-shadow:0 25px 50px -12px rgba(0,0,0,.25)}
-<<<<<<< HEAD
 .text-\[10px\]{font-size: 11px;line-height:1.25}
 .text-\[8px\]{font-size: 11px;line-height:1.25}
 .text-amber-700{color:#b45309}
 .text-emerald-700{color:#047857}
 .text-gray-300{color:#d9d6d0}
 .text-muted{color:#6B6862}
-=======
-.text-\[10px\]{font-size:10px;line-height:1.25}
-.text-\[8px\]{font-size:8px;line-height:1.25}
-.text-amber-700{color:#b45309}
-.text-emerald-700{color:#047857}
-.text-gray-300{color:#d9d6d0}
-.text-muted{color:#8E8B85}
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 .text-neutral-900{color:#171717}
 .text-red-600{color:#dc2626}
 .text-red-700{color:#b91c1c}
@@ -463,11 +434,7 @@ button, input, select, textarea { font: inherit; }
 .-mt-2 { margin-top: -.5rem; }
 .space-y-4 > * + * { margin-top: 1rem; }
 .space-y-5 > * + * { margin-top: 1.25rem; }
-<<<<<<< HEAD
 .font-sans { font-family: 'Kanit', sans-serif; }
-=======
-.font-sans { font-family: ui-sans-serif, system-ui, sans-serif; }
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 .text-base { font-size: 1rem; line-height: 1.5rem; }
 .text-xl { font-size: 1.25rem; line-height: 1.75rem; }
 .text-4xl { font-size: 2.25rem; line-height: 2.5rem; }
@@ -476,11 +443,7 @@ button, input, select, textarea { font: inherit; }
 .leading-snug { line-height: 1.375; }
 .tracking-tight { letter-spacing: -.025em; }
 .tracking-wide { letter-spacing: .025em; }
-<<<<<<< HEAD
 .text-\[9px\] { font-size: 11px; }
-=======
-.text-\[9px\] { font-size: 9px; }
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 .text-\[11px\] { font-size: 11px; }
 .text-\[13px\] { font-size: 13px; }
 .text-\[15px\] { font-size: 15px; }
@@ -490,11 +453,7 @@ button, input, select, textarea { font: inherit; }
 .tracking-\[-0\.02em\] { letter-spacing: -.02em; }
 .tracking-\[\.16em\] { letter-spacing: .16em; }
 .text-ink { color: var(--ink); }
-<<<<<<< HEAD
 .text-neutral-400 { color: #737373; }
-=======
-.text-neutral-400 { color: #a3a3a3; }
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 .text-neutral-500 { color: #737373; }
 .text-neutral-900 { color: #171717; }
 .text-slate-400 { color: #94a3b8; }
@@ -660,7 +619,6 @@ button, input, select, textarea { font: inherit; }
 @media (min-width: 1024px) {
   .lg\:flex { display: flex; }
   .lg\:hidden { display: none !important; }
-<<<<<<< HEAD
 }
 /* ---------- utilities เพิ่มสำหรับหน้า admin ใหม่ (รับรองงาน ตั้งค่า อนุมัติผู้สมัคร) ---------- */
 .bg-gray-50\/80 { background-color: rgb(250 250 248 / .8); }
@@ -713,6 +671,3 @@ button, input, select, textarea { font: inherit; }
 @media (min-width: 640px) {
   .sm\:inline-flex { display: inline-flex; }
 }
-=======
-}
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff

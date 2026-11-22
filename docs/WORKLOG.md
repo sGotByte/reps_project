@@ -515,4 +515,284 @@ Phase 1 validation ยังไม่ผ่านครบเนื่องจ�
 - Upload SHA-256 manifest matched, the test upload marker remained valid, and the test PHP server was stopped (`127.0.0.1:8765` returned no response). E2E continued to block outbound email and LINE.
 - PHP lint, shell syntax checks, and `git diff --check` passed. This checkout has no commits and its project files are untracked, so Git cannot provide a baseline diff; the touched sections were reviewed directly.
 
-Phase 1 validation is complete. Phase 2 remains blocked pending explicit approval.
+Phase 1 validation is complete. Phase 2 was approved; the homepage Visual Builder foundation and the CMS page editor are implemented.
+
+## Phase 2 — Visual Builder Foundation
+
+### Direction
+
+- The initial blank-page CMS composer did not match the requested workflow. The admin Visual Builder has been pivoted to edit the existing homepage in its original layout, with an admin-only iframe preview and selection by click or Layers.
+- CMS page editing was approved as a separate admin flow on the existing `site_pages` / `site_blocks` tables, so the homepage Visual Builder stays focused on the existing homepage. The CMS editor is documented in the next section.
+
+### Implemented
+
+- Added click-to-select and Layers editing for allowlisted homepage text, logo, and footer fields; reuses existing site settings, `site_media`, and theme services.
+- Added allowlisted section visibility, size presets, order, and background-color settings. Visibility for existing Steps/FAQ sections remains synchronized with their original settings.
+- Stores localized text and homepage layout as validated JSON in existing `system_settings` rows and records edits through existing `site_revisions`. No user-provided HTML, CSS, or JavaScript is executed.
+- Added desktop/tablet/mobile preview widths. The embedded edit mode requires an active admin session and blocks preview navigation and form submission.
+- Fixed the preview gate to evaluate the already-authenticated homepage user; it was previously evaluated before `$currentUser` was populated, so admin preview mode stayed disabled.
+- Firefox visual QA showed the canvas was below the Layers/Inspector stack on tablet and mobile. The responsive layout now places the existing-page canvas first below 820px, so the original page is visible before the editing panels.
+
+### Files
+
+- Modified: `index.php`, `includes/site_footer.php`, `docs/WORKLOG.md`.
+- Added for this editor: `includes/visual_builder.php`, `admin/admin_visual_builder.php`, `assets/css/visual-home.css`, `assets/css/visual-studio.css`, `assets/js/visual-studio.js`, `tests/visual_builder.php`.
+- CMS page files added separately: `page.php`, `admin/admin_pages.php`, `includes/visual_builder.php` (shared page helpers), `assets/css/visual-builder.css`, `assets/js/visual-builder.js`, `assets/js/cms-pages.js`.
+- Database schema changes: none. Smoke validation wrote only a synthetic admin, homepage/theme settings, and four revisions to the isolated test DB.
+
+### Validation and Safety
+
+- `php tests/visual_builder.php`: passed (`Visual Builder schema and safe-render tests passed`).
+- PHP lint passed for `index.php`, `includes/visual_builder.php`, `includes/site_footer.php`, `admin/admin_visual_builder.php`, and `tests/visual_builder.php`.
+- `node --check assets/js/visual-studio.js` and `git diff --check` passed.
+- Local HTTP smoke checks passed: unauthenticated admin access redirects to login, public preview has no edit mode, synthetic admin login enables edit mode, invalid CSRF returns HTTP 403, and text/layout/theme/default-logo saves reload successfully. Saved markup escapes HTML-like text.
+- Firefox screenshots were reviewed at 1600x1000, 768x1024, and 390x844; the canvas and existing content fit without horizontal overflow at all three viewport widths.
+- PHP and MySQL CLI identities matched `127.0.0.1:3307/reps_v2_db_test` before and after the smoke checks. Before testing, users/tickets/logs/revisions were empty; afterward, the test DB contains one synthetic admin, zero tickets/logs, zero CMS pages/blocks, and six expected revisions. `CHECK TABLE` returned OK for the affected tables.
+- A private pre-test database backup and SHA-256 were verified. No restore was performed. The upload directory remained isolated and its SHA-256 manifest matched the baseline; no file upload occurred. The local PHP test server was stopped.
+- The project `.env` targets `127.0.0.1:3306/reps_db` and contains real notification configuration; all smoke-test PHP requests instead received explicit isolated DB/upload settings, `REPS_E2E=1`, and disabled email/LINE credentials. No migration, E2E suite, or outbound notification was run.
+
+### Remaining
+
+- CMS pages are implemented as a new admin flow on `site_pages` / `site_blocks`; see the next section.
+- Undo/redo, rollback, copy/paste, animation controls, and a complete set of editable homepage elements remain future work.
+- Synthetic smoke-test data remains only in the isolated test DB; the verified pre-test backup is retained in session storage. No database restore was performed.
+
+## Phase 2 — CMS Pages on `site_pages` / `site_blocks`
+
+### Direction
+
+- Approved direction: add a separate CMS renderer/editor on the existing `site_pages` / `site_blocks` tables while leaving the homepage Visual Builder unchanged.
+- Draft and published block sets are stored separately (`site_blocks.status = 'draft' | 'published'`). The editor always writes the draft; publishing copies the draft set to the published set and sets `site_pages.status = 'published'`.
+- Public visibility is controlled by `site_pages.status`. A draft is only viewable by an active admin through `page.php?slug=...&preview=1`.
+- No user-supplied HTML, CSS, or JavaScript is accepted or executed. Every component is allowlisted and rendered server-side with escaped values.
+
+### Implemented
+
+- Added page helpers in `includes/visual_builder.php`: title/slug validation, slug uniqueness, page lookup by ID/slug, page listing with draft/published block counts, create, save draft, publish, unpublish, revert draft from published, delete, and revision history.
+- Added guarded transitions: saving or publishing an empty page is rejected, and reverting requires existing published content.
+- Added allowlisted components beyond heading/paragraph/button/image: `list` (bullet or numbered, 1–30 items), `quote`, `callout` (info/success/warning), `divider`, and `spacer` (small/medium/large). Existing component field contracts were not changed, so previously stored blocks remain valid.
+- Added `admin/admin_pages.php`: page list, create form, block editor, draft save, save-and-publish, unpublish, revert draft, delete, revision history, and a responsive draft-preview panel (desktop/tablet/mobile widths).
+- Reused the existing `assets/js/visual-builder.js` editor contract and `.vb-*` styles; added `assets/js/cms-pages.js` for preview widths and destructive-action confirmations.
+- Upgraded `page.php` to render published pages from `site_pages` / `site_blocks`, return 404 for unknown or unpublished slugs, and allow admin-only draft preview with a visible banner and `noindex, nofollow`. Public requests do not start a session.
+- Registered “หน้าเว็บ (CMS)” in `includes/site_menu.php` and `admin/admin_header.php`, and cross-linked it from `admin/admin_visual_builder.php`.
+- Fixed the incomplete tail of `admin/admin_visual_builder.php` (missing wrapper close, footer, and closing document tags).
+- Extended `site_media_usage()` so images referenced by CMS image blocks are reported as “หน้าเว็บ” and protected from deletion.
+- Added validation/safe-render tests for slug and title rules, list, quote, callout, divider, spacer, and invalid option rejection.
+
+### Files
+
+- Added: `admin/admin_pages.php`, `assets/js/cms-pages.js`.
+- Modified: `page.php`, `includes/visual_builder.php`, `includes/site_menu.php`, `includes/site_custom.php`, `admin/admin_header.php`, `admin/admin_visual_builder.php`, `assets/js/visual-builder.js`, `assets/css/visual-builder.css`, `tests/visual_builder.php`, `docs/WORKLOG.md`.
+- Database schema changes: none. The flow uses the existing `site_pages`, `site_blocks`, `site_revisions`, and `site_media` tables.
+
+### Validation and Safety
+
+- `php tests/visual_builder.php`: passed (`Visual Builder schema and safe-render tests passed`).
+- PHP lint passed for every project PHP file (`find . -name '*.php' ... | xargs php -l`).
+- `node --check assets/js/visual-builder.js`, `node --check assets/js/cms-pages.js`, and `git diff --check` passed.
+- An isolated MariaDB instance (`127.0.0.1:3307`, database `reps_cms_test`) was created from `reps_v2_db.sql` and used with an isolated PHP built-in server (`127.0.0.1:8765`) and a synthetic admin. The project `.env`/production database was not used.
+- HTTP smoke checks passed: admin login with CSRF, page list and editor render without PHP warnings, create page, save draft containing eight of the nine component types (all except `image`, which needs a media-library file; image validation and media usage were tested separately), draft 404 for the public, unauthenticated preview redirects to login, admin preview renders the draft with its banner, publish makes the page public, unpublish hides it again, revert copies published content back to draft, missing CSRF returns 403, an invalid block type returns a validation error, a duplicate slug is rejected, and delete removes the page and its blocks while retaining revision history.
+- HTML tag-balance checks were clean for the admin list, editor, draft preview, published page, and Visual Builder responses.
+- The homepage Visual Builder still renders in edit mode and the public homepage still returns 200 after the changes.
+- `site_media_usage()` returned `หน้าเว็บ` for an image referenced by a CMS image block, confirming deletion protection.
+- No outbound email, LINE notification, migration, or E2E suite was run.
+
+### Remaining
+
+- Browser-based visual QA for the new CMS editor (Firefox at desktop/tablet/mobile) has not been performed in this round; the responsive layout follows the already-QA’d Visual Builder pattern (preview panel first below 820px).
+- Production schema verification for `site_pages` / `site_blocks` / `site_revisions` / `site_media` remains part of the open Phase 0 migration check.
+- Revision history is visible but there is no restore-from-revision UI yet.
+- `site_media_usage()` scans all image blocks; acceptable for a small CMS, but a dedicated reference table would scale better.
+- Nothing has been committed or pushed. The new CMS files remain untracked and the modified files are unstaged.
+
+## Phase 3 — Advanced Visual Builder (implementation in progress)
+
+### Existing Features Reused
+
+- Reused the `VISUAL_BUILDER_COMPONENTS` allowlist, `visual_builder_validate_config()`, `visual_builder_render_blocks()`, and the existing draft/published/revision storage in `site_pages`, `site_blocks`, and `site_revisions`.
+- Reused admin authentication and the existing CSRF-protected CMS POST flow. No raw user HTML, CSS, or JavaScript is interpreted.
+
+### Implemented in this increment
+
+- Added a live CMS canvas that renders the current unsaved component fields with DOM APIs and `textContent`; image IDs and link destinations are constrained before preview.
+- Added native drag-and-drop ordering alongside the existing move buttons, bounded undo/redo history (100 states), keyboard shortcuts, and in-memory block copy/paste.
+- Connected the existing animation preset list to the CMS component registry, field controls, server validation, and safe renderer. Older component JSON without an animation remains valid and defaults to `none`.
+- Added CSS animations scoped to CMS pages and the editor canvas, with `prefers-reduced-motion` support.
+- Added restore-to-draft actions for page revisions. The server scopes the lookup to the current page, revalidates title/slug/component schema, writes only to the draft, and records the restore as a new revision.
+- Added homepage undo/redo, in-memory copy/paste, keyboard shortcuts, and bounded preview history for text, logo, section layout, and theme edits.
+- Added admin-only preview and allowlisted text targets for Login, Register, requester dashboard, staff dashboard, and admin dashboard. These targets edit display text only; form behavior, dashboard actions, and ticket logic stay outside the Visual Builder.
+- Added page-scoped text revisions and validated restore actions for those screens. Homepage revision history now includes safe restore for text, layout, theme, and logo snapshots, with every restore recorded as a new revision.
+- Kept shared navigation and footer editing on the existing site customization system. The homepage preview exposes its navigation and footer text targets through the Visual Builder; menu structure and role visibility continue to use the existing menu editor.
+- Added locale-aware fallback labels to the new dashboard targets and kept page `lang` attributes aligned with the active REPS locale.
+- Homepage section copy/paste now updates the associated divider visibility in the live canvas.
+
+### Files
+
+- Modified: `admin/admin_pages.php`, `admin/admin_visual_builder.php`, `admin/admin_dashboard.php`, `assets/css/visual-builder.css`, `assets/css/visual-studio.css`, `assets/js/visual-builder.js`, `assets/js/visual-studio.js`, `dashboard.php`, `includes/visual_builder.php`, `login.php`, `register.php`, `staff/staff_dashboard.php`, `tests/visual_builder.php`, `docs/WORKLOG.md`.
+- New project files: none.
+- Database changes: none. The integration check used an isolated temporary MariaDB database with only the existing CMS table shapes; no project or configured database was modified.
+
+### Security and Compatibility
+
+- Component animation names are selected from the server allowlist; renderer output only emits a validated `data-vb-animation` value.
+- Revision restore rejects a revision belonging to another page and never overwrites published blocks. Historical snapshots are revalidated before saving.
+- Existing CMS blocks without animation metadata are normalized to `none`; no migration is required.
+
+### Test Results
+
+- `php tests/visual_builder.php`: passed, including safe rendering, legacy configuration normalization, supported/unsupported animation presets, posted block validation, and allowlisted localized page text.
+- PHP lint for all project PHP files excluding `vendor/`: passed.
+- `node --check` for `visual-builder.js`, `visual-studio.js`, and `cms-pages.js`: passed.
+- `git diff --check`: passed.
+- Earlier isolated MariaDB integration: passed for CMS revision restore into draft, preserving a new revision record, and rejecting a cross-page restore.
+- Ran Phase 3 HTTP/database integration against a fresh isolated MariaDB schema made from DDL only (30 table definitions and 74 index/constraint statements); inserted only synthetic test users and settings. The configured project database and SQL dump data were not used.
+- Passed 34 HTTP assertions covering admin-only Visual Builder access, all five authenticated page previews and target metadata, CSRF rejection, localized homepage/page text saves, page and homepage revision restores, escaped HTML-like text, CMS page creation, safe animation rendering, published/draft separation, and cross-page revision rejection.
+- Passed 15 more HTTP/database assertions for save, revision restore, and preview output on the requester, staff, and admin dashboard targets.
+- Firefox 160 headless screenshots were reviewed at desktop (1365×900), tablet (768×1024), and mobile (390×844). This found a toolbar wrapping issue; the toolbar now wraps its controls and keeps its description on a separate line. Interactive drag/drop and undo/redo were not automated because no browser automation driver was available.
+- No project database migration or outbound email/LINE notification was run.
+
+### Remaining / Phase Gate
+
+- Phase 3 HTTP/database verification and desktop/tablet/mobile visual review are complete. Shared menu structure and footer links continue to use the existing admin editors; homepage navigation/footer text is editable in the Visual Builder.
+- Remaining test limitation: pointer-driven drag/drop, undo/redo, and copy/paste were not exercised in a browser automation run; those paths have static/unit checks and the surrounding UI was visually reviewed.
+- Phase 4 was not started during Phase 3 testing.
+
+## Phase 4 — CMS & Form Builder (complete)
+
+### Audit Findings
+
+- Reuse `site_pages`, `site_blocks`, `site_revisions`, `VISUAL_BUILDER_COMPONENTS`, `visual_builder_validate_config()`, `visual_builder_render_blocks()`, admin authentication, and CSRF-protected CMS actions.
+- The CMS currently supports safe content components and page draft/publish/revision flows. It has no form component, form schema editor, submission storage, or submission review UI.
+- `site_pages`, `site_blocks`, `site_revisions`, `site_media`, and `email_templates` already exist in the schema dump. No `site_forms` or `site_form_submissions` table and no form-builder migration exist.
+- Registration and repair-request forms are fixed PHP forms. Their validation, account creation, ticket submission, and workflow remain unchanged by this phase.
+- Reuse `db_transaction()` / prepared-statement helpers, `site_revision_save()`, existing admin RBAC, and the session CSRF service. New content must stay within an allowlisted schema and escaped server renderer.
+
+### Planned Scope
+
+- Add standalone forms that can be embedded in CMS pages, with allowlisted text/email/telephone/textarea/select/checkbox fields. No raw HTML, JavaScript, file uploads, custom endpoints, or workflow mutation.
+- Store form draft/published snapshots and submission records additively; retain form schema revisions in `site_revisions` and expose submissions only to admins.
+- Accept submissions only through a fixed page handler with session CSRF, schema-based validation, a honeypot, bounded values, and escaped output.
+- Add an additive migration after confirming the relevant existing columns, keys, and foreign-key types. No existing table or migration will be renamed or removed.
+
+### Implemented
+
+- Added the `form` component to the Visual Builder component allowlist. Page drafts can select a CMS form; page publish validates that every visible embedded form is published. Existing page and block storage is unchanged.
+- Added an admin-only Form Builder for form drafts, publishing/unpublishing, field ordering/add/remove, revision history and draft restore, plus viewing and deleting individual submissions. It reuses admin auth, session CSRF, prepared statements, and `site_revisions`.
+- Added allowlisted text, email, telephone, textarea, select, and checkbox fields. Definitions reject unknown properties/types, duplicate keys, invalid options, oversized values, and malformed keys. Forms render only from the validated schema; labels, options, responses, and messages are escaped.
+- Added a fixed handler to `page.php` for embedded public forms. It requires a published form embedded in that published page, session CSRF, schema validation, a honeypot, a 5-per-hour session limit, bounded answers, and POST/redirect/GET. Draft preview renders the form disabled and rejects submissions.
+- Form submissions store a SHA-256 session identifier rather than the raw PHP session ID. Admin submission access is protected by the existing admin route. Unpublishing a form is blocked while a visible published CMS page references it.
+- Registration and repair-request flows, authentication, and ticket behavior remain unchanged.
+- Added the additive `database/migrations/20261122_reps4_visual_forms.sql` for `site_forms` and `site_form_submissions`. The migration was applied only to a temporary isolated test database; no configured or production database was changed.
+
+### Files
+
+- Modified: `admin/admin_header.php`, `admin/admin_pages.php`, `assets/css/visual-builder.css`, `assets/js/visual-builder.js`, `docs/WORKLOG.md`, `includes/site_menu.php`, `includes/visual_builder.php`, `page.php`, `tests/visual_builder.php`.
+- New: `admin/admin_forms.php`, `assets/css/form-builder.css`, `assets/js/form-builder.js`, `database/migrations/20261122_reps4_visual_forms.sql`, `includes/form_builder.php`.
+- Database changes: additive migration creates only `site_forms` and `site_form_submissions`, with keys and foreign keys to the existing `users` and new forms tables. Migration history in this project has no central runner/table; deployment must apply this SQL migration before enabling the form features.
+
+### Security and Compatibility
+
+- No user-provided HTML, CSS, JavaScript, upload, or arbitrary endpoint is accepted or executed. Component data is schema-validated and rendered by fixed PHP code.
+- CSRF, active-admin RBAC, prepared statements, output escaping, field/value bounds, honeypot, and session-based rate limiting are applied at the corresponding boundaries.
+- Existing calls to `visual_builder_render_blocks()` remain compatible through optional arguments. Existing page CMS tables and workflows are not altered.
+- Form submissions can contain personal information. They are visible to admins, kept until an admin deletes them, and no automatic retention policy was part of this phase.
+
+### Test Results
+
+- `php tests/visual_builder.php`: passed, including form schema allowlist, duplicate-key and unsupported-type rejection, email/select answer validation, CSRF field rendering, and escaping checks.
+- PHP lint passed for `includes/form_builder.php`, `includes/visual_builder.php`, `page.php`, `admin/admin_forms.php`, `admin/admin_pages.php`, and `tests/visual_builder.php`.
+- `node --check` passed for `assets/js/form-builder.js` and `assets/js/visual-builder.js`; `git diff --check` passed for the Phase 4 files.
+- Applied the migration to an isolated MariaDB 12.3 database populated from DDL only (no SQL dump records). Verified both new table definitions and foreign keys, synthetic form/submission persistence, session rate limiting at the fifth submission, and the unpublish guard against an actually published CMS page. Synthetic rows were removed afterward.
+- Ran the Form Builder and public CMS page through a local PHP server backed only by the isolated test database. Both pages returned successfully; a valid synthetic form submission completed POST/redirect/GET and rendered its success message. Synthetic admin, page, form, submission, and DB account were removed afterward.
+- Firefox desktop visual QA of the Form Builder found labels and controls sharing one line and overlapping. Scoped `.vb-field` styles now stack labels above controls; the refreshed desktop screenshot was reviewed and the overlap is resolved. Mobile layout and pointer interaction of add/move/remove controls were not browser-automated.
+- No production migration was applied and no outbound notification was sent.
+
+### Remaining / Phase Gate
+
+- Phase 4 implementation, isolated migration checks, public submission HTTP check, and desktop editor visual review are complete. Before deployment, apply the additive migration and perform mobile browser QA plus interactive field editing and admin response review.
+- Phase 5 has not started. Proceed only when explicitly requested, per the phase gate.
+
+### Visual Builder follow-up — requester dashboard UI
+
+- The requester dashboard UI now includes the registered Visual Builder text targets for its greeting, introduction, ticket heading, and ticket introduction. It loads the existing page text settings and remains tied to `dashboard.php`, including its requester navigation partial.
+- Admin preview requests may view the requester dashboard through the existing Visual Builder preview query, while other roles receive HTTP 403. Normal dashboard requests continue to require the requester role. Staff dashboard preview is restricted to admins and now renders the staff UI shell rather than the admin shell; the normal admin staff view remains unchanged. Added a visible role label target alongside the queue/workflow targets.
+- Verified PHP lint for requester/staff dashboards and `php tests/visual_builder.php`; all passed. Browser preview was not run for this follow-up.
+
+## Phase 5 — 3D Authentication (in progress)
+
+### Audit Findings
+
+- The project already vendors Three.js at `assets/vendor/three/three.min.js` and uses it on the homepage through the separate `assets/js/home-3d.js` scene.
+- Login and Register were not loading a Three.js scene. They already share `assets/css/auth.css`, while their authentication handlers, CSRF fields, login throttling, and registration handler remain in their existing PHP flows.
+- No database changes are needed for a decorative auth background.
+
+### Implemented
+
+- Added one shared scene loader/engine for Login and Register. The loader waits for the background to intersect the viewport before downloading the vendored Three.js runtime and scene script.
+- Redesigned the auth background as a slowly moving wave of square pixel tiles in soft gray-blue, over a white surface with thin dashed rails. A CSS pixel-grid fallback appears when WebGL is unavailable. The scene does not receive pointer events and is marked `aria-hidden`; it does not wrap or replace either auth form.
+- Added responsive sizing and capped pixel ratio; the scene pauses when offscreen or the document is hidden, and disables continuous animation for `prefers-reduced-motion`.
+- Added a static CSS rails fallback and a renderer error/context-loss fallback. If reduced motion is enabled, the Three.js scripts are not loaded and the static index-style background remains.
+- Kept login verification, registration, CSRF, throttling, and redirect logic unchanged.
+
+### Files
+
+- Modified: `assets/css/auth.css`, `docs/WORKLOG.md`, `login.php`, `register.php`.
+- New: `assets/js/auth-3d-loader.js`, `assets/js/auth-3d.js`.
+- Database changes: none.
+
+### Test Results
+
+- `php -l login.php` and `php -l register.php`: passed.
+- `node --check assets/js/auth-3d-loader.js` and `node --check assets/js/auth-3d.js`: passed.
+- An earlier synthetic headless preview reported the scene-ready state, but its screenshot did not clearly show the geometry. The Phase 6 isolated Firefox preview fetched the loader, Three.js, and scene script, but still did not confirm visible pixel rendering.
+- No authentication POST, registration POST, or project database was used or changed.
+
+### Remaining / Phase Gate
+
+- Phase 5 implementation is in progress. Confirm visible WebGL output and reduced-motion / WebGL-unavailable fallback in a browser capable of rendering WebGL before marking this phase complete.
+- Phase 6 is now in progress; Phase 5 browser rendering and fallback confirmation remain open.
+
+## Phase 6 — Integration & Production Readiness (in progress)
+
+### Audit Findings
+
+- Reused integration points remain the existing ticket/workflow/signature services, permission and CSRF helpers, the safe Visual Builder/CMS renderer, `site_revisions`, the additive form tables, and the shared lazy-loaded auth scene. No replacement auth, ticket, signature, permission, or theme subsystem was introduced.
+- The checkout contains only `20261122_reps4_contact_snapshots.sql` and `20261122_reps4_visual_forms.sql` under `database/migrations/`. The historical migration sequence documented above is not present here, so the current production schema and its migration state cannot be reconstructed from this checkout alone.
+- The E2E runner is guarded to require the isolated `127.0.0.1:3307/reps_v2_db_test` database, test account, and marked upload directory. Those test-environment variables are unset in this session; no database or upload directory was touched.
+- The Phase 4 mobile editor/form interaction QA and Phase 5 visible WebGL/reduced-motion/fallback browser confirmation remain open. A database-free Firefox headless preview fetched the Three.js and scene scripts, but its screenshot did not show the pixel canvas; this is inconclusive visual evidence and does not close Phase 5 QA.
+
+### Implemented
+
+- The initial Phase 6 pass made no application or database changes because no isolated E2E database or verified production schema was available.
+- Follow-up integration fix: added desktop requester navigation links for “My requests” and “History” to the existing requester top bar. Mobile drawer/bottom navigation and the existing new-request action remain the same.
+- Removed the requester drawer's `rq-me` profile card and its dedicated CSS/data variables; account access continues through the existing account menu.
+- Added a shared, requester-scoped pink accent theme for primary actions, active dashboard filters, request form focus/current step, history hover, and profile controls. The body class is set only on requester pages (including the requester dashboard preview); staff/admin pages keep their existing colors.
+- Corrected the requester top-bar “New request” action, whose local navigation CSS still set a black background and overrode the shared pink theme.
+- Scoped the Request Form's pink primary button override to `#nextStep` and the submit button inside `#requestForm`, since the page shares `.admin-btn` with other roles and modules. The secondary/back buttons and unrelated `.admin-btn` controls are not targeted by this form-specific rule.
+
+### Files
+
+- Modified: `dashboard.php`, `docs/WORKLOG.md`, `history.php`, `includes/requester_nav.php`, `profile.php`, `request_form.php`.
+- New: `assets/css/requester-theme.css`.
+- Database changes: none; neither configured nor production database was accessed.
+
+### Security and Compatibility
+
+- No live authentication flow, permission policy, ticket data, CMS content, or database schema was changed.
+- The E2E runner's isolated-target and upload-root guards were reviewed; the suite was not run because its required isolated environment is absent.
+- The static auth preview used a temporary PHP server and did not include `db_connect.php` or any authentication handler. The server was stopped after review.
+
+### Test Results
+
+- `php tests/visual_builder.php`: passed.
+- `php -l` for every project PHP file outside `vendor/`: passed.
+- `bash -n` for all `tests/e2e/*.sh` and `node --check` for the Phase 3–5 Visual Builder/CMS/auth scripts: passed.
+- Firefox headless fetched the auth loader, vendored Three.js, and `auth-3d.js`; screenshot output did not confirm visible pixel rendering. Renderer readiness, reduced-motion behavior, and WebGL fallback remain unverified in a browser session with usable WebGL and diagnostics.
+- The requester navigation issue was traced to the desktop breakpoint hiding the drawer and there being no desktop inline links; the desktop links were added. No browser regression run was made for this small CSS/PHP-template change.
+- E2E HTTP/database suites, real mobile interaction review, production schema comparison, and migration execution were not run.
+
+### Remaining / Phase Gate
+
+- Phase 6 remains in progress. Run the guarded E2E suite and mobile/editor/form interaction QA in the isolated test environment; confirm the auth scene and both fallback modes with a browser that can expose renderer state.
+- Before deployment, compare the actual target schema and applied migration state against both additive REPS 4.0 migrations and the existing ticket/CMS tables. Do not apply migrations to production from this checkout until that comparison and an explicit deployment plan are available; the legacy migration files are absent here.
+- No production deployment or production migration was performed.

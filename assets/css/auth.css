@@ -108,6 +108,60 @@ body.auth-dark {
 }
 
 /* ---------- การ์ดฟอร์ม: เส้นประแทนกรอบกลม ---------- */
+.auth-3d-background {
+   position: fixed;
+   inset: 0;
+   z-index: 0;
+   overflow: hidden;
+   pointer-events: none;
+   background: #fff;
+}
+
+.auth-3d-background::before {
+   position: absolute;
+   inset: 0 auto 0 50%;
+   width: min(72rem, calc(100% - 3rem));
+   transform: translateX(-50%);
+   border-right: 1px dashed #C4C4C4;
+   border-left: 1px dashed #C4C4C4;
+   content: '';
+}
+
+.auth-3d-canvas {
+   position: absolute;
+   inset: 0;
+   display: block;
+   width: 100%;
+   height: 100%;
+   opacity: 0;
+   transition: opacity .7s ease;
+}
+
+.auth-3d-background[data-scene-ready="true"] .auth-3d-canvas { opacity: .5; }
+.auth-3d-background[data-scene-fallback="true"] .auth-3d-canvas { display: none; }
+.auth-3d-background[data-scene-fallback="true"]::after {
+   position: absolute;
+   inset: 0;
+   background-image:
+      linear-gradient(#aab4c1 1px, transparent 1px),
+      linear-gradient(90deg, #aab4c1 1px, transparent 1px);
+   background-size: 18px 18px;
+   content: '';
+   opacity: .08;
+   mask-image: radial-gradient(ellipse 55% 34% at 50% 100%, #000 18%, transparent 100%);
+   -webkit-mask-image: radial-gradient(ellipse 55% 34% at 50% 100%, #000 18%, transparent 100%);
+}
+body.auth-light > :not(.auth-3d-background) { position: relative; z-index: 1; }
+
+@media (max-width: 640px) {
+   .auth-3d-background::before { width: min(72rem, calc(100% - 1.5rem)); }
+   .auth-3d-background[data-scene-ready="true"] .auth-3d-canvas { opacity: .38; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+   .auth-3d-canvas { transition: none; }
+}
+
 .auth-card {
    position: relative;
    width: 100%;

@@ -2,6 +2,13 @@
 require_once __DIR__ . '/db_connect.php';
 require_once __DIR__ . '/includes/csrf.php';
 require_once __DIR__ . '/includes/site_config.php';
+$visualBuilderPreview = $_SERVER['REQUEST_METHOD'] === 'GET' && ($_GET['visual_builder_preview'] ?? '') === '1';
+if ($visualBuilderPreview) {
+   require_once __DIR__ . '/includes/user_auth.php';
+   app_require_active_user($conn, 'login.php', 'admin');
+}
+require_once __DIR__ . '/includes/visual_builder.php';
+$visualBuilderSettings = app_get_settings($conn);
 $csrfToken = app_csrf_token();
 require __DIR__ . '/includes/registration_handler.php';
 $siteName = function_exists('app_site_name') ? app_site_name($conn) : 'REPS';
@@ -10,7 +17,7 @@ $pwdClass    = 'auth-field auth-field-pad';
 $eyeBtnClass = 'auth-eye';
 ?>
 <!DOCTYPE html>
-<html lang="th">
+<html lang="<?= htmlspecialchars(app_lang(), ENT_QUOTES, 'UTF-8') ?>">
 
 <head>
    <meta charset="UTF-8">
@@ -198,6 +205,9 @@ $eyeBtnClass = 'auth-eye';
 </head>
 
 <body class="auth-light antialiased min-h-screen flex flex-col justify-between relative overflow-x-hidden font-sans">
+   <div class="auth-3d-background" data-auth-3d aria-hidden="true">
+      <canvas class="auth-3d-canvas"></canvas>
+   </div>
 
    <!-- Header -->
    <header class="auth-header sticky top-0 z-20">
@@ -217,8 +227,8 @@ $eyeBtnClass = 'auth-eye';
          <div class="auth-card">
 
             <div class="auth-card-title">
-               <h1>สร้างบัญชี</h1>
-               <p>กรอกข้อมูลเพื่อเริ่มใช้งานระบบแจ้งซ่อมออนไลน์</p>
+               <h1<?= visual_builder_content_target_attrs($visualBuilderPreview, 'register', 'register.title') ?>><?= htmlspecialchars(visual_builder_content_text($visualBuilderSettings, 'register', 'register.title', tr('สร้างบัญชี', 'Create an account')), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?></h1>
+               <p<?= visual_builder_content_target_attrs($visualBuilderPreview, 'register', 'register.intro') ?>><?= htmlspecialchars(visual_builder_content_text($visualBuilderSettings, 'register', 'register.intro', tr('กรอกข้อมูลเพื่อเริ่มใช้งานระบบแจ้งซ่อมออนไลน์', 'Enter your details to start using the repair system')), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?></p>
             </div>
 
             <div class="auth-alert-new is-info" role="note">
@@ -249,6 +259,8 @@ $eyeBtnClass = 'auth-eye';
 
    <!-- Footer -->
    <?php $footerBase = ''; $footerVariant = 'light'; require __DIR__ . '/includes/site_footer.php'; ?>
+
+   <script src="assets/js/auth-3d-loader.js?v=1" defer></script>
 
 </body>
 

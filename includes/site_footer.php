@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/site_config.php';
 require_once __DIR__ . '/site_custom.php';
+require_once __DIR__ . '/visual_builder.php';
 require_once __DIR__ . '/icons.php';
 require_once __DIR__ . '/i18n.php';
 
@@ -24,6 +25,15 @@ $footerUnit = trim((string)($footerSettings['org_unit'] ?? '')) ?: 'แผนก
 $footerHours = trim((string)($footerSettings['office_hours'] ?? '')) ?: 'จันทร์–ศุกร์ 08:30–16:30 น.';
 $footerContact = trim((string)($footerSettings['org_contact'] ?? ''));
 $footerNote = trim((string)($footerSettings['footer_text'] ?? ''));
+$footerVisualEditMode = !empty($visualBuilderEditMode) && function_exists('visual_builder_home_target_attrs');
+$footerTextValue = static function (string $key, string $value) use ($footerSettings): string {
+    return function_exists('visual_builder_home_text')
+        ? visual_builder_home_text($footerSettings, $key, $value)
+        : $value;
+};
+$footerTargetAttrs = static function (string $key) use ($footerVisualEditMode): string {
+    return $footerVisualEditMode ? visual_builder_home_target_attrs(true, $key) : '';
+};
 $footerLinks = isset($conn) && $conn instanceof mysqli ? site_footer_links($conn) : [];
 $footerYear = (int)date('Y') + 543;
 ?>
@@ -39,21 +49,21 @@ $footerYear = (int)date('Y') + 543;
         <?php else: ?>
             <div class="reps-site-footer__main">
                 <div class="reps-site-footer__brand">
-                    <div class="reps-site-footer__name"><?= $footerEsc($footerSite) ?></div>
-                    <?php if ($footerTagline !== ''): ?><div class="reps-site-footer__tagline"><?= $footerEsc($footerTagline) ?></div><?php endif; ?>
-                    <?php if ($footerOrg !== ''): ?><div><?= $footerEsc($footerOrg) ?></div><?php endif; ?>
-                    <div><?= $footerEsc($footerUnit) ?></div>
-                    <?php if ($footerNote !== ''): ?><div class="reps-site-footer__note"><?= $footerEsc($footerNote) ?></div><?php endif; ?>
+                    <div class="reps-site-footer__name"<?= $footerTargetAttrs('footer.site_name') ?>><?= $footerEsc($footerTextValue('footer.site_name', $footerSite)) ?></div>
+                    <?php if ($footerTagline !== ''): ?><div class="reps-site-footer__tagline"<?= $footerTargetAttrs('footer.tagline') ?>><?= $footerEsc($footerTextValue('footer.tagline', $footerTagline)) ?></div><?php endif; ?>
+                    <?php if ($footerOrg !== ''): ?><div<?= $footerTargetAttrs('footer.org_name') ?>><?= $footerEsc($footerTextValue('footer.org_name', $footerOrg)) ?></div><?php endif; ?>
+                    <div<?= $footerTargetAttrs('footer.org_unit') ?>><?= $footerEsc($footerTextValue('footer.org_unit', $footerUnit)) ?></div>
+                    <?php if ($footerNote !== ''): ?><div class="reps-site-footer__note"<?= $footerTargetAttrs('footer.note') ?>><?= $footerEsc($footerTextValue('footer.note', $footerNote)) ?></div><?php endif; ?>
                 </div>
                 <dl class="reps-site-footer__facts">
                     <div>
                         <dt>เวลาทำการ</dt>
-                        <dd><?= $footerEsc($footerHours) ?></dd>
+                        <dd<?= $footerTargetAttrs('footer.hours') ?>><?= $footerEsc($footerTextValue('footer.hours', $footerHours)) ?></dd>
                     </div>
                     <?php if ($footerContact !== ''): ?>
                         <div>
                             <dt>ติดต่อ</dt>
-                            <dd><?= $footerEsc($footerContact) ?></dd>
+                            <dd<?= $footerTargetAttrs('footer.contact') ?>><?= $footerEsc($footerTextValue('footer.contact', $footerContact)) ?></dd>
                         </div>
                     <?php endif; ?>
                     <?php if ($footerLinks): ?>

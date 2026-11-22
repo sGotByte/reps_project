@@ -19,11 +19,13 @@ $APP_SKIP_SESSION = true;
 require_once __DIR__ . '/db_connect.php';
 require_once __DIR__ . '/includes/permissions.php';
 require_once __DIR__ . '/includes/site_config.php';
+require_once __DIR__ . '/includes/visual_builder.php';
 require_once __DIR__ . '/includes/icons.php';
 $siteSettings = app_get_settings($conn);
 $siteLogoUrl = app_logo_url($conn);
-$showSteps = ($siteSettings['homepage_show_steps'] ?? '1') === '1';
-$showFaq = ($siteSettings['homepage_show_faq'] ?? '1') === '1';
+$homeLayout = visual_builder_home_layout($siteSettings);
+$showSteps = $homeLayout['how']['visible'];
+$showFaq = $homeLayout['faq']['visible'];
 $showAnnouncement = ($siteSettings['homepage_show_announcement'] ?? '0') === '1' && trim((string)($siteSettings['homepage_announcement'] ?? '')) !== '';
 $homeIntro = trim((string)($siteSettings['homepage_intro'] ?? ''));
 $footerText = trim((string)($siteSettings['footer_text'] ?? ''));
@@ -63,6 +65,10 @@ if ($sessionUserId && $sessionUserId > 0) {
    }
 }
 
+$visualBuilderEditMode = isset($_GET['visual_builder_preview'])
+   && $_GET['visual_builder_preview'] === '1'
+   && ($currentUser['role'] ?? '') === 'admin';
+
 $assetVersion = static function (string $relativePath): int {
    return (int)@filemtime(__DIR__ . '/' . $relativePath);
 };
@@ -92,6 +98,7 @@ $assetVersion = static function (string $relativePath): int {
    <link rel="stylesheet" href="assets/css/home.css?v=<?= $assetVersion('assets/css/home.css') ?>">
    <link rel="stylesheet" href="assets/css/app.css?v=<?= $assetVersion('assets/css/app.css') ?>">
    <link rel="stylesheet" href="assets/vendor/fontawesome/css/all.min.css">
+   <link rel="stylesheet" href="assets/css/visual-home.css?v=1">
 
    <style>
       /* Hero 3D canvas: อยู่หลังเนื้อหา คลิกทะลุได้ และจางหายที่ขอบเพื่อไม่รบกวนข้อความ */
@@ -115,7 +122,7 @@ $assetVersion = static function (string $relativePath): int {
    <link rel="stylesheet" href="assets/css/base.css?v=18">
 </head>
 
-<body class="public-page bg-white text-muted antialiased">
+<body class="public-page bg-white text-muted antialiased vb-home-page"<?= $visualBuilderEditMode ? ' data-vb-edit-mode="1"' : '' ?>>
 
    <a href="#main" class="skip-link">ข้ามไปยังเนื้อหาหลัก</a>
 
@@ -125,16 +132,16 @@ $assetVersion = static function (string $relativePath): int {
 
          <!-- Logo (ใส่ width/height ตามขนาดจริงของไฟล์ เพื่อกัน layout shift) -->
          <a class="flex items-center shrink-0" href="index.php" aria-label="REPS หน้าหลัก">
-            <img src="<?= htmlspecialchars($siteLogoUrl, ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars(app_site_name($conn), ENT_QUOTES, 'UTF-8') ?>" class="h-6 sm:h-7 w-auto">
+            <img<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'home.logo') ?> src="<?= htmlspecialchars($siteLogoUrl, ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars(app_site_name($conn), ENT_QUOTES, 'UTF-8') ?>" class="h-6 sm:h-7 w-auto">
          </a>
 
          <!-- Navigation Links -->
          <nav data-main-nav aria-label="เมนูหลัก" class="font-kanit hidden lg:flex items-center gap-8 text-sm text-muted whitespace-nowrap">
-            <a href="#services" class="nav-link hover:text-ink transition-colors">บริการแจ้งซ่อม</a>
-            <a href="#how" class="nav-link hover:text-ink transition-colors">ขั้นตอนการให้บริการ</a>
-            <a href="#showcase" class="nav-link hover:text-ink transition-colors">ฟีเจอร์</a>
-            <a href="#faq" class="nav-link hover:text-ink transition-colors">คำถามที่พบบ่อย</a>
-            <a href="#contact" class="nav-link hover:text-ink transition-colors">ติดต่อเรา</a>
+            <a href="#services" class="nav-link hover:text-ink transition-colors"<?= !$homeLayout['services']['visible'] ? ' hidden' : '' ?>><span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'navigation.services') ?>><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'navigation.services', 'บริการแจ้งซ่อม')) ?></span></a>
+            <a href="#how" class="nav-link hover:text-ink transition-colors"<?= !$showSteps ? ' hidden' : '' ?>><span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'navigation.how') ?>><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'navigation.how', 'ขั้นตอนการให้บริการ')) ?></span></a>
+            <a href="#showcase" class="nav-link hover:text-ink transition-colors"<?= !$homeLayout['showcase']['visible'] ? ' hidden' : '' ?>><span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'navigation.features') ?>><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'navigation.features', 'ฟีเจอร์')) ?></span></a>
+            <a href="#faq" class="nav-link hover:text-ink transition-colors"<?= !$showFaq ? ' hidden' : '' ?>><span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'navigation.faq') ?>><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'navigation.faq', 'คำถามที่พบบ่อย')) ?></span></a>
+            <a href="#contact" class="nav-link hover:text-ink transition-colors"<?= !$homeLayout['contact']['visible'] ? ' hidden' : '' ?>><span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'navigation.contact') ?>><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'navigation.contact', 'ติดต่อเรา')) ?></span></a>
          </nav>
 
          <!-- Actions -->
@@ -162,11 +169,11 @@ $assetVersion = static function (string $relativePath): int {
 
       <nav id="mobile-menu" aria-label="เมนูหลักบนมือถือ" hidden class="lg:hidden border-t border-line bg-white px-6 py-3">
          <div class="mx-auto flex max-w-6xl flex-col gap-1 font-kanit text-sm text-muted">
-            <a href="#services" class="nav-link hover:text-ink transition-colors">บริการแจ้งซ่อม</a>
-            <a href="#how" class="nav-link hover:text-ink transition-colors">ขั้นตอนการให้บริการ</a>
-            <a href="#showcase" class="nav-link hover:text-ink transition-colors">ฟีเจอร์</a>
-            <a href="#faq" class="nav-link hover:text-ink transition-colors">คำถามที่พบบ่อย</a>
-            <a href="#contact" class="nav-link hover:text-ink transition-colors">ติดต่อเรา</a>
+            <a href="#services" class="nav-link hover:text-ink transition-colors"<?= !$homeLayout['services']['visible'] ? ' hidden' : '' ?>><span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'navigation.services') ?>><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'navigation.services', 'บริการแจ้งซ่อม')) ?></span></a>
+            <a href="#how" class="nav-link hover:text-ink transition-colors"<?= !$showSteps ? ' hidden' : '' ?>><span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'navigation.how') ?>><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'navigation.how', 'ขั้นตอนการให้บริการ')) ?></span></a>
+            <a href="#showcase" class="nav-link hover:text-ink transition-colors"<?= !$homeLayout['showcase']['visible'] ? ' hidden' : '' ?>><span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'navigation.features') ?>><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'navigation.features', 'ฟีเจอร์')) ?></span></a>
+            <a href="#faq" class="nav-link hover:text-ink transition-colors"<?= !$showFaq ? ' hidden' : '' ?>><span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'navigation.faq') ?>><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'navigation.faq', 'คำถามที่พบบ่อย')) ?></span></a>
+            <a href="#contact" class="nav-link hover:text-ink transition-colors"<?= !$homeLayout['contact']['visible'] ? ' hidden' : '' ?>><span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'navigation.contact') ?>><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'navigation.contact', 'ติดต่อเรา')) ?></span></a>
             <div class="mt-1 border-t border-line pt-1">
                <?php if ($currentUser): ?>
                   <a href="<?= htmlspecialchars($currentUser['dashboard'], ENT_QUOTES, 'UTF-8') ?>" class="block rounded-lg px-3 py-2.5 hover:bg-neutral-50 hover:text-ink">แดชบอร์ดของฉัน</a>
@@ -180,42 +187,43 @@ $assetVersion = static function (string $relativePath): int {
       </nav>
    </header>
 
-   <main id="main">
+   <main id="main" class="vb-home-layout">
       <div class="rails" aria-hidden="true"></div>
 
       <!-- SECTION HERO -->
-      <section class="hero-full relative flex items-center justify-center px-6 overflow-hidden">
+      <?php if ($homeLayout['hero']['visible'] || $visualBuilderEditMode): ?>
+      <section<?= visual_builder_home_section_attrs($visualBuilderEditMode, $homeLayout, 'hero') ?> class="hero-full relative flex items-center justify-center px-6 overflow-hidden vb-home-section <?= visual_builder_home_section_class($homeLayout, 'hero') ?><?= !$homeLayout['hero']['visible'] ? ' vb-home-section--hidden' : '' ?>" style="<?= visual_builder_home_order_style($homeLayout, 'hero') ?>">
          <canvas id="hero-3d" class="hero-canvas" aria-hidden="true"></canvas>
          <div class="relative z-10 max-w-4xl mx-auto text-center flex flex-col items-center">
 
             <h1 class="mt-6 font-kanit text-[clamp(2.25rem,6vw,3.75rem)] font-normal text-ink leading-[1.2] tracking-[-0.02em] text-balance max-w-3xl">
-               ระบบบริหารจัดการ<br class="hidden sm:inline" />และแจ้งซ่อมอุปกรณ์คอมพิวเตอร์
+               <span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'hero.title_first') ?>><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'hero.title_first', 'ระบบบริหารจัดการ')) ?></span><br class="hidden sm:inline" /><span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'hero.title_second') ?>><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'hero.title_second', 'และแจ้งซ่อมอุปกรณ์คอมพิวเตอร์')) ?></span>
             </h1>
 
             <?php if ($showAnnouncement): ?>
                <div class="mt-4 max-w-xl rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 whitespace-pre-line" role="note">
-                  <i class="fa-solid fa-bullhorn mr-1" aria-hidden="true"></i><?= htmlspecialchars((string)$siteSettings['homepage_announcement'], ENT_QUOTES, 'UTF-8') ?>
+                  <i class="fa-solid fa-bullhorn mr-1" aria-hidden="true"></i><span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'hero.announcement') ?>><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'hero.announcement', (string)$siteSettings['homepage_announcement'])) ?></span>
                </div>
             <?php endif; ?>
 
-            <p class="mt-4 mb-2 text-muted text-base sm:text-lg max-w-xl mx-auto leading-relaxed text-pretty whitespace-pre-line">
-               <?= $homeIntro !== '' ? htmlspecialchars($homeIntro, ENT_QUOTES, 'UTF-8') : 'แจ้งซ่อมคอมพิวเตอร์ อุปกรณ์ไอที และระบบเครือข่าย ติดตามสถานะงานซ่อมได้ทุกขั้นตอน ตั้งแต่เข้าคิวจนครูรับรองงานเสร็จ' ?>
+            <p<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'hero.intro') ?> class="mt-4 mb-2 text-muted text-base sm:text-lg max-w-xl mx-auto leading-relaxed text-pretty whitespace-pre-line">
+               <?= visual_builder_escape(visual_builder_home_text($siteSettings, 'hero.intro', $homeIntro !== '' ? $homeIntro : 'แจ้งซ่อมคอมพิวเตอร์ อุปกรณ์ไอที และระบบเครือข่าย ติดตามสถานะงานซ่อมได้ทุกขั้นตอน ตั้งแต่เข้าคิวจนครูรับรองงานเสร็จ')) ?>
             </p>
 
             <div class="w-full mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
                <a href="request_form.php"
                   class="font-kanit w-full sm:w-48 inline-flex items-center justify-center bg-ink text-white font-medium text-base px-6 py-4 rounded-xl hover:bg-[#262626] hover:shadow-md transition-all duration-150 active:scale-[0.99]">
-                  แจ้งซ่อมทันที
+                  <span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'hero.primary_cta') ?>><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'hero.primary_cta', 'แจ้งซ่อมทันที')) ?></span>
                </a>
                <a href="#how"
                   class="font-kanit w-full sm:w-48 inline-flex items-center justify-center border border-line bg-white text-ink font-medium text-base px-6 py-4 rounded-xl hover:border-ink/50 hover:bg-[#F6F6F4] transition-all duration-150 active:scale-[0.99]">
-                  ขั้นตอนการให้บริการ
+                  <span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'hero.secondary_cta') ?>><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'hero.secondary_cta', 'ขั้นตอนการให้บริการ')) ?></span>
                </a>
             </div>
 
             <div class="mt-10 inline-flex items-center gap-2 bg-white px-4 py-2 font-kanit text-xs sm:text-sm text-muted">
                <i class="fa-regular fa-clock text-ink" aria-hidden="true"></i>
-               <span>เวลาทำการ: <span class="text-ink tabular-nums"><?= htmlspecialchars(trim((string)($siteSettings['office_hours'] ?? '')) ?: 'จันทร์–ศุกร์ 08:30–16:30 น.', ENT_QUOTES, 'UTF-8') ?></span></span>
+               <span><span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'hero.hours_label') ?>><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'hero.hours_label', 'เวลาทำการ')) ?></span>: <span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'hero.hours') ?> class="text-ink tabular-nums"><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'hero.hours', trim((string)($siteSettings['office_hours'] ?? '')) ?: 'จันทร์–ศุกร์ 08:30–16:30 น.')) ?></span></span>
             </div>
          </div>
 
@@ -225,11 +233,12 @@ $assetVersion = static function (string $relativePath): int {
             <i class="fa-solid fa-chevron-down text-[10px]" aria-hidden="true"></i>
          </a>
       </section>
-
-      <div class="divider" aria-hidden="true"></div>
+      <div class="divider" aria-hidden="true"<?= visual_builder_home_divider_attrs($visualBuilderEditMode, 'hero') ?> style="<?= visual_builder_home_order_style($homeLayout, 'hero', 1) ?>"></div>
+      <?php endif; ?>
 
       <!-- SECTION SERVICES -->
-      <section id="services" class="bg-[#F6F6F4] w-full px-6 py-24 scroll-mt-20">
+      <?php if ($homeLayout['services']['visible'] || $visualBuilderEditMode): ?>
+      <section<?= visual_builder_home_section_attrs($visualBuilderEditMode, $homeLayout, 'services') ?> id="services" class="bg-[#F6F6F4] w-full px-6 py-24 scroll-mt-20 vb-home-section <?= visual_builder_home_section_class($homeLayout, 'services') ?><?= !$homeLayout['services']['visible'] ? ' vb-home-section--hidden' : '' ?>" style="<?= visual_builder_home_order_style($homeLayout, 'services') ?>">
          <div class="max-w-6xl mx-auto">
             <div data-reveal class="section-head">
                <span class="section-eyebrow font-mono font-normal">
@@ -237,9 +246,9 @@ $assetVersion = static function (string $relativePath): int {
                   <span class="h-px w-8 bg-neutral-300" aria-hidden="true"></span>
                </span>
                <div class="section-head-body max-w-xl px-6">
-                  <h2 class="font-kanit text-3xl sm:text-4xl font-normal text-ink leading-[1.25] tracking-tight text-balance">ขอบเขตงานบริการ</h2>
-                  <p class="mt-2.5 text-muted text-sm sm:text-base leading-relaxed">
-                     ครอบคลุมทุกปัญหาทางด้านเทคโนโลยีสารสนเทศและอุปกรณ์ภายในห้องปฏิบัติการ
+                  <h2<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'services.title') ?> class="font-kanit text-3xl sm:text-4xl font-normal text-ink leading-[1.25] tracking-tight text-balance"><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'services.title', 'ขอบเขตงานบริการ')) ?></h2>
+                  <p<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'services.description') ?> class="mt-2.5 text-muted text-sm sm:text-base leading-relaxed whitespace-pre-line">
+                     <?= visual_builder_escape(visual_builder_home_text($siteSettings, 'services.description', 'ครอบคลุมทุกปัญหาทางด้านเทคโนโลยีสารสนเทศและอุปกรณ์ภายในห้องปฏิบัติการ')) ?>
                   </p>
                </div>
             </div>
@@ -250,43 +259,43 @@ $assetVersion = static function (string $relativePath): int {
                      <div class="flex items-center justify-between mb-4">
                         <i class="fa-solid fa-laptop text-xl text-ink" aria-hidden="true"></i>
                      </div>
-                     <h3 class="font-kanit text-lg font-normal text-ink leading-snug mb-3">คอมพิวเตอร์และฮาร์ดแวร์</h3>
-                     <p class="text-sm text-muted leading-relaxed">ตรวจเช็กเครื่องเปิดไม่ติด อุปกรณ์ชำรุด หรืออัปเกรดชิ้นส่วนต่าง ๆ</p>
+                     <h3<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'services.computer.title') ?> class="font-kanit text-lg font-normal text-ink leading-snug mb-3"><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'services.computer.title', 'คอมพิวเตอร์และฮาร์ดแวร์')) ?></h3>
+                     <p<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'services.computer.description') ?> class="text-sm text-muted leading-relaxed whitespace-pre-line"><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'services.computer.description', 'ตรวจเช็กเครื่องเปิดไม่ติด อุปกรณ์ชำรุด หรืออัปเกรดชิ้นส่วนต่าง ๆ')) ?></p>
                   </div>
 
                   <div class="service-card cell group relative">
                      <div class="flex items-center justify-between mb-4">
                         <i class="fa-brands fa-windows text-xl text-ink" aria-hidden="true"></i>
                      </div>
-                     <h3 class="font-kanit text-lg font-normal text-ink leading-snug mb-3">ระบบปฏิบัติการและซอฟต์แวร์</h3>
-                     <p class="text-sm text-muted leading-relaxed">ติดตั้งโปรแกรม แก้ไขปัญหาระบบ Windows ติดไวรัส หรือข้อผิดพลาดการใช้งาน</p>
+                     <h3<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'services.software.title') ?> class="font-kanit text-lg font-normal text-ink leading-snug mb-3"><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'services.software.title', 'ระบบปฏิบัติการและซอฟต์แวร์')) ?></h3>
+                     <p<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'services.software.description') ?> class="text-sm text-muted leading-relaxed whitespace-pre-line"><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'services.software.description', 'ติดตั้งโปรแกรม แก้ไขปัญหาระบบ Windows ติดไวรัส หรือข้อผิดพลาดการใช้งาน')) ?></p>
                   </div>
 
                   <div class="service-card cell group relative">
                      <div class="flex items-center justify-between mb-4">
                         <i class="fa-solid fa-print text-xl text-ink" aria-hidden="true"></i>
                      </div>
-                     <h3 class="font-kanit text-lg font-normal text-ink leading-snug mb-3">อุปกรณ์ต่อพ่วงและเครื่องพิมพ์</h3>
-                     <p class="text-sm text-muted leading-relaxed">ซ่อมบำรุงเครื่องพิมพ์ สแกนเนอร์ และโปรเจกเตอร์ในห้องเรียน/ห้องปฏิบัติการ</p>
+                     <h3<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'services.peripherals.title') ?> class="font-kanit text-lg font-normal text-ink leading-snug mb-3"><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'services.peripherals.title', 'อุปกรณ์ต่อพ่วงและเครื่องพิมพ์')) ?></h3>
+                     <p<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'services.peripherals.description') ?> class="text-sm text-muted leading-relaxed whitespace-pre-line"><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'services.peripherals.description', 'ซ่อมบำรุงเครื่องพิมพ์ สแกนเนอร์ และโปรเจกเตอร์ในห้องเรียน/ห้องปฏิบัติการ')) ?></p>
                   </div>
 
                   <div class="service-card cell group relative">
                      <div class="flex items-center justify-between mb-4">
                         <i class="fa-solid fa-globe text-xl text-ink" aria-hidden="true"></i>
                      </div>
-                     <h3 class="font-kanit text-lg font-normal text-ink leading-snug mb-3">ระบบเครือข่ายและอินเทอร์เน็ต</h3>
-                     <p class="text-sm text-muted leading-relaxed">แก้ปัญหาสาย LAN เชื่อมต่อ Wi-Fi ไม่ได้ หรือสัญญาณขัดข้อง</p>
+                     <h3<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'services.network.title') ?> class="font-kanit text-lg font-normal text-ink leading-snug mb-3"><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'services.network.title', 'ระบบเครือข่ายและอินเทอร์เน็ต')) ?></h3>
+                     <p<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'services.network.description') ?> class="text-sm text-muted leading-relaxed whitespace-pre-line"><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'services.network.description', 'แก้ปัญหาสาย LAN เชื่อมต่อ Wi-Fi ไม่ได้ หรือสัญญาณขัดข้อง')) ?></p>
                   </div>
                </div>
             </div>
          </div>
       </section>
-
-      <div class="divider" aria-hidden="true"></div>
+      <div class="divider" aria-hidden="true"<?= visual_builder_home_divider_attrs($visualBuilderEditMode, 'services') ?> style="<?= visual_builder_home_order_style($homeLayout, 'services', 1) ?>"></div>
+      <?php endif; ?>
 
       <!-- SECTION HOW (Stepper) -->
-      <?php if ($showSteps): ?>
-      <section id="how" class="bg-gray-50 w-full px-6 py-24 scroll-mt-20">
+      <?php if ($showSteps || $visualBuilderEditMode): ?>
+      <section<?= visual_builder_home_section_attrs($visualBuilderEditMode, $homeLayout, 'how') ?> id="how" class="bg-gray-50 w-full px-6 py-24 scroll-mt-20 vb-home-section <?= visual_builder_home_section_class($homeLayout, 'how') ?><?= !$showSteps ? ' vb-home-section--hidden' : '' ?>" style="<?= visual_builder_home_order_style($homeLayout, 'how') ?>">
          <div class="max-w-6xl mx-auto">
             <div data-reveal class="section-head">
                <span class="section-eyebrow font-mono font-normal">
@@ -294,8 +303,8 @@ $assetVersion = static function (string $relativePath): int {
                   <span class="h-px w-8 bg-neutral-300" aria-hidden="true"></span>
                </span>
                <div class="section-head-body max-w-xl px-6">
-                  <h2 class="font-kanit text-4xl font-normal text-ink">ขั้นตอนการให้บริการ</h2>
-                  <p class="mt-2 text-sm sm:text-base text-muted">ขั้นตอนง่าย ๆ เพื่อความสะดวกและติดตามผลได้จริง</p>
+                  <h2<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'how.title') ?> class="font-kanit text-4xl font-normal text-ink"><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'how.title', 'ขั้นตอนการให้บริการ')) ?></h2>
+                  <p<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'how.description') ?> class="mt-2 text-sm sm:text-base text-muted whitespace-pre-line"><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'how.description', 'ขั้นตอนง่าย ๆ เพื่อความสะดวกและติดตามผลได้จริง')) ?></p>
                </div>
             </div>
 
@@ -304,22 +313,22 @@ $assetVersion = static function (string $relativePath): int {
                   <li class="step">
                      <span class="step-num" aria-hidden="true">1</span>
                      <div class="step-body">
-                        <span class="font-kanit font-normal text-base text-ink leading-snug">กรอกข้อมูลแจ้งซ่อม</span>
-                        <span class="mt-1 font-sans text-sm text-muted leading-relaxed max-w-[220px]">ระบุอาการและอุปกรณ์ที่ชำรุดผ่านแบบฟอร์มออนไลน์</span>
+                        <span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'how.step1.title') ?> class="font-kanit font-normal text-base text-ink leading-snug"><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'how.step1.title', 'กรอกข้อมูลแจ้งซ่อม')) ?></span>
+                        <span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'how.step1.description') ?> class="mt-1 font-sans text-sm text-muted leading-relaxed max-w-[220px] whitespace-pre-line"><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'how.step1.description', 'ระบุอาการและอุปกรณ์ที่ชำรุดผ่านแบบฟอร์มออนไลน์')) ?></span>
                      </div>
                   </li>
                   <li class="step">
                      <span class="step-num" aria-hidden="true">2</span>
                      <div class="step-body">
-                        <span class="font-kanit font-normal text-base text-ink leading-snug">รับเรื่องและส่งต่อช่าง</span>
-                        <span class="mt-1 font-sans text-sm text-muted leading-relaxed max-w-[220px]">ใบงานเข้าคิว สตาฟฝ่ายซ่อมคนถัดไปกดรับงาน</span>
+                        <span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'how.step2.title') ?> class="font-kanit font-normal text-base text-ink leading-snug"><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'how.step2.title', 'รับเรื่องและส่งต่อช่าง')) ?></span>
+                        <span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'how.step2.description') ?> class="mt-1 font-sans text-sm text-muted leading-relaxed max-w-[220px] whitespace-pre-line"><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'how.step2.description', 'ใบงานเข้าคิว สตาฟฝ่ายซ่อมคนถัดไปกดรับงาน')) ?></span>
                      </div>
                   </li>
                   <li class="step">
                      <span class="step-num" aria-hidden="true">3</span>
                      <div class="step-body">
-                        <span class="font-kanit font-normal text-base text-ink leading-snug">เข้าแก้ไขและปิดงาน</span>
-                        <span class="mt-1 font-sans text-sm text-muted leading-relaxed max-w-[220px]">ช่างเข้าดำเนินการและปิดงานเมื่อซ่อมเสร็จสิ้น</span>
+                        <span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'how.step3.title') ?> class="font-kanit font-normal text-base text-ink leading-snug"><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'how.step3.title', 'เข้าแก้ไขและปิดงาน')) ?></span>
+                        <span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'how.step3.description') ?> class="mt-1 font-sans text-sm text-muted leading-relaxed max-w-[220px] whitespace-pre-line"><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'how.step3.description', 'ช่างเข้าดำเนินการและปิดงานเมื่อซ่อมเสร็จสิ้น')) ?></span>
                      </div>
                   </li>
                </ol>
@@ -328,10 +337,13 @@ $assetVersion = static function (string $relativePath): int {
       </section>
       <?php endif; ?>
 
-      <div class="divider" aria-hidden="true"></div>
+      <?php if ($showSteps || $visualBuilderEditMode): ?>
+      <div class="divider" aria-hidden="true"<?= visual_builder_home_divider_attrs($visualBuilderEditMode, 'how') ?> style="<?= visual_builder_home_order_style($homeLayout, 'how', 1) ?>"></div>
+      <?php endif; ?>
 
       <!-- SECTION FEATURES -->
-      <section id="showcase" class="relative bg-white w-full px-6 py-24 scroll-mt-20">
+      <?php if ($homeLayout['showcase']['visible'] || $visualBuilderEditMode): ?>
+      <section<?= visual_builder_home_section_attrs($visualBuilderEditMode, $homeLayout, 'showcase') ?> id="showcase" class="relative bg-white w-full px-6 py-24 scroll-mt-20 vb-home-section <?= visual_builder_home_section_class($homeLayout, 'showcase') ?><?= !$homeLayout['showcase']['visible'] ? ' vb-home-section--hidden' : '' ?>" style="<?= visual_builder_home_order_style($homeLayout, 'showcase') ?>">
          <div class="showcase-wrap max-w-6xl mx-auto">
 
             <div data-reveal class="section-head">
@@ -343,11 +355,9 @@ $assetVersion = static function (string $relativePath): int {
 
             <div data-reveal class="showcase-bento">
                <div class="showcase-bento-intro">
-                  <h2 class="font-kanit text-3xl sm:text-4xl font-normal text-ink leading-[1.25] tracking-tight text-balance">
-                     ออกแบบมาเพื่อห้องปฏิบัติการ<br class="hidden sm:inline">และการติดตามงานที่โปร่งใส
-                  </h2>
-                  <p class="mt-2.5 text-sm sm:text-base text-muted leading-relaxed max-w-md">
-                     ยกระดับการแจ้งซ่อมอุปกรณ์คอมพิวเตอร์จากกระดาษสู่ระบบออนไลน์ ตรวจสอบสถานะได้ทุกขั้นตอนตั้งแต่วินาทีที่เปิดใบงาน
+                  <h2<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'features.title') ?> class="font-kanit text-3xl sm:text-4xl font-normal text-ink leading-[1.25] tracking-tight text-balance"><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'features.title', 'ออกแบบมาเพื่อห้องปฏิบัติการและการติดตามงานที่โปร่งใส')) ?></h2>
+                  <p class="mt-2.5 text-sm sm:text-base text-muted leading-relaxed max-w-md whitespace-pre-line">
+                     <span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'features.description') ?>><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'features.description', 'ยกระดับการแจ้งซ่อมอุปกรณ์คอมพิวเตอร์จากกระดาษสู่ระบบออนไลน์ ตรวจสอบสถานะได้ทุกขั้นตอนตั้งแต่วินาทีที่เปิดใบงาน')) ?></span>
                   </p>
                </div>
 
@@ -376,10 +386,10 @@ $assetVersion = static function (string $relativePath): int {
                   </div>
                   <div class="feature-meta">
                      <h3 class="feature-title">
-                        ติดตามสถานะทุกขั้นตอน <span class="feature-arrow"><?= app_icon('arrow-right') ?></span>
+                        <span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'features.card1.title') ?>><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'features.card1.title', 'ติดตามสถานะทุกขั้นตอน')) ?></span> <span class="feature-arrow"><?= app_icon('arrow-right') ?></span>
                      </h3>
-                     <p class="feature-desc">
-                        เช็กสถานะได้ตั้งแต่เข้าคิว กำลังซ่อม รอครูรับรอง ไปจนถึงเสร็จสมบูรณ์ พร้อมรูปหลังซ่อม
+                     <p class="feature-desc whitespace-pre-line">
+                        <span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'features.card1.description') ?>><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'features.card1.description', 'เช็กสถานะได้ตั้งแต่เข้าคิว กำลังซ่อม รอครูรับรอง ไปจนถึงเสร็จสมบูรณ์ พร้อมรูปหลังซ่อม')) ?></span>
                      </p>
                   </div>
                </article>
@@ -413,10 +423,10 @@ $assetVersion = static function (string $relativePath): int {
                   </div>
                   <div class="feature-meta">
                      <h3 class="feature-title">
-                        แจ้งเตือนทีมช่างทันที <span class="feature-arrow"><?= app_icon('arrow-right') ?></span>
+                        <span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'features.card2.title') ?>><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'features.card2.title', 'แจ้งเตือนทีมช่างทันที')) ?></span> <span class="feature-arrow"><?= app_icon('arrow-right') ?></span>
                      </h3>
-                     <p class="feature-desc">
-                        แจ้งเตือนทีมช่างผ่าน LINE ทันทีที่มีใบแจ้งซ่อมใหม่ และส่งอีเมลถึงผู้แจ้งเมื่องานเสร็จ
+                     <p class="feature-desc whitespace-pre-line">
+                        <span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'features.card2.description') ?>><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'features.card2.description', 'แจ้งเตือนทีมช่างผ่าน LINE ทันทีที่มีใบแจ้งซ่อมใหม่ และส่งอีเมลถึงผู้แจ้งเมื่องานเสร็จ')) ?></span>
                      </p>
                   </div>
                </article>
@@ -448,10 +458,10 @@ $assetVersion = static function (string $relativePath): int {
                   </div>
                   <div class="feature-meta">
                      <h3 class="feature-title">
-                        หน้าจอตามบทบาท <span class="feature-arrow"><?= app_icon('arrow-right') ?></span>
+                        <span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'features.card3.title') ?>><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'features.card3.title', 'หน้าจอตามบทบาท')) ?></span> <span class="feature-arrow"><?= app_icon('arrow-right') ?></span>
                      </h3>
-                     <p class="feature-desc">
-                        แยกหน้าจอสำหรับผู้แจ้ง สตาฟฝ่ายซ่อม และครูผู้ดูแล แต่ละคนเห็นเฉพาะสิ่งที่ต้องทำ
+                     <p class="feature-desc whitespace-pre-line">
+                        <span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'features.card3.description') ?>><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'features.card3.description', 'แยกหน้าจอสำหรับผู้แจ้ง สตาฟฝ่ายซ่อม และครูผู้ดูแล แต่ละคนเห็นเฉพาะสิ่งที่ต้องทำ')) ?></span>
                      </p>
                   </div>
                </article>
@@ -472,10 +482,10 @@ $assetVersion = static function (string $relativePath): int {
                   </div>
                   <div class="feature-meta">
                      <h3 class="feature-title">
-                        แนบรูปประกอบ <span class="feature-arrow"><?= app_icon('arrow-right') ?></span>
+                        <span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'features.card4.title') ?>><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'features.card4.title', 'แนบรูปประกอบ')) ?></span> <span class="feature-arrow"><?= app_icon('arrow-right') ?></span>
                      </h3>
-                     <p class="feature-desc">
-                        แนบภาพถ่ายอาการเสียหรือหน้าจอ Error เพื่อให้ช่างวิเคราะห์และเตรียมอะไหล่ได้ตรงจุด
+                     <p class="feature-desc whitespace-pre-line">
+                        <span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'features.card4.description') ?>><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'features.card4.description', 'แนบภาพถ่ายอาการเสียหรือหน้าจอ Error เพื่อให้ช่างวิเคราะห์และเตรียมอะไหล่ได้ตรงจุด')) ?></span>
                      </p>
                   </div>
                </article>
@@ -503,10 +513,10 @@ $assetVersion = static function (string $relativePath): int {
                   </div>
                   <div class="feature-meta">
                      <h3 class="feature-title">
-                        Lab &amp; Asset History <span class="feature-arrow"><?= app_icon('arrow-right') ?></span>
+                        <span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'features.card5.title') ?>><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'features.card5.title', 'Lab & Asset History')) ?></span> <span class="feature-arrow"><?= app_icon('arrow-right') ?></span>
                      </h3>
-                     <p class="feature-desc">
-                        บันทึกประวัติการซ่อมบำรุงรายเครื่องและรายห้องปฏิบัติการ ตรวจสอบย้อนหลังได้แม่นยำ
+                     <p class="feature-desc whitespace-pre-line">
+                        <span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'features.card5.description') ?>><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'features.card5.description', 'บันทึกประวัติการซ่อมบำรุงรายเครื่องและรายห้องปฏิบัติการ ตรวจสอบย้อนหลังได้แม่นยำ')) ?></span>
                      </p>
                   </div>
                </article>
@@ -514,12 +524,12 @@ $assetVersion = static function (string $relativePath): int {
 
          </div>
       </section>
-
-      <div class="divider" aria-hidden="true"></div>
+      <div class="divider" aria-hidden="true"<?= visual_builder_home_divider_attrs($visualBuilderEditMode, 'showcase') ?> style="<?= visual_builder_home_order_style($homeLayout, 'showcase', 1) ?>"></div>
+      <?php endif; ?>
 
       <!-- SECTION FAQ -->
-      <?php if ($showFaq): ?>
-      <section id="faq" class="bg-[#F6F6F4] w-full px-6 py-24 scroll-mt-20">
+      <?php if ($showFaq || $visualBuilderEditMode): ?>
+      <section<?= visual_builder_home_section_attrs($visualBuilderEditMode, $homeLayout, 'faq') ?> id="faq" class="bg-[#F6F6F4] w-full px-6 py-24 scroll-mt-20 vb-home-section <?= visual_builder_home_section_class($homeLayout, 'faq') ?><?= !$showFaq ? ' vb-home-section--hidden' : '' ?>" style="<?= visual_builder_home_order_style($homeLayout, 'faq') ?>">
          <div class="max-w-6xl mx-auto">
             <div data-reveal class="section-head">
                <span class="section-eyebrow font-mono font-normal">
@@ -527,11 +537,9 @@ $assetVersion = static function (string $relativePath): int {
                   <span class="h-px w-8 bg-neutral-300" aria-hidden="true"></span>
                </span>
                <div class="section-head-body max-w-xl px-6">
-                  <h2 class="font-kanit text-3xl sm:text-4xl font-normal text-ink leading-[1.25] tracking-tight text-balance">
-                     คำถามที่พบบ่อย
-                  </h2>
-                  <p class="mt-2.5 text-muted text-sm sm:text-base leading-relaxed">
-                     ข้อควรรู้และการเตรียมข้อมูลเบื้องต้นก่อนเปิดใบแจ้งซ่อม เพื่อให้ทีมช่างเข้าแก้ไขได้รวดเร็วที่สุด
+                  <h2<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'faq.title') ?> class="font-kanit text-3xl sm:text-4xl font-normal text-ink leading-[1.25] tracking-tight text-balance"><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'faq.title', 'คำถามที่พบบ่อย')) ?></h2>
+                  <p<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'faq.description') ?> class="mt-2.5 text-muted text-sm sm:text-base leading-relaxed whitespace-pre-line">
+                     <?= visual_builder_escape(visual_builder_home_text($siteSettings, 'faq.description', 'ข้อควรรู้และการเตรียมข้อมูลเบื้องต้นก่อนเปิดใบแจ้งซ่อม เพื่อให้ทีมช่างเข้าแก้ไขได้รวดเร็วที่สุด')) ?>
                   </p>
                </div>
             </div>
@@ -540,8 +548,8 @@ $assetVersion = static function (string $relativePath): int {
                <div class="faq-grid">
                   <details class="faq-item" open>
                      <summary>
-                        <span class="font-kanit text-base font-normal text-ink leading-snug">
-                           ก่อนกดแจ้งซ่อม ต้องเตรียมข้อมูลอะไรบ้าง?
+                        <span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'faq.question1') ?> class="font-kanit text-base font-normal text-ink leading-snug">
+                           <?= visual_builder_escape(visual_builder_home_text($siteSettings, 'faq.question1', 'ก่อนกดแจ้งซ่อม ต้องเตรียมข้อมูลอะไรบ้าง?')) ?>
                         </span>
                         <span class="faq-icon" aria-hidden="true">
                            <i class="fa-solid fa-plus"></i>
@@ -554,8 +562,8 @@ $assetVersion = static function (string $relativePath): int {
 
                   <details class="faq-item" open>
                      <summary>
-                        <span class="font-kanit text-base font-normal text-ink leading-snug">
-                           ใช้เวลานานแค่ไหนในการเข้าตรวจสอบและซ่อมบำรุง?
+                        <span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'faq.question2') ?> class="font-kanit text-base font-normal text-ink leading-snug">
+                           <?= visual_builder_escape(visual_builder_home_text($siteSettings, 'faq.question2', 'ใช้เวลานานแค่ไหนในการเข้าตรวจสอบและซ่อมบำรุง?')) ?>
                         </span>
                         <span class="faq-icon" aria-hidden="true">
                            <i class="fa-solid fa-plus"></i>
@@ -568,8 +576,8 @@ $assetVersion = static function (string $relativePath): int {
 
                   <details class="faq-item">
                      <summary>
-                        <span class="font-kanit text-base font-normal text-ink leading-snug">
-                           หากเครื่องเปิดไม่ติดหรือจอไม่แสดงผล ควรเช็กอะไรเบื้องต้น?
+                        <span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'faq.question3') ?> class="font-kanit text-base font-normal text-ink leading-snug">
+                           <?= visual_builder_escape(visual_builder_home_text($siteSettings, 'faq.question3', 'หากเครื่องเปิดไม่ติดหรือจอไม่แสดงผล ควรเช็กอะไรเบื้องต้น?')) ?>
                         </span>
                         <span class="faq-icon" aria-hidden="true">
                            <i class="fa-solid fa-plus"></i>
@@ -582,8 +590,8 @@ $assetVersion = static function (string $relativePath): int {
 
                   <details class="faq-item">
                      <summary>
-                        <span class="font-kanit text-base font-normal text-ink leading-snug">
-                           อินเทอร์เน็ตใช้งานไม่ได้ทั้งห้อง ต้องแจ้งแยกทีละเครื่องไหม?
+                        <span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'faq.question4') ?> class="font-kanit text-base font-normal text-ink leading-snug">
+                           <?= visual_builder_escape(visual_builder_home_text($siteSettings, 'faq.question4', 'อินเทอร์เน็ตใช้งานไม่ได้ทั้งห้อง ต้องแจ้งแยกทีละเครื่องไหม?')) ?>
                         </span>
                         <span class="faq-icon" aria-hidden="true">
                            <i class="fa-solid fa-plus"></i>
@@ -596,8 +604,8 @@ $assetVersion = static function (string $relativePath): int {
 
                   <details class="faq-item">
                      <summary>
-                        <span class="font-kanit text-base font-normal text-ink leading-snug">
-                           ต้องการให้ติดตั้งโปรแกรมสำหรับการเรียนการสอน แจ้งผ่านระบบนี้ได้หรือไม่?
+                        <span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'faq.question5') ?> class="font-kanit text-base font-normal text-ink leading-snug">
+                           <?= visual_builder_escape(visual_builder_home_text($siteSettings, 'faq.question5', 'ต้องการให้ติดตั้งโปรแกรมสำหรับการเรียนการสอน แจ้งผ่านระบบนี้ได้หรือไม่?')) ?>
                         </span>
                         <span class="faq-icon" aria-hidden="true">
                            <i class="fa-solid fa-plus"></i>
@@ -610,8 +618,8 @@ $assetVersion = static function (string $relativePath): int {
 
                   <details class="faq-item">
                      <summary>
-                        <span class="font-kanit text-base font-normal text-ink leading-snug">
-                           จะติดตามความคืบหน้าของงานซ่อมที่แจ้งไปแล้วได้จากที่ไหน?
+                        <span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'faq.question6') ?> class="font-kanit text-base font-normal text-ink leading-snug">
+                           <?= visual_builder_escape(visual_builder_home_text($siteSettings, 'faq.question6', 'จะติดตามความคืบหน้าของงานซ่อมที่แจ้งไปแล้วได้จากที่ไหน?')) ?>
                         </span>
                         <span class="faq-icon" aria-hidden="true">
                            <i class="fa-solid fa-plus"></i>
@@ -627,10 +635,13 @@ $assetVersion = static function (string $relativePath): int {
       </section>
       <?php endif; ?>
 
-      <div class="divider" aria-hidden="true"></div>
+      <?php if ($showFaq || $visualBuilderEditMode): ?>
+      <div class="divider" aria-hidden="true"<?= visual_builder_home_divider_attrs($visualBuilderEditMode, 'faq') ?> style="<?= visual_builder_home_order_style($homeLayout, 'faq', 1) ?>"></div>
+      <?php endif; ?>
 
       <!-- SECTION CONTACT CTA -->
-      <section id="contact" class="contact-wrap max-w-6xl mx-auto py-24 scroll-mt-20">
+      <?php if ($homeLayout['contact']['visible'] || $visualBuilderEditMode): ?>
+      <section<?= visual_builder_home_section_attrs($visualBuilderEditMode, $homeLayout, 'contact') ?> id="contact" class="contact-wrap max-w-6xl mx-auto py-24 scroll-mt-20 vb-home-section <?= visual_builder_home_section_class($homeLayout, 'contact') ?><?= !$homeLayout['contact']['visible'] ? ' vb-home-section--hidden' : '' ?>" style="<?= visual_builder_home_order_style($homeLayout, 'contact') ?>">
 
          <span class="section-eyebrow contact-eyebrow font-mono font-normal" aria-hidden="true">
             05 Contact
@@ -644,11 +655,11 @@ $assetVersion = static function (string $relativePath): int {
 
             <div class="relative z-10">
 
-               <h2 class="mt-3 font-kanit text-2xl sm:text-3xl font-normal text-white leading-[1.3] text-balance">
-                  พร้อมแจ้งซ่อมแล้วหรือยัง?
+               <h2<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'contact.title') ?> class="mt-3 font-kanit text-2xl sm:text-3xl font-normal text-white leading-[1.3] text-balance">
+                  <?= visual_builder_escape(visual_builder_home_text($siteSettings, 'contact.title', 'พร้อมแจ้งซ่อมแล้วหรือยัง?')) ?>
                </h2>
-               <p class="mt-3 text-sm sm:text-base text-white/70 max-w-xl leading-relaxed">
-                  เปิดตั๋วแจ้งซ่อมได้ทันที และติดตามความคืบหน้าได้จากทุกที่ ตลอดเวลาทำการ
+               <p<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'contact.description') ?> class="mt-3 text-sm sm:text-base text-white/70 max-w-xl leading-relaxed whitespace-pre-line">
+                  <?= visual_builder_escape(visual_builder_home_text($siteSettings, 'contact.description', 'เปิดตั๋วแจ้งซ่อมได้ทันที และติดตามความคืบหน้าได้จากทุกที่ ตลอดเวลาทำการ')) ?>
                </p>
 
                <div class="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-px rounded-xl overflow-hidden border border-white/10 bg-white/10 text-left">
@@ -678,7 +689,7 @@ $assetVersion = static function (string $relativePath): int {
                <div class="mt-10 flex flex-col sm:flex-row items-center sm:justify-start gap-4">
                   <a href="request_form.php"
                      class="font-kanit w-full sm:w-56 inline-flex items-center justify-center bg-white text-neutral-900 font-medium text-base px-6 py-4 rounded-xl hover:bg-neutral-200 transition-colors duration-150 active:scale-[0.99]">
-                     แจ้งซ่อมทันที
+                     <span<?= visual_builder_home_target_attrs($visualBuilderEditMode, 'contact.primary_cta') ?>><?= visual_builder_escape(visual_builder_home_text($siteSettings, 'contact.primary_cta', 'แจ้งซ่อมทันที')) ?></span>
                   </a>
                   <?php if ($currentUser): ?>
                      <a href="<?= htmlspecialchars($currentUser['dashboard'], ENT_QUOTES, 'UTF-8') ?>"
@@ -696,7 +707,8 @@ $assetVersion = static function (string $relativePath): int {
          </div>
       </section>
 
-      <div class="divider" aria-hidden="true"></div>
+      <div class="divider" aria-hidden="true"<?= visual_builder_home_divider_attrs($visualBuilderEditMode, 'contact') ?> style="<?= visual_builder_home_order_style($homeLayout, 'contact', 1) ?>"></div>
+      <?php endif; ?>
 
    </main>
 

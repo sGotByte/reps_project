@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 <phpunit
 	bootstrap="tests/bootstrap.php"
     cacheResultFile="tmp/.phpunit.result.cache"
@@ -29,35 +28,3 @@
 	</coverage>
 
 </phpunit>
-=======
-<phpunit
-	bootstrap="tests/bootstrap.php"
-    cacheResultFile="tmp/.phpunit.result.cache"
-	colors="true"
-	backupGlobals="false"
-	beStrictAboutTestsThatDoNotTestAnything="false">
-
-	<testsuites>
-		<testsuite name="Tests">
-			<directory suffix="Test.php">./tests</directory>
-		</testsuite>
-	</testsuites>
-
-    <groups>
-        <exclude>
-            <group>snapshot</group>
-        </exclude>
-    </groups>
-
-	<coverage processUncoveredFiles="true">
-		<include>
-			<directory suffix=".php">src</directory>
-		</include>
-		<report>
-			<html outputDirectory="build/coverage"/>
-			<text outputFile="php://stdout" showOnlySummary="true"/>
-		</report>
-	</coverage>
-
-</phpunit>
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff

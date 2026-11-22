@@ -316,6 +316,36 @@ function site_media_usage(mysqli $conn, string $path): array
     $used = [];
     if (($s['site_logo_path'] ?? '') === $path) $used[] = 'โลโก้';
     if (($s['site_favicon_path'] ?? '') === $path) $used[] = 'ไอคอนแท็บ';
+
+    // รูปในบล็อกหน้าเว็บ (CMS) เก็บเป็น media_id ไม่ใช่ path
+    try {
+        $mediaId = 0;
+        $stmt = $conn->prepare('SELECT id FROM site_media WHERE file_path = ? LIMIT 1');
+        if ($stmt) {
+            $stmt->bind_param('s', $path);
+            if ($stmt->execute()) {
+                $row = $stmt->get_result()->fetch_assoc();
+                $mediaId = (int)($row['id'] ?? 0);
+            }
+            $stmt->close();
+        }
+        if ($mediaId > 0) {
+            $result = $conn->query("SELECT config_json FROM site_blocks WHERE block_type = 'image'");
+            if ($result) {
+                while ($block = $result->fetch_assoc()) {
+                    $config = json_decode((string)$block['config_json'], true);
+                    if (is_array($config) && (int)($config['media_id'] ?? 0) === $mediaId) {
+                        $used[] = 'หน้าเว็บ';
+                        break;
+                    }
+                }
+                $result->free();
+            }
+        }
+    } catch (Throwable $e) {
+        error_log('site_media_usage: ' . $e->getMessage());
+    }
+
     return $used;
 }
 

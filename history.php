@@ -285,24 +285,11 @@ $hasFilter = $statusFilter !== '' || $search !== '';
         }
     </style>
    <link rel="stylesheet" href="assets/css/base.css?v=18">
+   <link rel="stylesheet" href="assets/css/requester-theme.css?v=2">
 </head>
-<body class="admin-shell min-h-screen flex flex-col antialiased">
+<body class="admin-shell min-h-screen flex flex-col antialiased rq-on">
     <!-- Topbar Header -->
-    <header class="admin-topbar sticky top-0 z-35 h-header border-b w-full bg-white">
-        <div class="max-w-6xl w-full mx-auto px-4 sm:px-7 flex items-center justify-between h-16">
-            <a href="dashboard.php" class="flex items-center gap-3 no-underline">
-                <img src="assets/images/logo/reps-logo.svg" alt="REPS" class="h-6 w-auto">
-            </a>
-            <div class="flex items-center gap-3">
-                <a href="request_form.php" class="admin-btn">
-                    <i class="fa-solid fa-plus text-xs" aria-hidden="true"></i>
-                    <span><?php require_once __DIR__ . '/includes/i18n.php'; echo tr('แจ้งซ่อมใหม่', 'New request'); ?></span>
-                </a>
-                <?php require_once __DIR__ . '/includes/notifications.php'; echo notif_bell($conn, ''); ?>
-                <?php require_once __DIR__ . '/includes/user_menu.php'; echo user_menu_render($conn, ''); ?>
-            </div>
-        </div>
-    </header>
+    <?php $rqActive = 'history'; $rqBottom = true; require __DIR__ . '/includes/requester_nav.php'; ?>
 
     <main class="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-7">
         <header class="mb-6">

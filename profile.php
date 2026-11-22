@@ -269,25 +269,26 @@ $profileMeta = trim(($profileTypeLabels[$user['user_type']] ?? (string)$user['us
       input:focus-visible, select:focus-visible { outline: 2px solid #161616; outline-offset: 2px; }
    </style>
    <link rel="stylesheet" href="assets/css/base.css?v=18">
+   <link rel="stylesheet" href="assets/css/requester-theme.css?v=2">
 </head>
 
-<body class="admin-shell min-h-screen flex flex-col antialiased">
+<body class="admin-shell min-h-screen flex flex-col antialiased<?= current_role() === 'user' ? ' rq-on' : '' ?>">
     <!-- Topbar Header ขยายเต็มจอแต่เนื้อหาจัดกึ่งกลางสอดคล้องกับ Dashboard -->
-    <header class="admin-topbar sticky top-0 z-30 h-header border-b w-full bg-white">
+    <?php if (current_role() === 'user'): ?>
+    <?php $rqActive = 'profile'; $rqBottom = false; require __DIR__ . '/includes/requester_nav.php'; ?>
+<?php else: ?>
+<header class="admin-topbar sticky top-0 z-30 h-header border-b w-full bg-white">
         <div class="max-w-6xl w-full mx-auto px-4 sm:px-7 flex items-center justify-between h-16">
             <a href="<?= profile_h($profileHome) ?>" class="flex items-center gap-3 no-underline">
                 <img src="assets/images/logo/reps-logo.svg" alt="REPS" class="h-6 w-auto">
             </a>
             <div class="flex items-center gap-3">
-               <a href="request_form.php" class="admin-btn">
-                  <i class="fa-solid fa-plus text-xs" aria-hidden="true"></i>
-                  <span><?php require_once __DIR__ . '/includes/i18n.php'; echo tr('แจ้งซ่อมใหม่', 'New request'); ?></span>
-               </a>
                <?php require_once __DIR__ . '/includes/notifications.php'; echo notif_bell($conn, ''); ?>
                <?= user_menu_render($conn, '') ?>
             </div>
         </div>
     </header>
+<?php endif; ?>
 
    <main class="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-7">
       <header class="mb-6">

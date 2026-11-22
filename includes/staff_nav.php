@@ -2,22 +2,22 @@
 declare(strict_types=1);
 
 /**
- * REPS · includes/staff_nav.php — เมนูสตาฟแบบ sidebar (แทน top nav เดิม)
+ * REPS · includes/staff_nav.php — แถบบนเต็มความกว้าง + ลิ้นชักเมนู (hamburger)
  *
- * วางต่อจาก <body> เหมือนเดิม ไม่ต้องเปลี่ยนโครงหน้า — ไฟล์นี้ใส่ CSS/JS ของตัวเองครบ
- *   เดสก์ท็อป (≥1024px) : sidebar ติดซ้าย 264px
- *   มือถือ/แท็บเล็ต     : แถบบน (ปุ่มเมนู + ชื่อหน้า + สถานะคิว) + แถบแท็บล่างแตะด้วยนิ้วโป้ง + ลิ้นชักเมนูเต็ม
+ * วางต่อจาก <body> เหมือนเดิม ไฟล์นี้ใส่ CSS/JS ของตัวเองครบ
+ *   แถบบน : [☰] [Logo] ชื่อหน้า ........ [🔔] [ก ชื่อ ▾]
+ *   ☰ เปิดลิ้นชักเมนู (ทั้งเดสก์ท็อปและมือถือ)
  *
- * ตัวแปรที่รับจากหน้า (ไม่บังคับทั้งหมด ยกเว้น $staffNavActive):
+ * ตัวแปรที่รับจากหน้า:
  *   $staffNavActive  'jobs' | 'inventory' | 'thanks'
  *   $staffNavBadge   จำนวนวัสดุต่ำกว่าจุดแจ้งเตือน (ไม่ส่งมาก็นับเอง)
- *   $staffNavTitle   ชื่อหน้าบนแถบมือถือ (ไม่ส่งมาก็ใช้ชื่อเมนูที่ active)
+ *   $staffNavTitle   ชื่อหน้าบนแถบ (ไม่ส่งมาก็ใช้ชื่อเมนูที่ active)
  */
 
 $snActive = (string)($staffNavActive ?? '');
 $snH = static fn(mixed $v): string => htmlspecialchars((string)($v ?? ''), ENT_QUOTES, 'UTF-8');
 
-// ---- ข้อมูลผู้ใช้ + ตัวเลขแจ้งเตือน (query เบา ๆ ถ้าพลาดก็แสดงเมนูต่อได้) ----
+// ---- ข้อมูลผู้ใช้ + ตัวเลขแจ้งเตือน ----
 $snUser = [];
 $snLow = isset($staffNavBadge) ? (int)$staffNavBadge : null;
 $snTurn = 0;
@@ -33,19 +33,19 @@ if (isset($conn, $userId) && function_exists('db_one')) {
     }
 }
 $snLow = (int)($snLow ?? 0);
-$snName = trim((string)($snUser['first_name'] ?? '') . ' ' . (string)($snUser['last_name'] ?? ''));
+$snFirst = trim((string)($snUser['first_name'] ?? ''));
+$snName = trim($snFirst . ' ' . (string)($snUser['last_name'] ?? ''));
 $snInitial = $snName !== '' && preg_match('/^\X/u', $snName, $snM) ? (function_exists('mb_strtoupper') ? mb_strtoupper($snM[0]) : $snM[0]) : 'S';
 $snIsStaff = function_exists('current_role') && current_role() === 'staff';
 $snQueueOn = $snIsStaff && isset($snUser['is_active_queue']) ? ((int)$snUser['is_active_queue'] === 1) : null;
-$snSite = isset($siteName) && (string)$siteName !== '' ? (string)$siteName : 'REPS';
 
 // ---- เมนูหลัก (เพิ่มหน้าใหม่ที่นี่ที่เดียว) ----
 $snItems = [
-    'jobs'      => ['href' => 'staff_dashboard.php', 'icon' => 'fa-clipboard-list', 'label' => 'งานซ่อม',    'short' => 'งาน'],
-    'inventory' => ['href' => 'inventory.php',       'icon' => 'fa-boxes-stacked',  'label' => 'สต็อกวัสดุ', 'short' => 'สต็อก'],
-    'thanks'    => ['href' => 'thanks.php',          'icon' => 'fa-heart',          'label' => 'คำขอบคุณ',  'short' => 'ขอบคุณ'],
+    'jobs'      => ['href' => 'staff_dashboard.php', 'icon' => 'fa-clipboard-list', 'label' => 'งานซ่อม'],
+    'inventory' => ['href' => 'inventory.php',       'icon' => 'fa-boxes-stacked',  'label' => 'สต็อกวัสดุ'],
+    'thanks'    => ['href' => 'thanks.php',          'icon' => 'fa-heart',          'label' => 'คำขอบคุณ'],
 ];
-// ลิงก์บัญชี — ตรวจ path ให้ตรงกับระบบจริงของคุณ
+$snHomeHref = 'staff_dashboard.php';
 $snProfileHref = '../profile.php';
 $snLogoutHref = '../logout.php';
 
@@ -53,111 +53,158 @@ $snTitle = (string)($staffNavTitle ?? ($snItems[$snActive]['label'] ?? 'สต�
 $snBadgeFor = static function (string $key) use ($snLow, $snTurn): int {
     return $key === 'inventory' ? $snLow : ($key === 'jobs' ? $snTurn : 0);
 };
+
+// ---- สวิตช์ภาษา: ส่ง ?lang=th|en กลับหน้าเดิม (ปรับให้เข้ากับระบบ i18n ของคุณ) ----
+$snLang = (($_GET['lang'] ?? $_COOKIE['lang'] ?? 'th') === 'en') ? 'en' : 'th';
+$snLangUrl = static function (string $l): string {
+    $q = $_GET;
+    $q['lang'] = $l;
+    return strtok((string)($_SERVER['REQUEST_URI'] ?? ''), '?') . '?' . http_build_query($q);
+};
+
 require_once __DIR__ . '/site_config.php';
 require_once __DIR__ . '/notifications.php';
 $snNotifications = notif_bell($conn, '../');
+$snLogoUrl = app_logo_url($conn, '../');
+$snSiteName = function_exists('app_site_name') ? app_site_name($conn) : 'REPS';
 ?>
 <style>
-/* ===== REPS staff shell ===== */
-.sn-aside, .sn-top, .sn-bottom, .sn-overlay { font-family: 'Kanit', system-ui, sans-serif; }
-.sn-aside, .sn-top, .sn-bottom, .sn-aside *, .sn-top *, .sn-bottom * { box-sizing: border-box; }
-.sn-aside a, .sn-top a, .sn-bottom a { text-decoration: none; }
+/* ===== REPS staff shell · minimal ===== */
+:root { --sn-top: 60px; --sn-side: 248px; --sn-ink: #111111; --sn-mute: #8A8A85; --sn-soft: rgba(17,17,17,.045); --sn-line: rgba(17,17,17,.07); }
+.sn-top, .sn-aside, .sn-overlay { font-family: 'Kanit', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+.sn-top *, .sn-aside * { box-sizing: border-box; }
+.sn-top a, .sn-aside a { text-decoration: none; }
+body.sn-on { padding-top: var(--sn-top); }
 
-.sn-aside { position: fixed; inset: 0 auto 0 0; z-index: 60; display: flex; flex-direction: column; width: 264px; background: #FFFFFF; border-right: 1px solid #ECEAE6; color: #161616; }
-.sn-brand { display: flex; align-items: center; gap: 10px; flex: none; height: 64px; padding: 0 16px 0 18px; border-bottom: 1px solid #F1EFEC; }
-.sn-brand img { width: auto; max-width: 112px; height: 30px; flex: none; object-fit: contain; }
-.sn-brand__text { flex: 1 1 auto; min-width: 0; line-height: 1.25; }
-.sn-brand__name { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 15px; font-weight: 600; }
-.sn-brand__role { display: block; font-size: 12px; color: #6B6862; }
-.sn-icon-btn.sn-close { display: none; margin-left: auto; }
+/* แถบบน: โปร่งแสง ไร้เส้นขอบหนัก */
+.sn-top { position: fixed; inset: 0 0 auto 0; z-index: 50; display: flex; align-items: center; gap: 10px; height: var(--sn-top); padding: 0 20px 0 14px; background: rgba(255,255,255,.82); -webkit-backdrop-filter: saturate(180%) blur(16px); backdrop-filter: saturate(180%) blur(16px); box-shadow: 0 1px 0 var(--sn-line); color: var(--sn-ink); }
+.sn-top__brand { display: inline-flex; align-items: center; gap: 8px; flex: none; padding: 4px 6px; border-radius: 10px; color: var(--sn-ink); transition: background-color .15s ease; }
+.sn-top__brand:hover { background: var(--sn-soft); }
+.sn-top__brand img { display: block; width: auto; max-width: 124px; height: 26px; object-fit: contain; }
+.sn-top__sep { width: 1px; height: 18px; background: var(--sn-line); flex: none; }
+.sn-top__title { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 15px; font-weight: 500; letter-spacing: -.005em; }
+.sn-top__right { display: flex; align-items: center; gap: 10px; flex: none; }
 
-.sn-scroll { flex: 1 1 auto; overflow-y: auto; overscroll-behavior: contain; padding: 14px 12px; }
-.sn-label { padding: 10px 12px 6px; color: #6B6862; font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; }
+.sn-menu-btn { display: inline-grid; place-items: center; flex: none; width: 40px; height: 40px; padding: 0; border: 0; border-radius: 12px; background: transparent; color: var(--sn-ink); font-size: 16px; cursor: pointer; transition: background-color .15s ease; }
+.sn-menu-btn:hover { background: var(--sn-soft); }
+.sn-menu-btn:focus-visible, .sn-user__btn:focus-visible, .sn-link:focus-visible, .sn-top__brand:focus-visible { outline: 2px solid var(--sn-ink); outline-offset: 2px; }
+
+.sn-user { position: relative; }
+.sn-user__btn { display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 10px 0 4px; border: 0; border-radius: 999px; background: transparent; color: var(--sn-ink); font: inherit; font-size: 14px; font-weight: 500; cursor: pointer; transition: background-color .15s ease; }
+.sn-user__btn:hover, .sn-user__btn[aria-expanded="true"] { background: var(--sn-soft); }
+.sn-av { display: grid; place-items: center; flex: none; width: 32px; height: 32px; border-radius: 50%; background: var(--sn-ink); color: #FFFFFF; font-size: 13px; font-weight: 600; }
+.sn-user__name { max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sn-user__btn .fa-chevron-down { color: var(--sn-mute); font-size: 10px; transition: transform .15s ease; }
+.sn-user__btn[aria-expanded="true"] .fa-chevron-down { transform: rotate(180deg); }
+.sn-dd { position: absolute; right: 0; top: calc(100% + 10px); z-index: 70; display: none; min-width: 232px; padding: 6px; border-radius: 16px; background: #FFFFFF; box-shadow: 0 0 0 1px var(--sn-line), 0 18px 48px -8px rgba(17,17,17,.18); }
+.sn-dd.is-open { display: block; animation: sn-pop .14s ease-out; }
+@keyframes sn-pop { from { opacity: 0; transform: translateY(-4px) scale(.98); } to { opacity: 1; transform: none; } }
+.sn-dd__head { padding: 10px 12px 12px; margin-bottom: 4px; line-height: 1.4; box-shadow: 0 1px 0 var(--sn-line); }
+.sn-dd__head b { display: block; font-size: 14px; font-weight: 500; }
+
+.sn-state { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--sn-mute); }
+.sn-state::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #C4C4BE; }
+.sn-state.is-on { color: #15803D; }
+.sn-state.is-on::before { background: #22C55E; }
+
+/* ลิงก์: ไร้เส้น ใช้พื้นอ่อนบอกสถานะ */
+.sn-link { position: relative; display: flex; align-items: center; gap: 12px; min-height: 42px; padding: 0 12px; border-radius: 12px; color: #5C5C57; font-size: 14px; transition: background-color .15s ease, color .15s ease; }
+.sn-link i { flex: none; width: 18px; color: var(--sn-mute); font-size: 14px; text-align: center; transition: color .15s ease; }
+.sn-link:hover { background: var(--sn-soft); color: var(--sn-ink); }
+.sn-link:hover i { color: var(--sn-ink); }
+.sn-link[aria-current="page"] { background: var(--sn-ink); color: #FFFFFF; font-weight: 500; }
+.sn-link[aria-current="page"] i { color: #FFFFFF; }
+.sn-link--danger, .sn-link--danger i { color: #B91C1C; }
+.sn-link--danger:hover { background: #FEF2F2; color: #B91C1C; }
+.sn-link--danger:hover i { color: #B91C1C; }
+
+.sn-badge { flex: none; margin-left: auto; min-width: 20px; padding: 0 6px; border-radius: 999px; background: #F59E0B; color: #1F1300; font-size: 11px; font-weight: 600; line-height: 20px; text-align: center; font-variant-numeric: tabular-nums; }
+.sn-link[aria-current="page"] .sn-badge { background: #FFFFFF; color: var(--sn-ink); }
+
+/* sidebar */
+.sn-aside { position: fixed; z-index: 45; display: flex; flex-direction: column; background: #FAFAF9; color: var(--sn-ink); box-shadow: 1px 0 0 var(--sn-line); }
+.sn-brand { display: flex; align-items: center; gap: 10px; flex: none; height: var(--sn-top); padding: 0 10px 0 20px; }
+.sn-brand img { display: block; width: auto; max-width: 140px; height: 28px; object-fit: contain; }
+.sn-close { margin-left: auto; }
+.sn-scroll { flex: 1 1 auto; overflow-y: auto; overscroll-behavior: contain; padding: 16px 12px; }
+.sn-label { padding: 4px 12px 8px; color: var(--sn-mute); font-size: 11px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; }
 .sn-nav { display: grid; gap: 2px; }
-.sn-link { position: relative; display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 0 12px; border-radius: 12px; color: #57544F; font-size: 14.5px; transition: background-color .15s ease, color .15s ease; }
-.sn-link i { flex: none; width: 18px; font-size: 14px; text-align: center; }
-.sn-link:hover { background: #F7F6F4; color: #161616; }
-.sn-link[aria-current="page"] { background: #F4F3F0; color: #161616; font-weight: 500; }
-.sn-link[aria-current="page"]::before { content: ''; position: absolute; left: 3px; top: 12px; bottom: 12px; width: 3px; border-radius: 3px; background: var(--theme-primary, #161616); }
-.sn-link--danger, .sn-link--danger:hover { color: #B91C1C; }
-.sn-link--danger:hover { background: #FEF2F2; }
-
-.sn-badge { flex: none; margin-left: auto; min-width: 22px; padding: 0 7px; border-radius: 999px; background: #B45309; color: #FFFFFF; font-size: 12px; font-weight: 500; line-height: 20px; text-align: center; font-variant-numeric: tabular-nums; }
-
-.sn-foot { flex: none; padding: 10px 12px 12px; border-top: 1px solid #F1EFEC; }
-.sn-me { display: flex; align-items: center; gap: 10px; padding: 8px 10px 10px; }
-.sn-av { display: grid; place-items: center; flex: none; width: 38px; height: 38px; border-radius: 50%; background: #F4F3F0; box-shadow: inset 0 0 0 1px rgba(22, 22, 22, .08); color: #3F3D39; font-size: 16px; font-weight: 600; }
-.sn-me__who { min-width: 0; line-height: 1.3; }
-.sn-me__name { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; font-weight: 500; }
-.sn-state { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: #6B6862; }
-.sn-state::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: #A8A49D; }
-.sn-state.is-on { color: #166534; }
-.sn-state.is-on::before { background: #16A34A; }
-
-/* ปุ่มไอคอน (มือถือ) */
-.sn-icon-btn { display: inline-grid; place-items: center; flex: none; width: 44px; height: 44px; padding: 0; border: 0; border-radius: 12px; background: transparent; color: #161616; font-size: 18px; cursor: pointer; }
-.sn-icon-btn:hover { background: #F4F3F0; }
-
-/* แถบบน + แถบล่าง + overlay: ซ่อนบนเดสก์ท็อป */
-.sn-top, .sn-bottom, .sn-overlay { display: none; }
+.sn-overlay { display: none; }
 
 @media (min-width: 1024px) {
-    body.sn-on, body:has(> .sn-aside) { padding-left: 264px; }
+    .sn-aside { top: var(--sn-top); bottom: 0; left: 0; width: var(--sn-side); transition: transform .28s cubic-bezier(.16,1,.3,1), visibility 0s; }
+    .sn-aside .sn-brand { display: none; }
+    body.sn-on { padding-left: var(--sn-side); transition: padding-left .28s cubic-bezier(.16,1,.3,1); }
+    html.sn-collapsed body.sn-on { padding-left: 0; }
+    html.sn-collapsed .sn-aside { transform: translateX(-100%); visibility: hidden; transition: transform .28s cubic-bezier(.16,1,.3,1), visibility 0s linear .28s; }
+    .sn-close { display: none; }
 }
-
 @media (max-width: 1023px) {
-    body.sn-on, body:has(> .sn-aside) { padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px)); }
     html.sn-lock { overflow: hidden; }
-
-    /* ลิ้นชักเมนู */
-    .sn-aside { width: min(320px, 86vw); transform: translateX(-100%); visibility: hidden; box-shadow: none; transition: transform .25s cubic-bezier(.16, 1, .3, 1), visibility 0s linear .25s; }
-    .sn-aside.is-open { transform: none; visibility: visible; box-shadow: 0 24px 48px rgba(22, 22, 22, .24); transition: transform .25s cubic-bezier(.16, 1, .3, 1); }
-    .sn-icon-btn.sn-close { display: inline-grid; }
-    .sn-overlay { position: fixed; inset: 0; z-index: 55; display: block; background: rgba(22, 22, 22, .45); opacity: 0; pointer-events: none; transition: opacity .2s ease; }
+    .sn-aside { top: 0; bottom: 0; left: 0; z-index: 60; width: min(300px, 86vw); background: #FFFFFF; transform: translateX(-100%); visibility: hidden; box-shadow: none; transition: transform .28s cubic-bezier(.16,1,.3,1), visibility 0s linear .28s; }
+    .sn-aside.is-open { transform: none; visibility: visible; box-shadow: 0 24px 64px rgba(17,17,17,.22); transition: transform .28s cubic-bezier(.16,1,.3,1); }
+    .sn-overlay { position: fixed; inset: 0; z-index: 55; display: block; background: rgba(17,17,17,.32); -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px); opacity: 0; pointer-events: none; transition: opacity .2s ease; }
     .sn-overlay.is-open { opacity: 1; pointer-events: auto; }
-
-    /* แถบบน */
-    .sn-top { position: sticky; top: 0; z-index: 50; display: flex; align-items: center; flex: none; gap: 4px; height: 56px; padding: 0 12px 0 6px; border-bottom: 1px solid #ECEAE6; background: rgba(255, 255, 255, .96); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
-    .sn-top__title { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 16px; font-weight: 500; color: #161616; }
-    .sn-pill { flex: none; padding: 0 10px; border-radius: 999px; background: #F4F3F0; font-size: 12px; line-height: 26px; }
-
-    /* แถบแท็บล่าง */
-    .sn-bottom { position: fixed; inset: auto 0 0 0; z-index: 50; grid-template-columns: repeat(4, 1fr); padding-bottom: env(safe-area-inset-bottom, 0px); border-top: 1px solid #ECEAE6; background: #FFFFFF; }
-    .sn-bottom { display: grid; }
-    .sn-tab { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 60px; padding: 0; border: 0; background: transparent; color: #6B6862; font: inherit; font-size: 12px; cursor: pointer; }
-    .sn-tab i { font-size: 18px; }
-    .sn-tab[aria-current="page"] { color: #161616; font-weight: 500; }
-    .sn-tab[aria-current="page"]::before { content: ''; position: absolute; top: 0; left: 50%; width: 28px; height: 3px; margin-left: -14px; border-radius: 0 0 3px 3px; background: var(--theme-primary, #161616); }
-    .sn-tab .sn-badge { position: absolute; top: 6px; left: 50%; margin-left: 6px; min-width: 18px; padding: 0 5px; border: 2px solid #FFFFFF; font-size: 11px; line-height: 14px; box-sizing: content-box; }
 }
-
+@media (max-width: 640px) {
+    .sn-top { gap: 6px; padding: 0 12px 0 8px; }
+    .sn-top__right { gap: 6px; }
+    .sn-user__name, .sn-user__btn .fa-chevron-down { display: none; }
+    .sn-user__btn { padding: 0 4px; }
+}
+@media (max-width: 480px) {
+    .sn-top__brand img { max-width: 96px; height: 22px; }
+    .sn-top__sep { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .sn-aside, body.sn-on, .sn-overlay, .sn-dd { transition: none !important; animation: none !important; }
+}
 @media print {
-    .sn-aside, .sn-top, .sn-bottom, .sn-overlay { display: none !important; }
-    body.sn-on, body:has(> .sn-aside) { padding: 0 !important; }
+    .sn-top, .sn-aside, .sn-overlay { display: none !important; }
+    body.sn-on { padding: 0 !important; }
 }
 </style>
 
 <header class="sn-top">
-    <button type="button" class="sn-icon-btn" data-sn-open aria-controls="snAside" aria-expanded="false" aria-label="เปิดเมนู"><i class="fa-solid fa-bars" aria-hidden="true"></i></button>
+    <button type="button" class="sn-menu-btn" data-sn-open aria-controls="snAside" aria-expanded="false" aria-label="เปิดเมนู"><i class="fa-solid fa-bars" aria-hidden="true"></i></button>
+    <a class="sn-top__brand" href="<?= $snH($snHomeHref) ?>" aria-label="<?= $snH($snSiteName) ?>">
+        <img src="<?= $snH($snLogoUrl) ?>" alt="<?= $snH($snSiteName) ?>">
+    </a>
+    <span class="sn-top__sep" aria-hidden="true"></span>
     <div class="sn-top__title"><?= $snH($snTitle) ?></div>
-    <?php if ($snQueueOn !== null): ?>
-        <span class="sn-pill sn-state<?= $snQueueOn ? ' is-on' : '' ?>"><?= $snQueueOn ? 'เปิดรับคิว' : 'พักคิว' ?></span>
-    <?php endif; ?>
+
+    <div class="sn-top__right">
+        <?= $snNotifications ?>
+
+        <div class="sn-user">
+            <button type="button" class="sn-user__btn" id="snUserBtn" aria-haspopup="true" aria-expanded="false" aria-controls="snUserMenu">
+                <span class="sn-av" aria-hidden="true"><?= $snH($snInitial) ?></span>
+                <span class="sn-user__name"><?= $snH($snFirst !== '' ? $snFirst : 'สตาฟ') ?></span>
+                <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+            </button>
+            <div class="sn-dd" id="snUserMenu">
+                <div class="sn-dd__head">
+                    <b><?= $snH($snName !== '' ? $snName : 'สตาฟ') ?></b>
+                    <?php if ($snQueueOn !== null): ?>
+                        <span class="sn-state<?= $snQueueOn ? ' is-on' : '' ?>"><?= $snQueueOn ? 'เปิดรับคิวอยู่' : 'พักรับคิว' ?></span>
+                    <?php endif; ?>
+                </div>
+                <a class="sn-link" href="<?= $snH($snProfileHref) ?>"><i class="fa-solid fa-user" aria-hidden="true"></i><span>โปรไฟล์ของฉัน</span></a>
+                <a class="sn-link sn-link--danger" href="<?= $snH($snLogoutHref) ?>"><i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i><span>ออกจากระบบ</span></a>
+            </div>
+        </div>
+    </div>
 </header>
 
 <div class="sn-overlay" id="snOverlay" aria-hidden="true"></div>
 
 <aside class="sn-aside" id="snAside" aria-label="เมนูสตาฟ">
     <div class="sn-brand">
-        <img src="<?= $snH(app_logo_url($conn, '../')) ?>" alt="">
-        <div class="sn-brand__text">
-            <span class="sn-brand__name"><?= $snH($snSite) ?></span>
-            <span class="sn-brand__role">เจ้าหน้าที่ฝ่ายซ่อม</span>
-        </div>
-        <?= $snNotifications ?>
-        <button type="button" class="sn-icon-btn sn-close" data-sn-close aria-label="ปิดเมนู"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+        <a href="<?= $snH($snHomeHref) ?>" aria-label="<?= $snH($snSiteName) ?>">
+            <img src="<?= $snH($snLogoUrl) ?>" alt="<?= $snH($snSiteName) ?>">
+        </a>
+        <button type="button" class="sn-menu-btn sn-close" data-sn-close aria-label="ปิดเมนู"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
     </div>
-
     <div class="sn-scroll">
         <div class="sn-label">เมนูหลัก</div>
         <nav class="sn-nav" aria-label="เมนูหลัก">
@@ -171,72 +218,68 @@ $snNotifications = notif_bell($conn, '../');
                 </a>
             <?php endforeach; ?>
         </nav>
-
-        <div class="sn-label" style="margin-top:12px">บัญชี</div>
-        <nav class="sn-nav" aria-label="บัญชี">
-            <a class="sn-link" href="<?= $snH($snProfileHref) ?>"><i class="fa-solid fa-user" aria-hidden="true"></i><span>โปรไฟล์ของฉัน</span></a>
-        </nav>
-    </div>
-
-    <div class="sn-foot">
-        <div class="sn-me">
-            <span class="sn-av" aria-hidden="true"><?= $snH($snInitial) ?></span>
-            <div class="sn-me__who">
-                <span class="sn-me__name"><?= $snH($snName !== '' ? $snName : 'สตาฟ') ?></span>
-                <?php if ($snQueueOn !== null): ?>
-                    <span class="sn-state<?= $snQueueOn ? ' is-on' : '' ?>"><?= $snQueueOn ? 'เปิดรับคิวอยู่' : 'พักรับคิว' ?></span>
-                <?php endif; ?>
-            </div>
-        </div>
-        <a class="sn-link sn-link--danger" href="<?= $snH($snLogoutHref) ?>"><i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i><span>ออกจากระบบ</span></a>
     </div>
 </aside>
 
-<nav class="sn-bottom" aria-label="เมนูด่วน">
-    <?php foreach ($snItems as $snKey => $snItem): $snB = $snBadgeFor($snKey); ?>
-        <a class="sn-tab" href="<?= $snH($snItem['href']) ?>"<?= $snActive === $snKey ? ' aria-current="page"' : '' ?>>
-            <i class="fa-solid <?= $snH($snItem['icon']) ?>" aria-hidden="true"></i>
-            <span><?= $snH($snItem['short']) ?></span>
-            <?php if ($snB > 0): ?><span class="sn-badge"><?= $snB ?></span><?php endif; ?>
-        </a>
-    <?php endforeach; ?>
-    <button type="button" class="sn-tab" data-sn-open aria-controls="snAside" aria-expanded="false">
-        <i class="fa-solid fa-bars" aria-hidden="true"></i><span>เมนู</span>
-    </button>
-</nav>
-
 <script>
 (function () {
-    var d = document, aside = d.getElementById('snAside'), overlay = d.getElementById('snOverlay');
+    var d = document, html = d.documentElement, aside = d.getElementById('snAside'), overlay = d.getElementById('snOverlay');
     if (!aside) return;
     d.body.classList.add('sn-on');
+    var mq = window.matchMedia('(min-width: 1024px)');
+    var KEY = 'repsStaffNavCollapsed';
     var openers = Array.prototype.slice.call(d.querySelectorAll('[data-sn-open]'));
     var lastFocus = null;
 
-    function setOpen(open) {
+    try { if (localStorage.getItem(KEY) === '1') html.classList.add('sn-collapsed'); } catch (e) {}
+
+    function syncAria() {
+        var expanded = mq.matches ? !html.classList.contains('sn-collapsed') : aside.classList.contains('is-open');
+        openers.forEach(function (o) { o.setAttribute('aria-expanded', expanded ? 'true' : 'false'); });
+    }
+    function setDrawer(open) {
         aside.classList.toggle('is-open', open);
         overlay.classList.toggle('is-open', open);
-        d.documentElement.classList.toggle('sn-lock', open);
-        openers.forEach(function (o) { o.setAttribute('aria-expanded', open ? 'true' : 'false'); });
+        html.classList.toggle('sn-lock', open);
+        syncAria();
         if (open) {
             lastFocus = d.activeElement;
-            var first = aside.querySelector('[data-sn-close]');
-            if (first) first.focus();
+            var c = aside.querySelector('[data-sn-close]');
+            if (c) c.focus();
         } else if (lastFocus) {
             lastFocus.focus();
             lastFocus = null;
         }
     }
+    function toggleSide() {
+        var c = html.classList.toggle('sn-collapsed');
+        try { localStorage.setItem(KEY, c ? '1' : '0'); } catch (e) {}
+        syncAria();
+    }
 
-    openers.forEach(function (o) { o.addEventListener('click', function () { setOpen(true); }); });
-    overlay.addEventListener('click', function () { setOpen(false); });
-    aside.querySelector('[data-sn-close]').addEventListener('click', function () { setOpen(false); });
+    openers.forEach(function (o) {
+        o.addEventListener('click', function () { if (mq.matches) toggleSide(); else setDrawer(!aside.classList.contains('is-open')); });
+    });
+    overlay.addEventListener('click', function () { setDrawer(false); });
+    aside.querySelector('[data-sn-close]').addEventListener('click', function () { setDrawer(false); });
+    syncAria();
+
+    // dropdown ผู้ใช้
+    var ub = d.getElementById('snUserBtn'), um = d.getElementById('snUserMenu');
+    function setUser(open) {
+        um.classList.toggle('is-open', open);
+        ub.setAttribute('aria-expanded', open ? 'true' : 'false');
+    }
+    ub.addEventListener('click', function (e) { e.stopPropagation(); setUser(!um.classList.contains('is-open')); });
+    d.addEventListener('click', function (e) { if (!um.contains(e.target)) setUser(false); });
 
     d.addEventListener('keydown', function (e) {
-        if (!aside.classList.contains('is-open')) return;
-        if (e.key === 'Escape') { setOpen(false); return; }
-        if (e.key !== 'Tab') return;
-        // วนโฟกัสอยู่ในลิ้นชักตอนเปิด
+        if (e.key === 'Escape') {
+            if (um.classList.contains('is-open')) { setUser(false); ub.focus(); }
+            if (aside.classList.contains('is-open')) setDrawer(false);
+            return;
+        }
+        if (e.key !== 'Tab' || !aside.classList.contains('is-open') || mq.matches) return;
         var f = aside.querySelectorAll('a[href], button:not([disabled])');
         if (!f.length) return;
         var first = f[0], last = f[f.length - 1];
@@ -244,9 +287,8 @@ $snNotifications = notif_bell($conn, '../');
         else if (!e.shiftKey && d.activeElement === last) { e.preventDefault(); first.focus(); }
     });
 
-    // ขยายเป็นจอใหญ่ตอนลิ้นชักเปิดอยู่ → ปิดและปลดล็อกการเลื่อน
-    var mq = window.matchMedia('(min-width: 1024px)');
-    var onChange = function (e) { if (e.matches && aside.classList.contains('is-open')) setOpen(false); };
+    // ย่อ/ขยายหน้าจอข้ามจุดตัด → ปิดลิ้นชักและปลดล็อกการเลื่อน
+    var onChange = function () { if (aside.classList.contains('is-open')) setDrawer(false); else syncAria(); };
     if (mq.addEventListener) mq.addEventListener('change', onChange); else if (mq.addListener) mq.addListener(onChange);
 })();
 </script>

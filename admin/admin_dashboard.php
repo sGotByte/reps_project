@@ -3,6 +3,10 @@ $page_title = 'แดชบอร์ด';
 $current_page = 'dashboard';
 require_once __DIR__ . '/../includes/admin_auth.php';
 require_once __DIR__ . '/../db_connect.php';
+require_once __DIR__ . '/../includes/site_config.php';
+require_once __DIR__ . '/../includes/visual_builder.php';
+$visualBuilderPreview = $_SERVER['REQUEST_METHOD'] === 'GET' && ($_GET['visual_builder_preview'] ?? '') === '1';
+$visualBuilderSettings = app_get_settings($conn);
 require_once __DIR__ . '/../includes/terms.php';
 
 if (session_status() === PHP_SESSION_NONE) {
@@ -1831,8 +1835,8 @@ require_once __DIR__ . '/admin_header.php';
       <div class="tray-card recent-card">
          <div class="recent-head">
             <div class="min-w-0">
-               <h2 class="recent-title">คำขอแจ้งซ่อมล่าสุด</h2>
-               <p class="recent-sub">รายการที่เข้ามาใหม่ที่สุด พร้อมสถานะและผู้รับผิดชอบ</p>
+               <h2 class="recent-title"<?= visual_builder_content_target_attrs($visualBuilderPreview, 'admin_dashboard', 'admin.recent_title') ?>><?= h(visual_builder_content_text($visualBuilderSettings, 'admin_dashboard', 'admin.recent_title', tr('คำขอแจ้งซ่อมล่าสุด', 'Recent repair requests'))) ?></h2>
+               <p class="recent-sub"<?= visual_builder_content_target_attrs($visualBuilderPreview, 'admin_dashboard', 'admin.recent_intro') ?>><?= h(visual_builder_content_text($visualBuilderSettings, 'admin_dashboard', 'admin.recent_intro', tr('รายการที่เข้ามาใหม่ที่สุด พร้อมสถานะและผู้รับผิดชอบ', 'The newest requests with their status and assigned staff'))) ?></p>
             </div>
             <a href="admin_manage_request.php" class="recent-link">
                <span>ดูทั้งหมด</span>

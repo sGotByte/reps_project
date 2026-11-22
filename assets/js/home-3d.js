@@ -87,11 +87,7 @@
          sctx.fillStyle = '#161822';
          sctx.fillRect(0, 0, 1024, 72);
          sctx.fillStyle = '#ffffff';
-<<<<<<< HEAD
          sctx.font = 'bold 24px Kanit, sans-serif';
-=======
-         sctx.font = 'bold 24px "JetBrains Mono", monospace';
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
          sctx.fillText('REPS HARDWARE DIAGNOSTIC v3.4', 32, 46);
 
          // Live status pill
@@ -101,11 +97,7 @@
          sctx.fill();
 
          sctx.fillStyle = '#94a3b8';
-<<<<<<< HEAD
          sctx.font = '20px Kanit, sans-serif';
-=======
-         sctx.font = '20px "JetBrains Mono", monospace';
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
          sctx.fillText('ONLINE', 864, 44);
 
          // Diagnostic metrics
@@ -119,11 +111,7 @@
          metrics.forEach((m, idx) => {
             const my = 120 + idx * 60;
             sctx.fillStyle = '#94a3b8';
-<<<<<<< HEAD
             sctx.font = '22px Kanit, sans-serif';
-=======
-            sctx.font = '22px "JetBrains Mono", monospace';
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
             sctx.fillText(m.label, 32, my);
 
             sctx.fillStyle = '#ffffff';
@@ -158,11 +146,7 @@
          sctx.strokeRect(32, 520, 960, 84);
 
          sctx.fillStyle = '#ffffff';
-<<<<<<< HEAD
          sctx.font = 'bold 24px Kanit, sans-serif';
-=======
-         sctx.font = 'bold 24px "JetBrains Mono", monospace';
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
          const blink = Math.floor(t * 2) % 2 === 0 ? '_' : ' ';
          sctx.fillText('> SYSTEM READY: ALL CIRCUITS NOMINAL ' + blink, 56, 572);
 

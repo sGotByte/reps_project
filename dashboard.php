@@ -12,6 +12,11 @@ require_once __DIR__ . '/includes/user_auth.php';
 require_once __DIR__ . '/includes/csrf.php';
 require_once __DIR__ . '/includes/queue_manager.php';
 require_once __DIR__ . '/includes/icons.php';
+require_once __DIR__ . '/includes/site_config.php';
+require_once __DIR__ . '/includes/visual_builder.php';
+
+$visualBuilderPreview = ($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET'
+    && ($_GET['visual_builder_preview'] ?? '') === '1';
 
 /* ================================================================
  * ZONE A · Config
@@ -559,7 +564,12 @@ function build_log_timeline(array $ticket, array $logs): array
  * ZONE F · Main request flow
  * ================================================================ */
 
-$user_id = (int)app_require_active_user($conn, 'login.php?next=dashboard');
+$user_id = (int)app_require_active_user($conn, 'login.php?next=dashboard', $visualBuilderPreview ? null : 'user');
+if ($visualBuilderPreview && current_role() !== 'admin') {
+    http_response_code(403);
+    exit('Visual Builder preview is restricted to administrators.');
+}
+$visualBuilderSettings = app_get_settings($conn);
 $csrfToken = app_csrf_token();
 
 $user = fetch_user_profile($conn, $user_id);
@@ -635,7 +645,7 @@ $profileMeta = trim((USER_TYPE_LABELS[$user['user_type']] ?? (string)$user['user
 $hasFilter = ($filter !== '' || $search !== '');
 ?>
 <!DOCTYPE html>
-<html lang="th">
+<html lang="<?= h(app_lang()) ?>">
 
 <head>
     <meta charset="UTF-8">
@@ -1639,35 +1649,21 @@ $hasFilter = ($filter !== '' || $search !== '');
         details summary::-webkit-details-marker { display: none; }
     </style>
    <link rel="stylesheet" href="assets/css/base.css?v=18">
+   <link rel="stylesheet" href="assets/css/requester-theme.css?v=2">
 </head>
 
-<body class="admin-shell min-h-screen flex flex-col antialiased">
+<body class="admin-shell min-h-screen flex flex-col antialiased rq-on">
 
       <!-- Topbar Header -->
-      <header class="admin-topbar sticky top-0 z-30 h-header border-b w-full bg-white">
-         <div class="max-w-6xl w-full mx-auto px-4 sm:px-7 flex items-center justify-between h-full">
-            <a href="dashboard.php" class="admin-brand flex items-center gap-3 no-underline">
-                  <img src="assets/images/logo/reps-logo.svg" alt="REPS" class="h-6 w-auto">
-            </a>
-
-            <div class="flex items-center gap-3">
-				 <a href="request_form.php" class="admin-btn rounded-full">
-                 	<i class="fa-solid fa-plus text-xs rounded-full" aria-hidden="true"></i>
-                 	<span><?php require_once __DIR__ . '/includes/i18n.php'; echo tr('แจ้งซ่อมใหม่', 'New request'); ?></span>
-               	</a>
-                  <?php require_once __DIR__ . '/includes/notifications.php'; echo notif_bell($conn, ''); ?>
-                  <?php require_once __DIR__ . '/includes/user_menu.php'; echo user_menu_render($conn, ''); ?>
-            </div>
-         </div>
-      </header>
+      <?php $rqActive = 'jobs'; $rqBottom = true; require __DIR__ . '/includes/requester_nav.php'; ?>
 
     <!-- Main Container -->
     <main class="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-7">
 
         <!-- Page Title & Breadcrumb -->
         <header class="admin-page-head">
-            <h1 class="admin-page-title"><?= tr('สวัสดีคุณ', 'Hello,') ?> <span><?= h($user['first_name']) ?></span></h1>
-            <p class="admin-page-sub"><?= tr('จัดการและติดตามสถานะใบแจ้งซ่อมอุปกรณ์คอมพิวเตอร์และไอทีของคุณ', 'Manage and track your computer and IT repair requests') ?></p>
+            <h1 class="admin-page-title"><span<?= visual_builder_content_target_attrs($visualBuilderPreview, 'user_dashboard', 'user.greeting') ?>><?= h(visual_builder_content_text($visualBuilderSettings, 'user_dashboard', 'user.greeting', tr('สวัสดีคุณ', 'Hello,'))) ?></span> <span><?= h($user['first_name']) ?></span></h1>
+            <p class="admin-page-sub"<?= visual_builder_content_target_attrs($visualBuilderPreview, 'user_dashboard', 'user.intro') ?>><?= h(visual_builder_content_text($visualBuilderSettings, 'user_dashboard', 'user.intro', tr('จัดการและติดตามสถานะใบแจ้งซ่อมอุปกรณ์คอมพิวเตอร์และไอทีของคุณ', 'Manage and track your computer and IT repair requests'))) ?></p>
         </header>
 
         <!-- Flash Notice -->
@@ -1768,8 +1764,8 @@ $hasFilter = ($filter !== '' || $search !== '');
             <div class="bg-white rounded-2xl border border-neutral-200 p-4 mb-4 shadow-sm">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-neutral-100">
                     <div>
-                        <h3 id="tickets-heading" class="admin-section-title">รายการใบแจ้งซ่อมของฉัน</h3>
-                        <p class="admin-section-sub">ติดตามสถานะความคืบหน้าและประวัติของแต่ละใบงาน</p>
+                        <h3 id="tickets-heading" class="admin-section-title"<?= visual_builder_content_target_attrs($visualBuilderPreview, 'user_dashboard', 'user.tickets_title') ?>><?= h(visual_builder_content_text($visualBuilderSettings, 'user_dashboard', 'user.tickets_title', tr('รายการใบแจ้งซ่อมของฉัน', 'My repair requests'))) ?></h3>
+                        <p class="admin-section-sub"<?= visual_builder_content_target_attrs($visualBuilderPreview, 'user_dashboard', 'user.tickets_intro') ?>><?= h(visual_builder_content_text($visualBuilderSettings, 'user_dashboard', 'user.tickets_intro', tr('ติดตามสถานะความคืบหน้าและประวัติของแต่ละใบงาน', 'Track progress and history for each request'))) ?></p>
                     </div>
                     <span class="font-mono text-xs text-neutral-500">ทั้งหมด <?= number_format($total_filtered) ?> รายการ</span>
                 </div>
