@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 name: Feature request 🚀
 description: I would like to have a new functionality added
 body:
@@ -5,4 +6,13 @@ body:
     attributes:
       label: Please describe the new functionality as best as you can.
     validations:
+=======
+name: Feature request 🚀
+description: I would like to have a new functionality added
+body:
+  - type: textarea
+    attributes:
+      label: Please describe the new functionality as best as you can.
+    validations:
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
       required: true

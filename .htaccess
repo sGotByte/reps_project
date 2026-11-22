@@ -1,0 +1,21 @@
+Options -Indexes
+DirectoryIndex index.php index.html
+
+# Block hidden files such as .env, .htaccess, and .git
+<FilesMatch "^\.">
+   Require all denied
+</FilesMatch>
+
+# Block documentation, database dumps, and build configuration
+<FilesMatch "\.(md|sql|log|ini|lock|json|ya?ml)$">
+   Require all denied
+</FilesMatch>
+<FilesMatch "(^|/)tailwind\.config\.js$">
+   Require all denied
+</FilesMatch>
+
+# Block server-side and build-only directories
+<IfModule mod_rewrite.c>
+   RewriteEngine On
+   RewriteRule ^(?:includes|migrations|database|src|node_modules|uploads)/ - [F,L,NC]
+</IfModule>

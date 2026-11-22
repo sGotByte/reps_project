@@ -27,9 +27,13 @@ if (!$isValidDate($to)) $to = date('Y-m-d');
 
 $labels = [
    'pending'     => 'รอรับเรื่อง',
+<<<<<<< HEAD
    'pending' => 'รอรับเรื่อง', 'accepted' => 'รับแล้ว รอบันทึกเช็คลิสต์', 'awaiting_intake_sign' => 'รอผู้แจ้งเซ็นรับทราบ',
    'in_progress' => 'กำลังซ่อม', 'inspected_ready' => 'ตรวจซ้ำแล้ว รอส่งมอบ', 'awaiting_requester_sign' => 'รอผู้แจ้งเซ็นรับคืน',
    'awaiting_admin_sign' => 'รอครูรับรอง', 'disputed' => 'ผู้แจ้งไม่ยอมรับ',
+=======
+   'in_progress' => 'กำลังดำเนินการ',
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
    'completed'   => 'เสร็จสิ้น',
    'cancelled'   => 'ยกเลิก'
 ];
@@ -76,6 +80,7 @@ try {
    <meta charset="utf-8">
    <style>
       * { box-sizing: border-box; }
+<<<<<<< HEAD
       body { margin: 0; color: #171717; font-family: kanit, sans-serif; font-size: 10pt; line-height: 1.45; }
       h1, h2, p { margin: 0; }
       .header { border-bottom: 2px solid #171717; padding-bottom: 9px; margin-bottom: 14px; }
@@ -85,6 +90,17 @@ try {
       .summary { width: 100%; border-collapse: separate; border-spacing: 6px; margin: 0 -6px 14px; }
       .summary td { width: 25%; padding: 9px 10px; border: 1px solid #e5e2dc; background: #fafaf8; vertical-align: top; }
       .summary-label { color: #5F5C57; font-size: 8pt; }
+=======
+      body { margin: 0; color: #171717; font-family: "Noto Sans Thai", "Droid Sans Thai", Arial, sans-serif; font-size: 10pt; line-height: 1.45; }
+      h1, h2, p { margin: 0; }
+      .header { border-bottom: 2px solid #171717; padding-bottom: 9px; margin-bottom: 14px; }
+      .eyebrow { color: #77736d; font-size: 8pt; letter-spacing: 1.2px; text-transform: uppercase; }
+      h1 { margin-top: 3px; font-size: 20pt; font-weight: 700; }
+      .range { margin-top: 4px; color: #77736d; font-size: 9pt; }
+      .summary { width: 100%; border-collapse: separate; border-spacing: 6px; margin: 0 -6px 14px; }
+      .summary td { width: 25%; padding: 9px 10px; border: 1px solid #e5e2dc; background: #fafaf8; vertical-align: top; }
+      .summary-label { color: #77736d; font-size: 8pt; }
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
       .summary-value { margin-top: 3px; font-size: 17pt; font-weight: 700; }
       .section { margin-top: 13px; }
       .section-title { padding-bottom: 5px; border-bottom: 1px solid #d9d6d0; font-size: 11pt; font-weight: 700; }
@@ -94,15 +110,26 @@ try {
       .data th { padding: 6px 7px; background: #f3f2ef; color: #55534f; font-size: 8pt; font-weight: 700; text-align: left; }
       .data td { padding: 6px 7px; border-bottom: 1px solid #eceae6; vertical-align: top; }
       .data .number { text-align: right; white-space: nowrap; }
+<<<<<<< HEAD
       .muted { color: #5F5C57; }
       .status { display: inline-block; padding: 2px 6px; border: 1px solid #d9d6d0; background: #fafaf8; font-size: 8pt; }
       .small { font-size: 8.5pt; }
       .empty { padding: 12px 7px !important; color: #5F5C57; text-align: center; }
+=======
+      .muted { color: #77736d; }
+      .status { display: inline-block; padding: 2px 6px; border: 1px solid #d9d6d0; background: #fafaf8; font-size: 8pt; }
+      .small { font-size: 8.5pt; }
+      .empty { padding: 12px 7px !important; color: #77736d; text-align: center; }
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
       .tickets { page-break-inside: auto; }
       .tickets table { page-break-inside: auto; }
       .tickets thead { display: table-header-group; }
       .tickets tr { page-break-inside: avoid; }
+<<<<<<< HEAD
       .footer-note { margin-top: 12px; color: #5F5C57; font-size: 8pt; }
+=======
+      .footer-note { margin-top: 12px; color: #77736d; font-size: 8pt; }
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
    </style>
 </head>
 <body>
@@ -178,7 +205,11 @@ try {
                <td><?= report_pdf_h(trim($ticket['first_name'] . ' ' . $ticket['last_name'])) ?><br><span class="muted"><?= report_pdf_h($ticket['id_number'] ?? '—') ?></span></td>
                <td><?= report_pdf_h($ticket['category_name']) ?></td>
                <td><span class="status"><?= report_pdf_h($labels[$ticket['status']] ?? $ticket['status']) ?></span></td>
+<<<<<<< HEAD
                <td><?= report_pdf_h($ticket['urgency'] === 'urgent' ? 'ด่วน' : 'ปกติ') ?></td>
+=======
+               <td><?= report_pdf_h($ticket['urgency'] === 'urgent' ? 'ด่วน' : ($ticket['urgency'] === 'low' ? 'ไม่เร่งด่วน' : 'ปกติ')) ?></td>
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
             </tr>
          <?php endforeach; ?>
          </tbody>
@@ -224,6 +255,7 @@ try {
       'margin_right' => 12,
       'margin_top' => 14,
       'margin_bottom' => 14,
+<<<<<<< HEAD
       'fontDir' => array_merge((new \Mpdf\Config\ConfigVariables())->getDefaults()['fontDir'], [__DIR__ . '/../assets/fonts/kanit']),
       'fontdata' => (new \Mpdf\Config\FontVariables())->getDefaults()['fontdata'] + [
          'kanit' => ['R' => 'Kanit-Regular.ttf', 'B' => 'Kanit-SemiBold.ttf', 'I' => 'Kanit-Regular.ttf', 'BI' => 'Kanit-SemiBold.ttf'],
@@ -231,6 +263,11 @@ try {
       'default_font' => 'kanit',
       'autoScriptToLang' => true,
       'autoLangToFont' => false,
+=======
+      'default_font' => 'garuda',
+      'autoScriptToLang' => true,
+      'autoLangToFont' => true,
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
       'tempDir' => $mpdfTempDir
    ]);
    $mpdf->SetTitle('รายงานสรุปคำขอแจ้งซ่อม');

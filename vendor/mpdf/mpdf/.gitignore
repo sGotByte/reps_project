@@ -1,3 +1,9 @@
+<<<<<<< HEAD
 vendor/*
 tests/Mpdf/tmp/*
 composer.lock
+=======
+vendor/*
+tests/Mpdf/tmp/*
+composer.lock
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff

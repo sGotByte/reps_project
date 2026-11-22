@@ -4,6 +4,7 @@ declare(strict_types=1);
 /** REPS · ประวัติใบแจ้งซ่อมทั้งหมดของผู้แจ้ง (Stack & Detail Modal) */
 require_once __DIR__ . '/db_connect.php';
 require_once __DIR__ . '/includes/user_auth.php';
+<<<<<<< HEAD
 require_once __DIR__ . '/includes/thanks.php';
 require_once __DIR__ . '/includes/icons.php';
 
@@ -34,6 +35,18 @@ $ticketStatusLabels = $statusLabels + [
     'disputed' => 'คุณไม่ยอมรับ รอครูพิจารณา',
 ];
 $ticketStatusLabels['in_progress'] = 'กำลังซ่อม';
+=======
+
+const HISTORY_PER_PAGE = 10;
+const HISTORY_SEARCH_MAX = 100;
+
+$statusLabels = [
+    'pending' => 'รอรับเรื่อง',
+    'in_progress' => 'กำลังดำเนินการ',
+    'completed' => 'เสร็จสิ้น',
+    'cancelled' => 'ยกเลิก',
+];
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 
 function history_h(mixed $value): string
 {
@@ -57,9 +70,12 @@ function history_get(string $key): string
 
 function history_page_url(array $params): string
 {
+<<<<<<< HEAD
     if (HISTORY_PER_PAGE !== 10 && !array_key_exists('per', $params)) {
         $params['per'] = HISTORY_PER_PAGE;
     }
+=======
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
     $params = array_filter($params, static fn($value): bool => $value !== '' && $value !== null && $value !== 1);
     return 'history.php' . ($params === [] ? '' : '?' . http_build_query($params));
 }
@@ -80,6 +96,7 @@ function history_tracker(array $ticket, array $logs): array
         ];
     }
 
+<<<<<<< HEAD
     $phase = match ($status) {
         'accepted', 'awaiting_intake_sign', 'in_progress', 'inspected_ready' => 'in_progress',
         'awaiting_requester_sign', 'awaiting_admin_sign', 'disputed' => 'awaiting_signoff',
@@ -97,6 +114,13 @@ function history_tracker(array $ticket, array $logs): array
         ['label' => 'กำลังดำเนินการ', 'when' => $ticket['accepted_at'] ?? null, 'on' => $index >= 1, 'now' => $index === 1],
         ['label' => 'รอเซ็นรับรอง', 'when' => $submittedAt, 'on' => $index >= 2, 'now' => $index === 2],
         ['label' => 'เสร็จสมบูรณ์', 'when' => $ticket['completed_at'] ?? null, 'on' => $index >= 3, 'now' => $index === 3],
+=======
+    $index = $status === 'completed' ? 2 : ($status === 'in_progress' ? 1 : 0);
+    return [
+        ['label' => 'รอรับเรื่อง', 'when' => $ticket['created_at'] ?? null, 'on' => true, 'now' => $index === 0],
+        ['label' => 'กำลังดำเนินการ', 'when' => $ticket['accepted_at'] ?? null, 'on' => $index >= 1, 'now' => $index === 1],
+        ['label' => 'เสร็จสิ้น', 'when' => $ticket['completed_at'] ?? null, 'on' => $index >= 2, 'now' => $index === 2],
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
     ];
 }
 
@@ -132,10 +156,16 @@ $where = ['t.requester_id = ?'];
 $types = 'i';
 $params = [$userId];
 if ($statusFilter !== '') {
+<<<<<<< HEAD
     $filterStatuses = $statusPhases[$statusFilter] ?? [$statusFilter];
     $where[] = 't.status IN (' . implode(',', array_fill(0, count($filterStatuses), '?')) . ')';
     $types .= str_repeat('s', count($filterStatuses));
     array_push($params, ...$filterStatuses);
+=======
+    $where[] = 't.status = ?';
+    $types .= 's';
+    $params[] = $statusFilter;
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 }
 if ($search !== '') {
     $where[] = '(t.ticket_no LIKE ? OR t.symptom LIKE ? OR t.location_note LIKE ? OR c.name LIKE ?)';
@@ -160,7 +190,11 @@ $page = min($page, $maxPages);
 $offset = ($page - 1) * HISTORY_PER_PAGE;
 $ticketSql = "SELECT t.id AS ticket_id, t.ticket_no, t.category_id, t.symptom AS symptoms,
                      t.urgency, t.status, t.created_at, t.accepted_at, t.completed_at,
+<<<<<<< HEAD
                      t.resolution_summary, t.cancel_reason, t.location_note AS location_name, t.completion_image,
+=======
+                     t.resolution_summary, t.cancel_reason, t.location_note AS location_name,
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                      c.name AS category_name,
                      CONCAT(tech.first_name, ' ', tech.last_name) AS tech_name
               FROM tickets t
@@ -181,12 +215,15 @@ $ticketParams[] = $offset;
 $ticketStmt->bind_param($ticketTypes, ...$ticketParams);
 $ticketStmt->execute();
 $tickets = $ticketStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+<<<<<<< HEAD
 // ใบงานที่ยังขอบคุณทีมช่างได้ (ระบบขอบคุณเปิด · เซ็นรับคืนแล้ว · ยังไม่เกินกำหนดวัน)
 $thanksIds = [];
 if (thanks_enabled($conn)) {
     $thanksDays = thanks_settings($conn)['days'];
     $thanksIds = array_flip(array_map('intval', array_column(db_all($conn, "SELECT t.id FROM tickets t JOIN ticket_signoffs s ON s.ticket_id = t.id AND s.signer_role = 'requester' AND s.stage = 'return' WHERE t.requester_id = ? AND t.status IN ('awaiting_admin_sign', 'completed') GROUP BY t.id HAVING MAX(s.signed_at) >= NOW() - INTERVAL ? DAY", 'ii', [$userId, $thanksDays]), 'id')));
 }
+=======
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 $ticketStmt->close();
 
 $logsByTicket = [];
@@ -225,17 +262,30 @@ $hasFilter = $statusFilter !== '' || $search !== '';
     <link rel="icon" type="image/svg+xml" href="assets/images/logo/reps-icon.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<<<<<<< HEAD
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/vendor/fontawesome/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Kanit', 'sans-serif'], kanit: ['Kanit', 'sans-serif'] } } } };</script>
+=======
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/vendor/fontawesome/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { theme: { extend: { fontFamily: { kanit: ['Kanit', 'sans-serif'] } } } };</script>
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
     <style>
         .tnum { font-variant-numeric: tabular-nums; }
         .admin-shell { background: #FAFAF8; color: #161616; font-family: 'Kanit', sans-serif; }
         .admin-topbar { background: #FFFFFF !important; border-color: #ECEAE6 !important; box-shadow: 0 1px 2px rgba(22, 22, 22, .035); }
+<<<<<<< HEAD
         .admin-brand-label { font-family: 'Kanit', sans-serif; font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; }
         .admin-brand-sub { display: block; margin-top: 2px; color: #6B6862; font-family: 'Kanit', sans-serif; font-size: 11px; letter-spacing: .12em; }
         .admin-user-avatar { background: #F7F6F4; border: 1px solid #ECEAE6; color: #55534F; font-family: 'Kanit', sans-serif; font-size: 13px; font-weight: 600; }
+=======
+        .admin-brand-label { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; }
+        .admin-brand-sub { display: block; margin-top: 2px; color: #8E8B85; font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: .12em; }
+        .admin-user-avatar { background: #F7F6F4; border: 1px solid #ECEAE6; color: #55534F; font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; }
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
         .admin-btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 38px; padding: 0 14px; border: 1px solid #161616; border-radius: 999px; background: #161616; color: #FFFFFF; font-size: 13px; font-weight: 500; text-decoration: none; transition: background-color .15s ease; cursor: pointer; }
         .admin-btn:hover { background: #2A2927; }
         .admin-btn-secondary { background: #FFFFFF; border-color: #D9D6D0; color: #55534F; }
@@ -247,11 +297,17 @@ $hasFilter = $statusFilter !== '' || $search !== '';
         .admin-chip { display: inline-flex; align-items: center; gap: 6px; padding: 3px 9px; border: 1px solid #ECEAE6; border-radius: 999px; background: #F7F6F4; color: #55534F; font-size: 11.5px; font-weight: 500; white-space: nowrap; }
         .admin-chip::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--c, #B9B5AE); flex: none; }
         .st-pending { --c: #D97706; }
+<<<<<<< HEAD
         .st-in_progress, .st-accepted, .st-awaiting_intake_sign, .st-inspected_ready { --c: #2563EB; }
         .st-awaiting_signoff, .st-awaiting_requester_sign, .st-awaiting_admin_sign { --c: #0E7490; }
         .st-disputed { --c: #B45309; }
         .st-completed { --c: #12A150; }
         .st-cancelled { --c: #6B6862; }
+=======
+        .st-in_progress { --c: #2563EB; }
+        .st-completed { --c: #12A150; }
+        .st-cancelled { --c: #8E8B85; }
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 
         /* Stacked History Cards Effect */
         .history-stack {
@@ -284,7 +340,10 @@ $hasFilter = $statusFilter !== '' || $search !== '';
             backdrop-filter: blur(4px);
         }
     </style>
+<<<<<<< HEAD
    <link rel="stylesheet" href="assets/css/base.css?v=18">
+=======
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 </head>
 <body class="admin-shell min-h-screen flex flex-col antialiased">
     <!-- Topbar Header -->
@@ -296,16 +355,44 @@ $hasFilter = $statusFilter !== '' || $search !== '';
             <div class="flex items-center gap-3">
                 <a href="request_form.php" class="admin-btn">
                     <i class="fa-solid fa-plus text-xs" aria-hidden="true"></i>
+<<<<<<< HEAD
                     <span><?php require_once __DIR__ . '/includes/i18n.php'; echo tr('แจ้งซ่อมใหม่', 'New request'); ?></span>
                 </a>
                 <?php require_once __DIR__ . '/includes/notifications.php'; echo notif_bell($conn, ''); ?>
                 <?php require_once __DIR__ . '/includes/user_menu.php'; echo user_menu_render($conn, ''); ?>
+=======
+                    <span>แจ้งซ่อมใหม่</span>
+                </a>
+                <details class="relative" id="userMenu">
+                    <summary class="flex items-center gap-2.5 cursor-pointer select-none p-1 pr-2.5 rounded-full border border-neutral-200 hover:border-neutral-300 transition">
+                        <div class="admin-user-avatar w-8 h-8 rounded-full flex items-center justify-center text-xs flex-none">
+                            <?= history_h($initial) ?>
+                        </div>
+                        <span class="max-w-[120px] truncate text-xs text-neutral-800 hidden sm:inline font-medium"><?= history_h($user['first_name']) ?></span>
+                        <i class="fa-solid fa-chevron-down text-[10px] text-neutral-400" aria-hidden="true"></i>
+                    </summary>
+                    <div class="absolute right-0 mt-2 w-56 rounded-xl border border-neutral-200 bg-white p-1.5 shadow-lg z-50">
+                        <div class="border-b border-neutral-100 px-3 py-2.5">
+                            <p class="truncate text-xs font-semibold text-neutral-900"><?= history_h($fullName) ?></p>
+                            <p class="truncate text-[10px] text-neutral-400 font-mono mt-0.5"><?= history_h($profileMeta) ?></p>
+                        </div>
+                        <div class="py-1">
+                           <a href="dashboard.php" class="flex items-center justify-between rounded-lg px-3 py-2 text-xs text-neutral-700 hover:bg-neutral-50 transition no-underline">ใบงานของฉัน <i class="fa-solid fa-clipboard-list text-[10px] text-neutral-400" aria-hidden="true"></i></a>
+                           <a href="profile.php" class="flex items-center justify-between rounded-lg px-3 py-2 text-xs text-neutral-700 hover:bg-neutral-50 transition no-underline">ตั้งค่าโปรไฟล์ <i class="fa-solid fa-user-gear text-[10px] text-neutral-400" aria-hidden="true"></i></a>
+                           <a href="request_form.php" class="flex items-center justify-between rounded-lg px-3 py-2 text-xs text-neutral-700 hover:bg-neutral-50 transition no-underline">แจ้งซ่อมใหม่ <i class="fa-solid fa-plus text-[10px] text-neutral-400" aria-hidden="true"></i></a>
+                           <div class="border-t border-neutral-100 my-1"></div>
+                           <a href="logout.php" class="flex items-center justify-between rounded-lg px-3 py-2 text-xs text-rose-600 hover:bg-rose-50 transition no-underline">ออกจากระบบ <i class="fa-solid fa-arrow-right-from-bracket text-[10px]" aria-hidden="true"></i></a>
+                        </div>
+                    </div>
+                </details>
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
             </div>
         </div>
     </header>
 
     <main class="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-7">
         <header class="mb-6">
+<<<<<<< HEAD
             <nav class="flex items-center gap-2 mb-2 text-[10.5px] font-kanit uppercase tracking-wider text-[#6B6862]" aria-label="Breadcrumb">
                 <a href="dashboard.php" class="hover:text-[#161616] no-underline"><?= tr('หน้าหลัก', 'Home') ?></a>
                 <i class="fa-solid fa-chevron-right text-[8px] opacity-50" aria-hidden="true"></i>
@@ -315,6 +402,17 @@ $hasFilter = $statusFilter !== '' || $search !== '';
                 <div>
                     <h1 class="text-2xl sm:text-3xl font-normal tracking-tight text-[#161616]"><?= tr('ประวัติใบแจ้งซ่อมทั้งหมด', 'All repair requests') ?></h1>
                     <p class="mt-1 text-xs text-[#6B6862]"><?= tr('คลิกที่รายการการ์ดเพื่อดูรายละเอียดข้อมูลเชิงลึกและประวัติสถานะ', 'Click a card to see full details and status history') ?></p>
+=======
+            <nav class="flex items-center gap-2 mb-2 text-[10.5px] font-kanit uppercase tracking-wider text-[#8E8B85]" aria-label="Breadcrumb">
+                <a href="dashboard.php" class="hover:text-[#161616] no-underline">หน้าหลัก</a>
+                <i class="fa-solid fa-chevron-right text-[8px] opacity-50" aria-hidden="true"></i>
+                <span class="text-[#161616]">ประวัติการแจ้งซ่อม</span>
+            </nav>
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                    <h1 class="text-2xl sm:text-3xl font-normal tracking-tight text-[#161616]">ประวัติใบแจ้งซ่อมทั้งหมด</h1>
+                    <p class="mt-1 text-xs text-[#8E8B85]">คลิกที่รายการการ์ดเพื่อดูรายละเอียดข้อมูลเชิงลึกและประวัติสถานะ</p>
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                 </div>
             </div>
         </header>
@@ -323,8 +421,13 @@ $hasFilter = $statusFilter !== '' || $search !== '';
         <div class="bg-white rounded-2xl border border-[#EAE8E4] p-4 mb-6 shadow-sm">
             <form method="get" class="flex flex-col sm:flex-row items-center justify-between gap-3">
                 <div class="relative w-full sm:w-80">
+<<<<<<< HEAD
                     <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-xs text-neutral-500" aria-hidden="true"></i>
                     <input type="search" name="q" aria-label="ค้นหาใบงานในประวัติ" value="<?= history_h($search) ?>" maxlength="<?= HISTORY_SEARCH_MAX ?>" placeholder="ค้นหาเลขใบงาน อาการ หรือสถานที่..." class="w-full border border-[#D9D6D0] rounded-xl bg-white py-2 pl-9 pr-3 text-xs text-neutral-900 placeholder:text-neutral-500 focus:border-neutral-950 focus:outline-none">
+=======
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-xs text-neutral-400" aria-hidden="true"></i>
+                    <input type="search" name="q" value="<?= history_h($search) ?>" maxlength="<?= HISTORY_SEARCH_MAX ?>" placeholder="ค้นหาเลขใบงาน อาการ หรือสถานที่..." class="w-full border border-[#D9D6D0] rounded-xl bg-white py-2 pl-9 pr-3 text-xs text-neutral-900 placeholder:text-neutral-400 focus:border-neutral-950 focus:outline-none">
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                 </div>
                 <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
                     <label class="text-xs text-neutral-600 flex items-center gap-2">สถานะ:
@@ -341,7 +444,11 @@ $hasFilter = $statusFilter !== '' || $search !== '';
                     <?php endif; ?>
                 </div>
             </form>
+<<<<<<< HEAD
             <div class="mt-3 pt-3 border-t border-[#ECEAE6] flex items-center justify-between text-xs text-[#6B6862] font-mono">
+=======
+            <div class="mt-3 pt-3 border-t border-[#ECEAE6] flex items-center justify-between text-xs text-[#8E8B85] font-mono">
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                 <span>แสดง <?= number_format(count($tickets)) ?> จากทั้งหมด <?= number_format($total) ?> รายการ</span>
                 <span>เรียงจากรายการล่าสุด</span>
             </div>
@@ -370,7 +477,11 @@ $hasFilter = $statusFilter !== '' || $search !== '';
                              data-open-modal 
                              data-ticket-no="<?= history_h($ticket['ticket_no']) ?>"
                              data-category="<?= history_h($ticket['category_name'] ?? 'ไม่ระบุหมวดหมู่') ?>"
+<<<<<<< HEAD
                              data-status-label="<?= history_h($ticketStatusLabels[$ticketStatus] ?? $ticketStatus) ?>"
+=======
+                             data-status-label="<?= history_h($statusLabels[$ticketStatus] ?? $ticketStatus) ?>"
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                              data-status-class="st-<?= history_h($ticketStatus) ?>"
                              data-created="<?= history_h(history_fmt($ticket['created_at'])) ?>"
                              data-urgency="<?= history_h($ticket['urgency']) ?>"
@@ -379,10 +490,13 @@ $hasFilter = $statusFilter !== '' || $search !== '';
                              data-symptoms="<?= history_h($ticket['symptoms']) ?>"
                              data-resolution="<?= history_h($ticket['resolution_summary'] ?? '') ?>"
                              data-cancel-reason="<?= history_h($ticket['cancel_reason'] ?? '') ?>"
+<<<<<<< HEAD
                              data-ticket-id="<?= (int)$ticket['ticket_id'] ?>"
                              data-has-completion="<?= !empty($ticket['completion_image']) ? '1' : '0' ?>"
                              data-is-completed="<?= $ticketStatus === 'completed' ? '1' : '0' ?>"
                              data-can-thank="<?= isset($thanksIds[(int)$ticket['ticket_id']]) ? '1' : '0' ?>"
+=======
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                              data-logs='<?= json_encode($logs, JSON_HEX_APOS | JSON_HEX_QUOT) ?>'
                              data-tracker='<?= json_encode($tracker, JSON_HEX_APOS | JSON_HEX_QUOT) ?>'>
                         
@@ -392,13 +506,21 @@ $hasFilter = $statusFilter !== '' || $search !== '';
                                     #<?= history_h($ticket['ticket_no']) ?>
                                 </span>
                                 <span class="text-neutral-300">·</span>
+<<<<<<< HEAD
                                 <span class="font-mono text-[11px] text-neutral-500"><?= history_h(history_fmt($ticket['created_at'])) ?></span>
+=======
+                                <span class="font-mono text-[11px] text-neutral-400"><?= history_h(history_fmt($ticket['created_at'])) ?></span>
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                                 <?php if ($ticket['urgency'] === 'urgent'): ?>
                                     <span class="admin-chip urgency-urgent !text-[10px] !py-0.5 !px-2 bg-neutral-900 text-white border-neutral-900">ด่วน</span>
                                 <?php endif; ?>
                             </div>
                             <span class="admin-chip st-<?= history_h($ticketStatus) ?>">
+<<<<<<< HEAD
                                 <?= history_h($ticketStatusLabels[$ticketStatus] ?? $ticketStatus) ?>
+=======
+                                <?= history_h($statusLabels[$ticketStatus] ?? $ticketStatus) ?>
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                             </span>
                         </div>
 
@@ -411,18 +533,42 @@ $hasFilter = $statusFilter !== '' || $search !== '';
                         </p>
 
                         <div class="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-[#ECEAE6] text-xs text-neutral-500">
+<<<<<<< HEAD
                             <span class="truncate max-w-[280px] sm:max-w-md"><i class="fa-solid fa-location-dot text-neutral-500 mr-1.5" aria-hidden="true"></i><?= history_h($ticket['location_name']) ?></span>
                             <span class="text-neutral-500 text-[11px]"><i class="fa-solid fa-circle-info mr-1"></i> คลิกเพื่อดูรายละเอียดทั้งหมด</span>
+=======
+                            <span class="truncate max-w-[280px] sm:max-w-md"><i class="fa-solid fa-location-dot text-neutral-400 mr-1.5" aria-hidden="true"></i><?= history_h($ticket['location_name']) ?></span>
+                            <span class="text-neutral-400 text-[11px]"><i class="fa-solid fa-circle-info mr-1"></i> คลิกเพื่อดูรายละเอียดทั้งหมด</span>
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                         </div>
                     </article>
                 <?php endforeach; ?>
             </section>
         <?php endif; ?>
 
+<<<<<<< HEAD
         <?php if ($total > min(HISTORY_PER_PAGE_OPTIONS)): ?>
         <div class="mt-6 overflow-hidden rounded-2xl border border-[#EAE8E4] bg-white">
             <?php pager_render('history.php', $total, $page, HISTORY_PER_PAGE, HISTORY_PER_PAGE_OPTIONS, static fn(int $p): string => history_page_url(['status' => $statusFilter, 'q' => $search, 'page' => $p]), ['status' => $statusFilter, 'q' => $search], 'เปลี่ยนหน้าประวัติ'); ?>
         </div>
+=======
+        <?php if ($maxPages > 1): ?>
+            <nav class="flex items-center justify-between p-4 bg-white rounded-2xl border border-[#EAE8E4] mt-6 font-mono text-xs text-neutral-500" aria-label="เปลี่ยนหน้าประวัติ">
+                <span>หน้า <?= $page ?> จาก <?= $maxPages ?></span>
+                <div class="flex items-center gap-3">
+                    <?php if ($page > 1): ?>
+                        <a class="text-neutral-900 hover:underline" href="<?= history_h(history_page_url(['status' => $statusFilter, 'q' => $search, 'page' => $page - 1])) ?>">← ก่อนหน้า</a>
+                    <?php else: ?>
+                        <span class="text-neutral-300">← ก่อนหน้า</span>
+                    <?php endif; ?>
+                    <?php if ($page < $maxPages): ?>
+                        <a class="text-neutral-900 hover:underline" href="<?= history_h(history_page_url(['status' => $statusFilter, 'q' => $search, 'page' => $page + 1])) ?>">ถัดไป →</a>
+                    <?php else: ?>
+                        <span class="text-neutral-300">ถัดไป →</span>
+                    <?php endif; ?>
+                </div>
+            </nav>
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
         <?php endif; ?>
     </main>
 
@@ -430,21 +576,36 @@ $hasFilter = $statusFilter !== '' || $search !== '';
     <dialog id="detailModal" class="w-full max-w-2xl rounded-2xl bg-white p-0 shadow-2xl backdrop:bg-black/40">
         <div class="flex items-center justify-between border-b border-[#ECEAE6] px-6 py-4 bg-[#FAFAF8]">
             <div>
+<<<<<<< HEAD
                 <span class="text-[10px] font-mono font-semibold uppercase text-neutral-500 tracking-wider">Ticket Details</span>
                 <h2 class="text-base font-semibold text-neutral-900">รายละเอียดใบแจ้งซ่อม <span id="modalTicketNo" class="font-mono font-normal"></span></h2>
             </div>
             <button type="button" class="text-neutral-500 hover:text-neutral-900 border-0 bg-transparent cursor-pointer p-1" data-close-modal aria-label="ปิด"><i class="fa-solid fa-xmark text-lg" aria-hidden="true"></i></button>
+=======
+                <span class="text-[10px] font-mono font-semibold uppercase text-neutral-400 tracking-wider">Ticket Details</span>
+                <h2 class="text-base font-semibold text-neutral-900">รายละเอียดใบแจ้งซ่อม <span id="modalTicketNo" class="font-mono font-normal"></span></h2>
+            </div>
+            <button type="button" class="text-neutral-400 hover:text-neutral-900 border-0 bg-transparent cursor-pointer p-1" data-close-modal aria-label="ปิด"><i class="fa-solid fa-xmark text-lg" aria-hidden="true"></i></button>
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
         </div>
         
         <div class="p-6 space-y-6 max-h-[70vh] overflow-y-auto text-xs">
             <!-- Header Info -->
             <div class="flex flex-wrap items-center justify-between gap-3 bg-[#FAFAF8] p-4 rounded-xl border border-[#ECEAE6]">
                 <div>
+<<<<<<< HEAD
                     <span class="text-neutral-500 block mb-1">หมวดหมู่ปัญหา</span>
                     <strong id="modalCategory" class="text-sm font-semibold text-neutral-900">—</strong>
                 </div>
                 <div>
                     <span class="text-neutral-500 block mb-1">สถานะปัจจุบัน</span>
+=======
+                    <span class="text-neutral-400 block mb-1">หมวดหมู่ปัญหา</span>
+                    <strong id="modalCategory" class="text-sm font-semibold text-neutral-900">—</strong>
+                </div>
+                <div>
+                    <span class="text-neutral-400 block mb-1">สถานะปัจจุบัน</span>
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                     <span id="modalStatusBadge" class="admin-chip">—</span>
                 </div>
             </div>
@@ -452,6 +613,7 @@ $hasFilter = $statusFilter !== '' || $search !== '';
             <!-- Metadata Grid -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div class="p-3 bg-white rounded-xl border border-[#ECEAE6]">
+<<<<<<< HEAD
                     <span class="text-neutral-500 block mb-1">วันที่แจ้งซ่อม</span>
                     <strong id="modalCreated" class="font-mono text-neutral-800">—</strong>
                 </div>
@@ -465,13 +627,32 @@ $hasFilter = $statusFilter !== '' || $search !== '';
                 </div>
                 <div class="p-3 bg-white rounded-xl border border-[#ECEAE6]">
                     <span class="text-neutral-500 block mb-1">ผู้รับผิดชอบ (ช่าง/Lab Boy)</span>
+=======
+                    <span class="text-neutral-400 block mb-1">วันที่แจ้งซ่อม</span>
+                    <strong id="modalCreated" class="font-mono text-neutral-800">—</strong>
+                </div>
+                <div class="p-3 bg-white rounded-xl border border-[#ECEAE6]">
+                    <span class="text-neutral-400 block mb-1">ระดับความเร่งด่วน</span>
+                    <strong id="modalUrgency" class="text-neutral-800">—</strong>
+                </div>
+                <div class="p-3 bg-white rounded-xl border border-[#ECEAE6]">
+                    <span class="text-neutral-400 block mb-1">สถานที่ / อุปกรณ์</span>
+                    <strong id="modalLocation" class="text-neutral-800">—</strong>
+                </div>
+                <div class="p-3 bg-white rounded-xl border border-[#ECEAE6]">
+                    <span class="text-neutral-400 block mb-1">ผู้รับผิดชอบ (ช่าง/Lab Boy)</span>
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                     <strong id="modalTech" class="text-neutral-800">—</strong>
                 </div>
             </div>
 
             <!-- Symptoms -->
             <div>
+<<<<<<< HEAD
                 <span class="font-semibold text-neutral-900 block mb-1.5"><i class="fa-solid fa-message text-neutral-500 mr-1.5"></i> อาการที่พบและรายละเอียด</span>
+=======
+                <span class="font-semibold text-neutral-900 block mb-1.5"><i class="fa-solid fa-message text-neutral-400 mr-1.5"></i> อาการที่พบและรายละเอียด</span>
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                 <div id="modalSymptoms" class="p-4 bg-neutral-50 rounded-xl border border-[#ECEAE6] text-neutral-700 whitespace-pre-line leading-relaxed">—</div>
             </div>
 
@@ -480,6 +661,7 @@ $hasFilter = $statusFilter !== '' || $search !== '';
                 <span id="modalResultTitle" class="font-semibold text-neutral-900 block mb-1.5">ผลการดำเนินงาน</span>
                 <div id="modalResultText" class="p-4 rounded-xl border text-neutral-800 whitespace-pre-line leading-relaxed">—</div>
             </div>
+<<<<<<< HEAD
             <div id="modalProofLinks" class="hidden flex flex-wrap gap-3 text-xs">
                 <a id="modalCompletionLink" class="hidden underline text-neutral-700" target="_blank" rel="noopener"><i class="fa-regular fa-image mr-1"></i>รูปหลังซ่อม</a>
                 <a id="modalCertificateLink" class="hidden underline text-neutral-700" target="_blank" rel="noopener"><i class="fa-solid fa-file-signature mr-1"></i>ใบรับรองงาน</a>
@@ -489,6 +671,12 @@ $hasFilter = $statusFilter !== '' || $search !== '';
             <!-- Tracker Stepper -->
             <div>
                 <span class="font-semibold text-neutral-900 block mb-3"><i class="fa-solid fa-chart-line text-neutral-500 mr-1.5"></i> ความคืบหน้าภาพรวม</span>
+=======
+
+            <!-- Tracker Stepper -->
+            <div>
+                <span class="font-semibold text-neutral-900 block mb-3"><i class="fa-solid fa-chart-line text-neutral-400 mr-1.5"></i> ความคืบหน้าภาพรวม</span>
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                 <div class="p-4 bg-[#FAFAF8] rounded-xl border border-[#ECEAE6]">
                     <ol id="modalTrackerList" class="grid grid-cols-3 gap-3 text-xs" aria-label="ความคืบหน้า">
                         <!-- JS Dynamic Render -->
@@ -498,7 +686,11 @@ $hasFilter = $statusFilter !== '' || $search !== '';
 
             <!-- Logs Timeline -->
             <div>
+<<<<<<< HEAD
                 <span class="font-semibold text-neutral-900 block mb-3"><i class="fa-solid fa-clock-rotate-left text-neutral-500 mr-1.5"></i> ประวัติลำดับสถานะย้อนหลัง</span>
+=======
+                <span class="font-semibold text-neutral-900 block mb-3"><i class="fa-solid fa-clock-rotate-left text-neutral-400 mr-1.5"></i> ประวัติลำดับสถานะย้อนหลัง</span>
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                 <ol id="modalLogList" class="relative space-y-3 border-l border-neutral-200 pl-4 text-xs text-neutral-600">
                     <!-- JS Dynamic Render -->
                 </ol>
@@ -510,9 +702,25 @@ $hasFilter = $statusFilter !== '' || $search !== '';
         </div>
     </dialog>
 
+<<<<<<< HEAD
     <?php $footerBase = ''; $footerVariant = 'light'; require __DIR__ . '/includes/site_footer.php'; ?>
 
     <script>
+=======
+    <footer class="mt-auto border-t border-[#ECEAE6] bg-white py-6">
+        <div class="max-w-6xl mx-auto px-4 sm:px-7 flex items-center justify-between text-xs text-[#8E8B85] font-kanit font-normal">
+            <span>REPS · แผนกเทคโนโลยีธุรกิจดิจิทัล</span>
+            <span>User Workspace</span>
+        </div>
+    </footer>
+
+    <script>
+        const userMenu = document.getElementById('userMenu');
+        document.addEventListener('click', (event) => {
+            if (userMenu?.open && !userMenu.contains(event.target)) userMenu.open = false;
+        });
+
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
         // Modal Handler Logic
         const detailModal = document.getElementById('detailModal');
         
@@ -529,6 +737,7 @@ $hasFilter = $statusFilter !== '' || $search !== '';
 
                 document.getElementById('modalCreated').textContent = dataset.created;
                 
+<<<<<<< HEAD
                 const esc = (value) => String(value ?? '').replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
                 const proof = document.getElementById('modalProofLinks');
                 const completionLink = document.getElementById('modalCompletionLink');
@@ -543,6 +752,9 @@ $hasFilter = $statusFilter !== '' || $search !== '';
                 proof.classList.toggle('hidden', dataset.hasCompletion !== '1' && dataset.isCompleted !== '1' && dataset.canThank !== '1');
 
                 const urgencyMap = { 'urgent': 'ด่วน', 'normal': 'ปกติ' };
+=======
+                const urgencyMap = { 'urgent': 'ด่วน', 'normal': 'ปกติ', 'low': 'ไม่เร่งด่วน' };
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                 document.getElementById('modalUrgency').textContent = urgencyMap[dataset.urgency] || dataset.urgency;
                 
                 document.getElementById('modalLocation').textContent = dataset.location;
@@ -575,21 +787,34 @@ $hasFilter = $statusFilter !== '' || $search !== '';
                 trackerList.innerHTML = trackers.map(step => `
                     <li class="relative border-t-2 pt-2 ${step.now ? 'border-neutral-900' : (step.on ? 'border-neutral-500' : 'border-neutral-200')}">
                         <span class="absolute -top-[5px] left-0 h-2 w-2 rounded-full border-2 border-white ${step.now ? 'bg-neutral-900' : (step.on ? 'bg-neutral-500' : 'bg-neutral-300')}"></span>
+<<<<<<< HEAD
                         <span class="block pl-1 text-[11px] font-medium ${step.now ? 'text-neutral-900 font-semibold' : (step.on ? 'text-neutral-700' : 'text-neutral-500')}">${esc(step.label)}</span>
                         <span class="mt-0.5 block pl-1 font-mono text-[10px] text-neutral-500">${step.on ? esc(step.when || '—') : 'รอ'}</span>
+=======
+                        <span class="block pl-1 text-[11px] font-medium ${step.now ? 'text-neutral-900 font-semibold' : (step.on ? 'text-neutral-700' : 'text-neutral-400')}">${step.label}</span>
+                        <span class="mt-0.5 block pl-1 font-mono text-[10px] text-neutral-400">${step.on ? (step.when || '—') : 'รอ'}</span>
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                     </li>
                 `).join('');
 
                 // Render Logs Timeline
                 const logList = document.getElementById('modalLogList');
                 const logs = JSON.parse(dataset.logs || '[]');
+<<<<<<< HEAD
                 const statusLabelsMap = <?= json_encode($ticketStatusLabels, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG) ?>;
+=======
+                const statusLabelsMap = { 'pending': 'รอรับเรื่อง', 'in_progress': 'กำลังดำเนินการ', 'completed': 'เสร็จสิ้น', 'cancelled': 'ยกเลิก' };
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                 
                 let logsHtml = `
                     <li class="relative">
                         <span class="absolute -left-[21px] top-1 h-2 w-2 rounded-full border border-white bg-neutral-900"></span>
                         <p class="text-neutral-800">สร้างใบงาน · สถานะเริ่มต้น <strong class="font-medium">รอรับเรื่อง</strong></p>
+<<<<<<< HEAD
                         <time class="mt-0.5 block font-mono text-[10px] text-neutral-500">${esc(dataset.created)}</time>
+=======
+                        <time class="mt-0.5 block font-mono text-[10px] text-neutral-400">${dataset.created}</time>
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                     </li>
                 `;
                 
@@ -599,9 +824,15 @@ $hasFilter = $statusFilter !== '' || $search !== '';
                     logsHtml += `
                         <li class="relative">
                             <span class="absolute -left-[21px] top-1 h-2 w-2 rounded-full border border-white bg-neutral-500"></span>
+<<<<<<< HEAD
                             <p class="text-neutral-800">เปลี่ยนสถานะเป็น <strong class="font-medium">${esc(newLbl)}</strong>${oldLbl ? ' (จาก ' + esc(oldLbl) + ')' : ''}</p>
                             <p class="mt-0.5 text-[11px] text-neutral-500">ดำเนินการโดย: ${esc(log.by_name || 'ระบบ')}</p>
                             <time class="mt-0.5 block font-mono text-[10px] text-neutral-500">${esc(log.created_at || '—')}</time>
+=======
+                            <p class="text-neutral-800">เปลี่ยนสถานะเป็น <strong class="font-medium">${newLbl}</strong>${oldLbl ? ' (จาก ' + oldLbl + ')' : ''}</p>
+                            <p class="mt-0.5 text-[11px] text-neutral-500">ดำเนินการโดย: ${log.by_name || 'ระบบ'}</p>
+                            <time class="mt-0.5 block font-mono text-[10px] text-neutral-400">${log.created_at || '—'}</time>
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                         </li>
                     `;
                 });

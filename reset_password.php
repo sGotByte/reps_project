@@ -49,9 +49,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                $message = 'ลิงก์นี้ไม่ถูกต้องหรือหมดอายุแล้ว กรุณาขอลิงก์ใหม่';
             } else {
                $userId = (int)$tokenRow['user_id'];
+<<<<<<< HEAD
                // ตั้งรหัสใหม่ด้วยลิงก์ = ไม่ต้องเปลี่ยนรหัสชั่วคราวอีก (fallback ถ้ายังไม่ได้รัน migration 20261120)
                $update = $conn->prepare('UPDATE users SET password = ?, must_change_password = 0 WHERE user_id = ?')
                   ?: $conn->prepare('UPDATE users SET password = ? WHERE user_id = ?');
+=======
+               $update = $conn->prepare('UPDATE users SET password = ? WHERE user_id = ?');
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                if (!$update) {
                   throw new RuntimeException($conn->error);
                }
@@ -124,6 +128,7 @@ function reset_h($value): string
    <link rel="apple-touch-icon" href="assets/images/logo/apple-touch-icon.png">
    <link rel="preconnect" href="https://fonts.googleapis.com">
    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<<<<<<< HEAD
    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
    <link rel="stylesheet" href="assets/css/app.css?v=<?= (int)@filemtime(__DIR__ . '/assets/css/app.css') ?>">
    <link rel="stylesheet" href="assets/vendor/fontawesome/css/all.min.css">
@@ -131,6 +136,13 @@ function reset_h($value): string
 </head>
 <body class="flex min-h-screen flex-col bg-[#f6f6f4] font-kanit text-gray-900">
    <div class="flex flex-1 items-center justify-center px-4 py-10">
+=======
+   <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+   <link rel="stylesheet" href="assets/css/app.css?v=<?= (int)@filemtime(__DIR__ . '/assets/css/app.css') ?>">
+   <link rel="stylesheet" href="assets/vendor/fontawesome/css/all.min.css">
+</head>
+<body class="flex min-h-screen items-center justify-center bg-[#f6f6f4] px-4 py-10 font-kanit text-gray-900">
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
    <main class="w-full max-w-md rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
       <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-neutral-900 text-white"><i class="fa-solid fa-lock"></i></div>
       <h1 class="mt-5 text-center text-2xl font-medium">ตั้งรหัสผ่านใหม่</h1>
@@ -155,7 +167,10 @@ function reset_h($value): string
          <a href="login.php" class="mt-6 flex w-full items-center justify-center gap-2 rounded-lg border border-gray-500 px-4 py-2.5 text-sm text-gray-500 hover:border-black hover:text-gray-900">กลับหน้าเข้าสู่ระบบ</a>
       <?php endif; ?>
    </main>
+<<<<<<< HEAD
    </div>
 <?php $footerBase = ''; $footerVariant = 'light'; require __DIR__ . '/includes/site_footer.php'; ?>
+=======
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 </body>
 </html>

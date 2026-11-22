@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 parameters:
 	level: 2
 	paths:
@@ -5,4 +6,13 @@ parameters:
 	treatPhpDocTypesAsCertain: false
 
 includes:
+=======
+parameters:
+	level: 2
+	paths:
+		- src
+	treatPhpDocTypesAsCertain: false
+
+includes:
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 	- phpstan-baseline.neon

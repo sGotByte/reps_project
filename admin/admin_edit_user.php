@@ -3,8 +3,11 @@ $page_title = 'แก้ไขข้อมูลผู้ใช้';
 $current_page = 'users';
 require_once __DIR__ . '/../includes/admin_auth.php';
 require_once __DIR__ . '/../db_connect.php';
+<<<<<<< HEAD
 require_once __DIR__ . '/../includes/permissions.php';
 require_once __DIR__ . '/../includes/user_admin.php';
+=======
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 
 if (session_status() === PHP_SESSION_NONE) {
    session_start();
@@ -49,7 +52,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $email = trim(is_string($_POST['email'] ?? null) ? $_POST['email'] : '');
       $phone = trim(is_string($_POST['phone_number'] ?? null) ? $_POST['phone_number'] : '');
       $departmentId = filter_input(INPUT_POST, 'department_id', FILTER_VALIDATE_INT);
+<<<<<<< HEAD
       $newRole = normalize_role(trim(is_string($_POST['role'] ?? null) ? $_POST['role'] : ''));
+=======
+      $newRole = trim(is_string($_POST['role'] ?? null) ? $_POST['role'] : '');
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
       $isSelf = $id === (int)$_SESSION['user_id'];
 
       $validTypes = ['student', 'teacher', 'staff'];
@@ -102,7 +109,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                $updateError = '';
 
                // ตรวจสอบการเปลี่ยน role (ถ้ามีการส่ง role มา)
+<<<<<<< HEAD
                $currentStmt = $conn->prepare('SELECT user_id, id_number, user_type, first_name, last_name, email, phone_number, department_id, role, status FROM users WHERE user_id = ? LIMIT 1');
+=======
+               $currentStmt = $conn->prepare('SELECT role, status FROM users WHERE user_id = ? LIMIT 1');
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                if (!$currentStmt) {
                   $updateError = 'ตรวจสอบบัญชีผู้ใช้ไม่สำเร็จ';
                } else {
@@ -115,12 +126,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                      $updateError = 'ไม่พบผู้ใช้ที่เลือก';
                   } elseif ($newRole === '' || $newRole === $current['role']) {
                      // ไม่มีการเปลี่ยน role
+<<<<<<< HEAD
                   } elseif (!is_valid_role($newRole)) {
                      $updateError = 'role ที่เลือกไม่ถูกต้อง';
                   } elseif ($isSelf) {
                      $updateError = 'ไม่สามารถเปลี่ยน role ของบัญชีที่กำลังใช้งานอยู่ได้';
                   } elseif ($current['role'] === 'admin' && $current['status'] === 'active' && user_active_admin_count($conn) <= 1) {
                      $updateError = 'ไม่สามารถลด role ของผู้ดูแลที่ใช้งานอยู่คนสุดท้ายได้';
+=======
+                  } elseif (!in_array($newRole, ['requester', 'admin'], true)) {
+                     $updateError = 'role ที่เลือกไม่ถูกต้อง';
+                  } elseif ($isSelf) {
+                     $updateError = 'ไม่สามารถเปลี่ยน role ของบัญชีที่กำลังใช้งานอยู่ได้';
+                  } elseif ($current['role'] === 'admin' && $current['status'] === 'active') {
+                     $activeAdmins = $conn->query('SELECT COUNT(*) AS total FROM users WHERE role = "admin" AND status = "active"');
+                     $activeAdminCount = $activeAdmins ? (int)$activeAdmins->fetch_assoc()['total'] : 0;
+                     if ($activeAdminCount <= 1) {
+                        $updateError = 'ไม่สามารถลด role ของผู้ดูแลที่ใช้งานอยู่คนสุดท้ายได้';
+                     }
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                   }
                }
 
@@ -129,7 +153,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                   $messageType = 'error';
                } else {
                   $updateStmt = $conn->prepare('UPDATE users SET id_number = ?, user_type = ?, first_name = ?, last_name = ?, email = ?, phone_number = ?, department_id = ?, role = ? WHERE user_id = ?');
+<<<<<<< HEAD
                   $roleValue = is_valid_role($newRole) ? $newRole : normalize_role((string)$current['role']);
+=======
+                  $roleValue = ($newRole === '' || !in_array($newRole, ['requester', 'admin'], true)) ? ($current['role'] ?? 'requester') : $newRole;
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                   if (!$updateStmt) {
                      $message = 'บันทึกข้อมูลผู้ใช้ไม่สำเร็จ';
                      $messageType = 'error';
@@ -137,6 +165,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                      $updateStmt->bind_param('ssssssisi', $idNumber, $userType, $firstName, $lastName, $email, $phone, $departmentId, $roleValue, $id);
                      if ($updateStmt->execute()) {
                         $message = $updateStmt->affected_rows > 0 ? 'บันทึกข้อมูลผู้ใช้เรียบร้อยแล้ว' : 'ข้อมูลไม่มีการเปลี่ยนแปลง';
+<<<<<<< HEAD
                         if ($updateStmt->affected_rows > 0) {
                            $changes = [];
                            $newValues = ['id_number' => $idNumber, 'user_type' => $userType, 'first_name' => $firstName, 'last_name' => $lastName, 'email' => $email, 'phone_number' => $phone, 'department_id' => (string)$departmentId, 'role' => $roleValue];
@@ -153,6 +182,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                               $conn->query('UPDATE users SET is_active_queue = 0 WHERE user_id = ' . (int)$id);
                               $conn->query("UPDATE tickets SET queue_assigned_to = NULL, queue_expires_at = NULL WHERE status = 'pending' AND queue_assigned_to = " . (int)$id);
                            }
+=======
+                        if ($updateStmt->affected_rows > 0 && $newRole !== '' && $newRole !== ($current['role'] ?? '')) {
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                            $message = 'บันทึกข้อมูลผู้ใช้และเปลี่ยน role เรียบร้อยแล้ว';
                         }
                      } else {
@@ -192,6 +224,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                   $messageType = 'error';
                   error_log('User deletion confirm mismatch for user ' . $id . ' by admin ' . (int)$_SESSION['user_id']);
                } else {
+<<<<<<< HEAD
                   try {
                      $referenceCount = user_reference_count($conn, $id);
                   } catch (Throwable $e) {
@@ -211,6 +244,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                      if ($message === '') {
                         $avatarBeforeDelete = user_avatar_path($conn, $id);
+=======
+                  $referenceStmt = $conn->prepare(
+                     'SELECT
+                        (SELECT COUNT(*) FROM tickets WHERE requester_id = ?) AS requester_tickets,
+                        (SELECT COUNT(*) FROM tickets WHERE assigned_to = ?) AS assigned_tickets,
+                        (SELECT COUNT(*) FROM ticket_logs WHERE action_by = ?) AS action_logs'
+                  );
+                  if (!$referenceStmt) {
+                     $message = 'ตรวจสอบข้อมูลที่เกี่ยวข้องไม่สำเร็จ';
+                     $messageType = 'error';
+                  } else {
+                     $referenceStmt->bind_param('iii', $id, $id, $id);
+                     $referenceStmt->execute();
+                     $references = $referenceStmt->get_result()->fetch_assoc();
+                     $referenceStmt->close();
+
+                     if (!$references || (int)$references['requester_tickets'] + (int)$references['assigned_tickets'] + (int)$references['action_logs'] > 0) {
+                        $message = 'ลบไม่ได้ เนื่องจากบัญชีนี้มีใบงานหรือประวัติที่ระบบต้องเก็บไว้';
+                        $messageType = 'error';
+                     } elseif ($target['role'] === 'admin' && $target['status'] === 'active') {
+                        $activeAdmins = $conn->query('SELECT COUNT(*) AS total FROM users WHERE role = "admin" AND status = "active"');
+                        $activeAdminCount = $activeAdmins ? (int)$activeAdmins->fetch_assoc()['total'] : 0;
+                        if ($activeAdminCount <= 1) {
+                           $message = 'ไม่สามารถลบผู้ดูแลที่ใช้งานอยู่คนสุดท้ายได้';
+                           $messageType = 'error';
+                        }
+                     }
+
+                     if ($message === '') {
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                         $deleteStmt = $conn->prepare('DELETE FROM users WHERE user_id = ?');
                         if (!$deleteStmt) {
                            $message = 'ลบบัญชีผู้ใช้ไม่สำเร็จ';
@@ -218,8 +281,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         } else {
                            $deleteStmt->bind_param('i', $id);
                            if ($deleteStmt->execute() && $deleteStmt->affected_rows === 1) {
+<<<<<<< HEAD
                               user_delete_private_files($avatarBeforeDelete);
                               audit_user($conn, null, (int)$_SESSION['user_id'], 'ลบบัญชี #' . $id . ' ' . $target['id_number'] . ' (role ' . $target['role'] . ')');
+=======
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                               $message = 'ลบบัญชีผู้ใช้เรียบร้อยแล้ว';
                            } else {
                               $message = 'ลบบัญชีผู้ใช้ไม่สำเร็จ';
@@ -234,6 +300,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
          }
       }
+<<<<<<< HEAD
    } elseif ($id && in_array($action, ['reset_password_temp', 'reset_password_link'], true)) {
       // ครูรีเซ็ตรหัสผ่านให้ผู้ใช้/สตาฟที่ลืมรหัส (ตรวจสิทธิ์เป้าหมายใน includes/password_reset.php)
       require_once __DIR__ . '/../includes/password_reset.php';
@@ -256,6 +323,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
          $message = 'รีเซ็ตรหัสผ่านไม่สำเร็จ กรุณาลองใหม่';
          $messageType = 'error';
       }
+=======
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
    } else {
       $message = 'คำขอไม่ถูกต้อง';
       $messageType = 'error';
@@ -301,6 +370,7 @@ if (!$userId) {
    }
 }
 
+<<<<<<< HEAD
 // สถานะรหัสผ่าน: รอผู้ใช้ตั้งรหัสใหม่อยู่หรือไม่ (คอลัมน์จาก migration 20261120 — ไม่มีก็ข้าม)
 $mustChange = false;
 if ($user) {
@@ -321,6 +391,8 @@ if (is_array($pwFlash) && (int)($pwFlash['user_id'] ?? 0) === (int)$userId && ti
 }
 $canResetPassword = $user && !$isSelf && $user['role'] !== 'admin' && !in_array($user['status'], ['pending', 'rejected'], true);
 
+=======
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 // ดึงรายชื่อแผนก
 $departments = [];
 $deptResult = $conn->query('SELECT d_id, name FROM department ORDER BY name');
@@ -339,6 +411,7 @@ require_once __DIR__ . '/admin_header.php';
 
          <div class="admin-page-head">
             <nav class="admin-crumb">
+<<<<<<< HEAD
                <a href="admin_dashboard.php"><?= tr('แดชบอร์ด', 'Dashboard') ?></a>
                <i class="fa-solid fa-chevron-right"></i>
                <a href="admin_manage_user.php"><?= tr('จัดการผู้ใช้', 'Users') ?></a>
@@ -347,6 +420,16 @@ require_once __DIR__ . '/admin_header.php';
             </nav>
             <h1 class="admin-page-title"><?= tr('แก้ไขข้อมูลผู้ใช้', 'Edit user') ?></h1>
             <p class="admin-page-sub"><?= tr('แก้ไขข้อมูลส่วนตัว การติดต่อ และ role ของบัญชีผู้ใช้', 'Update personal details, contact info and the account role') ?></p>
+=======
+               <a href="admin_dashboard.php">Dashboard</a>
+               <i class="fa-solid fa-chevron-right"></i>
+               <a href="admin_manage_user.php">จัดการผู้ใช้</a>
+               <i class="fa-solid fa-chevron-right"></i>
+               <span>แก้ไขข้อมูลผู้ใช้</span>
+            </nav>
+            <h1 class="admin-page-title">แก้ไขข้อมูลผู้ใช้</h1>
+            <p class="admin-page-sub">แก้ไขข้อมูลส่วนตัว การติดต่อ และ role ของบัญชีผู้ใช้</p>
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
          </div>
 
          <?php if ($message): ?>
@@ -361,8 +444,13 @@ require_once __DIR__ . '/admin_header.php';
             </div>
             <a href="admin_manage_user.php" class="inline-flex items-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"><i class="fa-solid fa-arrow-left"></i> กลับหน้าจัดการผู้ใช้</a>
          <?php else: ?>
+<<<<<<< HEAD
             <?php $statusLabels = ['active' => 'ใช้งานได้', 'disabled' => 'ระงับใช้งาน', 'pending' => 'รออนุมัติ', 'rejected' => 'ปฏิเสธการสมัคร']; ?>
             <?php $roleLabels = ROLE_LABELS; ?>
+=======
+            <?php $statusLabels = ['active' => 'ใช้งานได้', 'disabled' => 'ระงับใช้งาน']; ?>
+            <?php $roleLabels = ['requester' => 'ผู้ใช้', 'admin' => 'ผู้ดูแลระบบ']; ?>
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
             <?php $typeLabels = ['student' => 'นักศึกษา', 'teacher' => 'ครู/อาจารย์', 'staff' => 'บุคลากร']; ?>
             <?php $initial = trim(mb_substr((string)$user['first_name'], 0, 1)) !== '' ? mb_substr((string)$user['first_name'], 0, 1) : '?'; ?>
 
@@ -400,6 +488,7 @@ require_once __DIR__ . '/admin_header.php';
                      </section>
                   </div>
 
+<<<<<<< HEAD
                   <!-- รีเซ็ตรหัสผ่าน (ผู้ใช้/สตาฟลืมรหัส) -->
                   <div class="admin-tray">
                      <div class="admin-tray-label">Password</div>
@@ -444,6 +533,8 @@ require_once __DIR__ . '/admin_header.php';
                      </section>
                   </div>
 
+=======
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                   <!-- โซนยืนยันก่อนลบบัญชี -->
                   <div class="admin-tray">
                      <div class="admin-tray-label">Danger Zone</div>
@@ -539,9 +630,14 @@ require_once __DIR__ . '/admin_header.php';
                                     </select>
                                  <?php else: ?>
                                     <select id="role" name="role" class="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm focus:border-gray-900 focus:outline-none">
+<<<<<<< HEAD
                                        <?php foreach (ROLE_LABELS as $roleKey => $roleText): ?>
                                           <option value="<?= h($roleKey) ?>" <?= normalize_role((string)$user['role']) === $roleKey ? 'selected' : '' ?>><?= h($roleText) ?></option>
                                        <?php endforeach; ?>
+=======
+                                       <option value="requester" <?= $user['role'] === 'requester' ? 'selected' : '' ?>>ผู้ใช้</option>
+                                       <option value="admin" <?= $user['role'] === 'admin' ? 'selected' : '' ?>>ผู้ดูแลระบบ</option>
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                                     </select>
                                  <?php endif; ?>
                               </div>
@@ -578,7 +674,11 @@ require_once __DIR__ . '/admin_header.php';
                         <h2 id="userDeleteTitle" class="mt-0.5 font-semibold text-gray-950">ยืนยันการลบบัญชี</h2>
                      </div>
                   </div>
+<<<<<<< HEAD
                   <button type="button" data-close-user-delete aria-label="ปิด" class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-gray-500 transition hover:bg-gray-100 hover:text-gray-900"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+=======
+                  <button type="button" data-close-user-delete aria-label="ปิด" class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-gray-400 transition hover:bg-gray-100 hover:text-gray-900"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                </div>
                <div class="space-y-4 px-5 py-5 sm:px-6">
                   <p class="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">
@@ -588,7 +688,11 @@ require_once __DIR__ . '/admin_header.php';
                   <div>
                      <label for="userDeleteConfirmInput" class="mb-1.5 block text-sm font-medium text-gray-800">พิมพ์รหัสประจำตัวเพื่อยืนยันการลบ</label>
                      <input type="text" id="userDeleteConfirmInput" name="confirm_id_number" autocomplete="off" spellcheck="false" autocapitalize="off" autocorrect="off" placeholder="รหัสประจำตัวของบัญชีนี้"
+<<<<<<< HEAD
                         class="w-full rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 font-mono text-sm outline-none transition placeholder:font-kanit placeholder:text-gray-500 focus:border-red-600 focus:ring-2 focus:ring-red-600/10">
+=======
+                        class="w-full rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 font-mono text-sm outline-none transition placeholder:font-kanit placeholder:text-gray-400 focus:border-red-600 focus:ring-2 focus:ring-red-600/10">
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                      <p id="userDeleteHint" class="mt-1.5 text-xs text-gray-500">รหัสประจำตัวของบัญชีที่เลือก ยังไม่ต้องสนใจตัวพิมพ์เล็ก-ใหญ่และช่องว่าง</p>
                      <p class="mt-1 text-xs text-gray-500">บัญชีที่มีใบงานหรือประวัติจะลบไม่ได้</p>
                   </div>
@@ -627,10 +731,17 @@ require_once __DIR__ . '/admin_header.php';
                         hint.textContent = hintDefault;
                         hint.className = 'mt-1.5 text-xs text-gray-500';
                      } else if (match) {
+<<<<<<< HEAD
                         repsSetIconText(hint, 'check', 'รหัสตรงกันแล้ว กด "ยืนยันลบบัญชี" เพื่อทำรายการ');
                         hint.className = 'mt-1.5 text-xs font-medium text-emerald-600';
                      } else {
                         repsSetIconText(hint, 'x', 'รหัสที่พิมพ์ยังไม่ตรงกัน กรุณาตรวจสอบอีกครั้ง');
+=======
+                        hint.textContent = 'รหัสตรงกันแล้ว กด "ยืนยันลบบัญชี" เพื่อทำรายการ';
+                        hint.className = 'mt-1.5 text-xs font-medium text-emerald-600';
+                     } else {
+                        hint.textContent = 'รหัสที่พิมพ์ยังไม่ตรงกัน กรุณาตรวจสอบอีกครั้ง';
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                         hint.className = 'mt-1.5 text-xs font-medium text-amber-600';
                      }
                   }
@@ -659,7 +770,11 @@ require_once __DIR__ . '/admin_header.php';
                   if (normalize(confirmInput.value) !== normalize(expected)) {
                      event.preventDefault();
                      refreshConfirmState();
+<<<<<<< HEAD
                      repsSetIconText(hint, 'x', 'รหัสประจำตัวไม่ตรง จึงยังลบบัญชีไม่ได้');
+=======
+                     hint && (hint.textContent = '✗ รหัสประจำตัวไม่ตรง จึงยังลบบัญชีไม่ได้');
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                      return;
                   }
                   submitButton.disabled = true;
@@ -672,6 +787,7 @@ require_once __DIR__ . '/admin_header.php';
                   if (event.target === modal) modal.close();
                });
             })();
+<<<<<<< HEAD
 
             // รีเซ็ตรหัสผ่าน: ยืนยันก่อนส่ง + คัดลอกรหัสชั่วคราว
             (function () {
@@ -697,6 +813,10 @@ require_once __DIR__ . '/admin_header.php';
          </script>
       </div>
 <?php $footerBase = '../'; $footerVariant = 'app'; require __DIR__ . '/../includes/site_footer.php'; ?>
+=======
+         </script>
+      </div>
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
    </div>
 </body>
 </html>

@@ -17,8 +17,12 @@
       บนพื้นดำ ต้องกลับค่าความสว่างให้เส้นยังอ่านออกแต่ไม่แผดเสีย */
    --dash: rgb(255 255 255 / .3);
    --plus: rgb(255 255 255 / .6);
+<<<<<<< HEAD
    /* เท่ากับกรอบ max-w-6xl ของ header/footer (และ --rail-w ของ index.php) โลโก้และข้อความ footer จึงอยู่ในแนวเดียวกับเส้น */
    --rail-w: min(72rem, calc(100% - 3rem));
+=======
+   --rail-w: min(36rem, calc(100% - 3rem));
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 
    --ink-bg: #0A0A0A;
    --ink-fg: #FFFFFF;
@@ -141,7 +145,11 @@ body.auth-dark {
 .auth-card-title p {
    margin: 8px auto 0;
    max-width: 34ch;
+<<<<<<< HEAD
    font-family: 'Kanit', sans-serif;
+=======
+   font-family: 'Google Sans', 'Kanit', sans-serif;
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
    font-size: .875rem;
    line-height: 1.6;
    color: var(--ink-fg-soft);
@@ -150,7 +158,11 @@ body.auth-dark {
 /* ---------- ฟอร์ม ---------- */
 .auth-label {
    display: block;
+<<<<<<< HEAD
    font-family: 'Kanit', sans-serif;
+=======
+   font-family: 'Google Sans', 'Kanit', sans-serif;
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
    font-size: .75rem;
    font-weight: 500;
    line-height: 1.5;
@@ -166,7 +178,11 @@ body.auth-dark {
    border-radius: 8px;
    background: rgb(255 255 255 / .04);
    color: var(--ink-fg);
+<<<<<<< HEAD
    font-family: 'Kanit', sans-serif;
+=======
+   font-family: 'Google Sans', 'Kanit', sans-serif;
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
    font-size: .875rem;
    transition: border-color .15s, background-color .15s;
 }
@@ -285,7 +301,11 @@ select.auth-field option {
    margin-bottom: 16px;
    padding: 12px;
    border: 1px dashed currentColor;
+<<<<<<< HEAD
    font-family: 'Kanit', sans-serif;
+=======
+   font-family: 'Google Sans', 'Kanit', sans-serif;
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
    font-size: .75rem;
    line-height: 1.6;
 }
@@ -316,18 +336,25 @@ select.auth-field option {
    color: #6EE7B7;
 }
 
+<<<<<<< HEAD
 /* ข้อมูลที่ผู้ใช้ควรรู้ก่อนลงมือ (เช่น ต้องรอครูอนุมัติบัญชี) */
 .auth-alert-info {
    background: rgb(254 243 199 / .08);
    color: #FCD34D;
 }
 
+=======
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 /* ---------- ส่วนล่างการ์ด ---------- */
 .auth-alt {
    margin-top: 24px;
    padding-top: 20px;
    border-top: 1px dashed var(--dash);
+<<<<<<< HEAD
    font-family: 'Kanit', sans-serif;
+=======
+   font-family: 'Google Sans', 'Kanit', sans-serif;
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
    font-size: .75rem;
    line-height: 1.6;
    text-align: center;
@@ -399,6 +426,7 @@ select.auth-field option {
    -webkit-backdrop-filter: blur(12px);
 }
 
+<<<<<<< HEAD
 .auth-header-inner {
    --auth-header-height: 64px;
    --auth-logo-height: 32px;
@@ -464,19 +492,30 @@ body.auth-light .auth-logo {
    }
 }
 
+=======
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 .auth-footer {
    z-index: 10;
    width: 100%;
    border-top: 1px dashed var(--dash);
    padding: 24px 0;
+<<<<<<< HEAD
    font-family: 'Kanit', sans-serif;
+=======
+   font-family: 'Google Sans', 'Kanit', sans-serif;
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
    font-size: .75rem;
    line-height: 1.6;
    color: var(--ink-fg-dim);
 }
 
+<<<<<<< HEAD
 /* โหมดมืด: โลโก์ SVG สีดำจะกลับเป็นสีขาวอัตโนมัติ */
 body:not(.auth-light) .auth-logo {
+=======
+/* โลโก้เป็น SVG สีดำ (#000) ต้องกลับสีเพื่อให้เห็นบนพื้นดำ */
+.auth-logo {
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
    filter: invert(1);
 }
 
@@ -495,6 +534,7 @@ body:not(.auth-light) .auth-logo {
    .auth-eye {
       transition: none;
    }
+<<<<<<< HEAD
 }
 /* วงแหวน focus บนพื้นมืด (ใช้ร่วมกับ base.css) */
 body.auth-dark {
@@ -512,3 +552,6 @@ body.auth-dark textarea::placeholder {
 .auth-footer {
    color: #9A968F;
 }
+=======
+}
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff

@@ -42,6 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!in_array($old['user_type'], ['student', 'teacher', 'staff'], true)) {
         $errors[] = 'ประเภทผู้ใช้ไม่ถูกต้อง';
     }
+<<<<<<< HEAD
     // ต้องตรงกับ users.id_number varchar(20) และหน้า login ที่รับไม่เกิน 20 ตัวอักษร
     if ($old['username'] === '' || strlen($old['username']) > 20) {
         $errors[] = 'กรุณากรอกชื่อผู้ใช้ (Username) ไม่เกิน 20 ตัวอักษร (ภาษาอังกฤษ/ตัวเลข)';
@@ -51,6 +52,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     if (strlen($old['email']) > 255) {
         $errors[] = 'อีเมลยาวเกินไป';
+=======
+    if ($old['username'] === '' || strlen($old['username']) > 50) {
+        $errors[] = 'กรุณากรอกชื่อผู้ใช้ (Username) ไม่เกิน 50 ตัวอักษร';
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
     }
     if ($old['first_name'] === '' || $old['last_name'] === '') {
         $errors[] = 'กรุณากรอกชื่อและนามสกุล';
@@ -94,7 +99,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!$errors) {
             $passwordHash = password_hash($password, PASSWORD_DEFAULT);
             $role = 'user';
+<<<<<<< HEAD
             $status = 'pending'; // 3.7 ต้องรอ admin อนุมัติก่อนเข้าสู่ระบบได้
+=======
+            $status = 'active';
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
             $deptId = (int)$old['department_id'];
 
             $insertStmt = $conn->prepare(

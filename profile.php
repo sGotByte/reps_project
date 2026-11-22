@@ -2,10 +2,15 @@
 require_once __DIR__ . '/db_connect.php';
 require_once __DIR__ . '/includes/user_auth.php';
 require_once __DIR__ . '/includes/csrf.php';
+<<<<<<< HEAD
 require_once __DIR__ . '/includes/private_storage.php';
 require_once __DIR__ . '/includes/user_menu.php';
 
 $userId = app_require_active_user($conn, 'login.php', null);
+=======
+
+$userId = app_require_active_user($conn, 'login.php');
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 $csrfToken = app_csrf_token();
 $message = '';
 $messageType = 'info';
@@ -16,7 +21,11 @@ $departments = $departmentResult ? $departmentResult->fetch_all(MYSQLI_ASSOC) : 
 $departmentIds = array_map('intval', array_column($departments, 'd_id'));
 
 // ดึงข้อมูลผู้ใช้ปัจจุบัน
+<<<<<<< HEAD
 $userStmt = $conn->prepare('SELECT u.user_id, u.id_number, u.first_name, u.last_name, u.user_type, u.department_id, d.name AS department_name, u.phone_number, u.email, u.password, u.role, u.status, u.created_at, u.avatar_path, u.signature_path, u.promptpay_qr_path FROM users u LEFT JOIN department d ON d.d_id = u.department_id WHERE u.user_id = ? LIMIT 1');
+=======
+$userStmt = $conn->prepare('SELECT u.user_id, u.id_number, u.first_name, u.last_name, u.user_type, u.department_id, d.name AS department_name, u.phone_number, u.email, u.password, u.role, u.status, u.created_at FROM users u LEFT JOIN department d ON d.d_id = u.department_id WHERE u.user_id = ? LIMIT 1');
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 $userStmt->bind_param('i', $userId);
 $userStmt->execute();
 $user = $userStmt->get_result()->fetch_assoc();
@@ -29,11 +38,14 @@ if (!$user) {
    exit;
 }
 
+<<<<<<< HEAD
 if (isset($_SESSION['profile_flash']) && is_array($_SESSION['profile_flash'])) {
    [$messageType, $message] = $_SESSION['profile_flash'] + ['info', ''];
    unset($_SESSION['profile_flash']);
 }
 
+=======
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 // เก็บ hash ปัจจุบันจากฐานข้อมูลแยกไว้ตรวจสอบรหัสผ่าน
 $currentPasswordHash = $user['password'];
 
@@ -43,6 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       exit('คำขอไม่ถูกต้อง กรุณาโหลดหน้าใหม่แล้วลองอีกครั้ง');
    }
 
+<<<<<<< HEAD
    // ---------- รูปโปรไฟล์ (ฟอร์มแยก) → บันทึกแล้ว redirect กลับ (PRG)
    $avatarAction = is_string($_POST['avatar_action'] ?? null) ? $_POST['avatar_action'] : '';
    if ($avatarAction === 'upload' || $avatarAction === 'remove') {
@@ -131,6 +144,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       exit;
    }
 
+=======
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
    $firstName = trim(is_string($_POST['first_name'] ?? null) ? $_POST['first_name'] : '');
    $lastName = trim(is_string($_POST['last_name'] ?? null) ? $_POST['last_name'] : '');
    $email = trim(is_string($_POST['email'] ?? null) ? $_POST['email'] : '');
@@ -230,7 +245,10 @@ function profile_h($value): string
 {
    return htmlspecialchars((string)($value ?? ''), ENT_QUOTES, 'UTF-8');
 }
+<<<<<<< HEAD
 $profileHome = role_home_url(current_role());
+=======
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 $profileInitial = mb_strtoupper(mb_substr(trim((string)$user['first_name']), 0, 1, 'UTF-8'), 'UTF-8');
 $profileTypeLabels = ['student' => 'นักศึกษา', 'teacher' => 'ครู/อาจารย์', 'staff' => 'บุคลากร'];
 $profileMeta = trim(($profileTypeLabels[$user['user_type']] ?? (string)$user['user_type'])
@@ -248,49 +266,98 @@ $profileMeta = trim(($profileTypeLabels[$user['user_type']] ?? (string)$user['us
    <link rel="apple-touch-icon" href="assets/images/logo/apple-touch-icon.png">
    <link rel="preconnect" href="https://fonts.googleapis.com">
    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<<<<<<< HEAD
    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+=======
+   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
    <link rel="stylesheet" href="assets/css/app.css?v=<?= (int)@filemtime(__DIR__ . '/assets/css/app.css') ?>">
    <link rel="stylesheet" href="assets/css/portal-shell.css?v=<?= (int)@filemtime(__DIR__ . '/assets/css/portal-shell.css') ?>">
    <link rel="stylesheet" href="assets/vendor/fontawesome/css/all.min.css">
    <script src="https://cdn.tailwindcss.com"></script>
+<<<<<<< HEAD
    <script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Kanit', 'sans-serif'], kanit: ['Kanit', 'sans-serif'] } } } };</script>
+=======
+   <script>tailwind.config = { theme: { extend: { fontFamily: { kanit: ['Kanit', 'sans-serif'] } } } };</script>
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
    <style>
       details > summary { list-style: none; }
       details > summary::-webkit-details-marker { display: none; }
       .admin-shell { background: #FAFAF8; color: #161616; font-family: 'Kanit', sans-serif; }
       .admin-topbar { background: #FFFFFF !important; border-color: #ECEAE6 !important; box-shadow: 0 1px 2px rgba(22, 22, 22, .035); }
+<<<<<<< HEAD
       .admin-brand-label { font-family: 'Kanit', sans-serif; font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; }
       .admin-brand-sub { display: block; margin-top: 2px; color: #6B6862; font-family: 'Kanit', sans-serif; font-size: 11px; letter-spacing: .12em; }
       .admin-user-avatar { background: #F7F6F4; border: 1px solid #ECEAE6; color: #55534F; font-family: 'Kanit', sans-serif; font-size: 13px; font-weight: 600; }
+=======
+      .admin-brand-label { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; }
+      .admin-brand-sub { display: block; margin-top: 2px; color: #8E8B85; font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: .12em; }
+      .admin-user-avatar { background: #F7F6F4; border: 1px solid #ECEAE6; color: #55534F; font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; }
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
       .admin-btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 38px; padding: 0 14px; border: 1px solid #161616; border-radius: 999px; background: #161616; color: #FFFFFF; font-size: 13px; font-weight: 500; text-decoration: none; transition: background-color .15s ease; cursor: pointer; }
       .admin-btn:hover { background: #2A2927; }
       .admin-btn-secondary { background: #FFFFFF; border-color: #D9D6D0; color: #55534F; }
       .admin-btn-secondary:hover { background: #F7F6F4; color: #161616; border-color: #C9C6C0; }
       input:focus-visible, select:focus-visible { outline: 2px solid #161616; outline-offset: 2px; }
    </style>
+<<<<<<< HEAD
    <link rel="stylesheet" href="assets/css/base.css?v=18">
+=======
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 </head>
 
 <body class="admin-shell min-h-screen flex flex-col antialiased">
     <!-- Topbar Header ขยายเต็มจอแต่เนื้อหาจัดกึ่งกลางสอดคล้องกับ Dashboard -->
     <header class="admin-topbar sticky top-0 z-30 h-header border-b w-full bg-white">
         <div class="max-w-6xl w-full mx-auto px-4 sm:px-7 flex items-center justify-between h-16">
+<<<<<<< HEAD
             <a href="<?= profile_h($profileHome) ?>" class="flex items-center gap-3 no-underline">
+=======
+            <a href="dashboard.php" class="flex items-center gap-3 no-underline">
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                 <img src="assets/images/logo/reps-logo.svg" alt="REPS" class="h-6 w-auto">
             </a>
             <div class="flex items-center gap-3">
                <a href="request_form.php" class="admin-btn">
                   <i class="fa-solid fa-plus text-xs" aria-hidden="true"></i>
+<<<<<<< HEAD
                   <span><?php require_once __DIR__ . '/includes/i18n.php'; echo tr('แจ้งซ่อมใหม่', 'New request'); ?></span>
                </a>
                <?php require_once __DIR__ . '/includes/notifications.php'; echo notif_bell($conn, ''); ?>
                <?= user_menu_render($conn, '') ?>
+=======
+                  <span>แจ้งซ่อมใหม่</span>
+               </a>
+               <details class="relative" id="userMenu">
+                  <summary class="flex items-center gap-2.5 cursor-pointer select-none p-1 pr-2.5 rounded-full border border-neutral-200 hover:border-neutral-300 transition">
+                     <div class="admin-user-avatar w-8 h-8 rounded-full flex items-center justify-center text-xs flex-none">
+                        <?= profile_h($profileInitial) ?>
+                     </div>
+                     <span class="max-w-[120px] truncate text-xs text-neutral-800 hidden sm:inline font-medium"><?= profile_h($user['first_name']) ?></span>
+                     <i class="fa-solid fa-chevron-down text-[10px] text-neutral-400" aria-hidden="true"></i>
+                  </summary>
+                  <div class="absolute right-0 mt-2 w-56 rounded-xl border border-neutral-200 bg-white p-1.5 shadow-lg z-50">
+                     <div class="border-b border-neutral-100 px-3 py-2.5">
+                        <p class="truncate text-xs font-semibold text-neutral-900"><?= profile_h(trim($user['first_name'] . ' ' . $user['last_name'])) ?></p>
+                        <p class="truncate text-[10px] text-neutral-400 font-mono mt-0.5"><?= profile_h($profileMeta) ?></p>
+                     </div>
+                     <div class="py-1">
+                        <a href="dashboard.php" class="flex items-center justify-between rounded-lg px-3 py-2 text-xs text-neutral-700 hover:bg-neutral-50 transition no-underline">ใบงานของฉัน <i class="fa-solid fa-clipboard-list text-[10px] text-neutral-400" aria-hidden="true"></i></a>
+                        <a href="history.php" class="flex items-center justify-between rounded-lg px-3 py-2 text-xs text-neutral-700 hover:bg-neutral-50 transition no-underline">ประวัติใบแจ้งซ่อม <i class="fa-solid fa-clock-rotate-left text-[10px] text-neutral-400" aria-hidden="true"></i></a>
+                        <a href="request_form.php" class="flex items-center justify-between rounded-lg px-3 py-2 text-xs text-neutral-700 hover:bg-neutral-50 transition no-underline">แจ้งซ่อมใหม่ <i class="fa-solid fa-plus text-[10px] text-neutral-400" aria-hidden="true"></i></a>
+                        <div class="border-t border-neutral-100 my-1"></div>
+                        <a href="logout.php" class="flex items-center justify-between rounded-lg px-3 py-2 text-xs text-rose-600 hover:bg-rose-50 transition no-underline">ออกจากระบบ <i class="fa-solid fa-arrow-right-from-bracket text-[10px]" aria-hidden="true"></i></a>
+                     </div>
+                  </div>
+               </details>
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
             </div>
         </div>
     </header>
 
    <main class="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-7">
       <header class="mb-6">
+<<<<<<< HEAD
          <nav class="flex items-center gap-2 mb-2 text-[10.5px] font-mono uppercase tracking-wider text-[#6B6862]" aria-label="Breadcrumb">
              <a href="<?= profile_h($profileHome) ?>" class="font-kanit hover:text-[#161616] no-underline"><?= tr('หน้าหลัก', 'Home') ?></a>
              <i class="fa-solid fa-chevron-right text-[8px] opacity-50" aria-hidden="true"></i>
@@ -298,6 +365,15 @@ $profileMeta = trim(($profileTypeLabels[$user['user_type']] ?? (string)$user['us
          </nav>
          <h1 class="text-2xl sm:text-3xl font-normal tracking-tight text-[#161616]"><?= tr('แก้ไขโปรไฟล์', 'Edit profile') ?></h1>
          <p class="mt-1 text-xs text-[#6B6862]"><?= tr('จัดการข้อมูลส่วนตัว ข้อมูลติดต่อ และความปลอดภัยของบัญชีผู้ใช้งาน', 'Manage your personal details, contact info and account security') ?></p>
+=======
+         <nav class="flex items-center gap-2 mb-2 text-[10.5px] font-mono uppercase tracking-wider text-[#8E8B85]" aria-label="Breadcrumb">
+             <a href="dashboard.php" class="font-kanit hover:text-[#161616] no-underline">หน้าหลัก</a>
+             <i class="fa-solid fa-chevron-right text-[8px] opacity-50" aria-hidden="true"></i>
+             <span class="font-kanit text-[#161616]">ตั้งค่าโปรไฟล์</span>
+         </nav>
+         <h1 class="text-2xl sm:text-3xl font-normal tracking-tight text-[#161616]">แก้ไขโปรไฟล์</h1>
+         <p class="mt-1 text-xs text-[#8E8B85]">จัดการข้อมูลส่วนตัว ข้อมูลติดต่อ และความปลอดภัยของบัญชีผู้ใช้งาน</p>
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
       </header>
 
       <?php if ($message !== ''): ?>
@@ -307,6 +383,7 @@ $profileMeta = trim(($profileTypeLabels[$user['user_type']] ?? (string)$user['us
          </div>
       <?php endif; ?>
 
+<<<<<<< HEAD
       <section id="avatar" class="pf-avatar bg-white rounded-2xl border border-[#EAE8E4] shadow-sm mb-6" aria-labelledby="avatar-heading">
          <div class="pf-avatar__photo">
             <?= user_avatar_html($user, '', 'user-avatar--xl') ?>
@@ -394,6 +471,8 @@ $profileMeta = trim(($profileTypeLabels[$user['user_type']] ?? (string)$user['us
       </section>
       <?php endif; ?>
 
+=======
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
       <form method="post" class="bg-white rounded-2xl border border-[#EAE8E4] shadow-sm overflow-hidden">
          <input type="hidden" name="csrf" value="<?= profile_h($csrfToken) ?>">
 
@@ -407,11 +486,19 @@ $profileMeta = trim(($profileTypeLabels[$user['user_type']] ?? (string)$user['us
                <div class="grid gap-4 sm:grid-cols-2">
                   <div>
                      <label class="block text-xs font-medium text-[#55534F] mb-1.5">รหัสนักศึกษา / รหัสบุคลากร</label>
+<<<<<<< HEAD
                      <input type="text" value="<?= profile_h($user['id_number']) ?>" readonly class="w-full rounded-xl border border-[#D9D6D0] bg-[#FAFAF8] px-3.5 py-2.5 text-xs text-[#6B6862] cursor-not-allowed">
                   </div>
                   <div>
                      <label class="block text-xs font-medium text-[#55534F] mb-1.5">ประเภทผู้ใช้</label>
                      <select disabled class="w-full rounded-xl border border-[#D9D6D0] bg-[#FAFAF8] px-3.5 py-2.5 text-xs text-[#6B6862] cursor-not-allowed">
+=======
+                     <input type="text" value="<?= profile_h($user['id_number']) ?>" readonly class="w-full rounded-xl border border-[#D9D6D0] bg-[#FAFAF8] px-3.5 py-2.5 text-xs text-[#8E8B85] cursor-not-allowed">
+                  </div>
+                  <div>
+                     <label class="block text-xs font-medium text-[#55534F] mb-1.5">ประเภทผู้ใช้</label>
+                     <select disabled class="w-full rounded-xl border border-[#D9D6D0] bg-[#FAFAF8] px-3.5 py-2.5 text-xs text-[#8E8B85] cursor-not-allowed">
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                         <?php foreach (['student' => 'นักศึกษา', 'teacher' => 'ครู/อาจารย์', 'staff' => 'บุคลากร'] as $typeValue => $typeLabel): ?>
                            <option value="<?= profile_h($typeValue) ?>" <?= $user['user_type'] === $typeValue ? 'selected' : '' ?>><?= profile_h($typeLabel) ?></option>
                         <?php endforeach; ?>
@@ -460,7 +547,11 @@ $profileMeta = trim(($profileTypeLabels[$user['user_type']] ?? (string)$user['us
             <!-- ส่วนเปลี่ยนรหัสผ่าน -->
             <div class="rounded-2xl border border-[#EAE8E4] bg-[#FAFAF8] p-5">
                <h2 class="text-xs font-semibold uppercase tracking-wider text-[#161616] mb-1">เปลี่ยนรหัสผ่าน</h2>
+<<<<<<< HEAD
                <p class="text-[11px] text-[#6B6862] mb-4">ปล่อยว่างไว้หากไม่ต้องการเปลี่ยนรหัสผ่านในครั้งนี้</p>
+=======
+               <p class="text-[11px] text-[#8E8B85] mb-4">ปล่อยว่างไว้หากไม่ต้องการเปลี่ยนรหัสผ่านในครั้งนี้</p>
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                <div class="grid gap-4 sm:grid-cols-2">
                   <div class="sm:col-span-2">
                      <label class="block text-xs font-medium text-[#55534F] mb-1.5">รหัสผ่านปัจจุบัน</label>
@@ -479,7 +570,11 @@ $profileMeta = trim(($profileTypeLabels[$user['user_type']] ?? (string)$user['us
 
             <!-- ปุ่มบันทึก -->
             <div class="flex flex-col sm:flex-row items-center justify-end gap-3 pt-4 border-t border-[#ECEAE6]">
+<<<<<<< HEAD
                <a href="<?= profile_h($profileHome) ?>" class="w-full sm:w-auto admin-btn admin-btn-secondary text-xs rounded-lg">ยกเลิก</a>
+=======
+               <a href="dashboard.php" class="w-full sm:w-auto admin-btn admin-btn-secondary text-xs rounded-lg">ยกเลิก</a>
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                <button type="submit" class="w-full sm:w-auto admin-btn text-xs rounded-lg">
                   <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i> บันทึกโปรไฟล์
                </button>
@@ -488,6 +583,7 @@ $profileMeta = trim(($profileTypeLabels[$user['user_type']] ?? (string)$user['us
       </form>
    </main>
 
+<<<<<<< HEAD
     <?php $footerBase = ''; $footerVariant = 'light'; require __DIR__ . '/includes/site_footer.php'; ?>
 
    <script>
@@ -510,6 +606,20 @@ $profileMeta = trim(($profileTypeLabels[$user['user_type']] ?? (string)$user['us
             document.getElementById('avatarForm').submit();
          });
       })();
+=======
+   <footer class="mt-auto border-t border-[#ECEAE6] bg-white py-6">
+      <div class="max-w-6xl mx-auto px-4 sm:px-7 flex items-center justify-between text-sm text-[#8E8B85] font-kanit font-normal">
+         <span>REPS · แผนกเทคโนโลยีธุรกิจดิจิทัล</span>
+         <span>User Workspace</span>
+      </div>
+   </footer>
+
+   <script>
+      const userMenu = document.getElementById('userMenu');
+      document.addEventListener('click', (event) => {
+         if (userMenu?.open && !userMenu.contains(event.target)) userMenu.open = false;
+      });
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
    </script>
 </body>
 </html>

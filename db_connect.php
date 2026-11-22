@@ -41,8 +41,12 @@ $displayErrors = filter_var(getenv('APP_DISPLAY_ERRORS') ?: 'false', FILTER_VALI
 ini_set('display_errors', $displayErrors ? '1' : '0');
 ini_set('log_errors', '1');
 
+<<<<<<< HEAD
 // หน้าสาธารณะ (เช่น index.php สำหรับผู้เยี่ยมชม) ตั้ง $APP_SKIP_SESSION = true เพื่อไม่สร้าง session ใหม่
 if (session_status() === PHP_SESSION_NONE && empty($GLOBALS['APP_SKIP_SESSION'])) {
+=======
+if (session_status() === PHP_SESSION_NONE) {
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
     ini_set('session.cookie_httponly', '1');
     ini_set('session.cookie_samesite', 'Lax');
     ini_set('session.cookie_lifetime', '604800');
@@ -53,10 +57,13 @@ if (session_status() === PHP_SESSION_NONE && empty($GLOBALS['APP_SKIP_SESSION'])
     session_start();
 }
 
+<<<<<<< HEAD
 // แปล UI เป็นภาษาอังกฤษตอนแสดงผลเมื่อผู้ใช้เลือก EN (ไม่ทำอะไรเลยเมื่อเป็นภาษาไทย)
 require_once __DIR__ . '/includes/i18n_output.php';
 i18n_boot();
 
+=======
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 $appTimezone = trim((string)(getenv('APP_TIMEZONE') ?: 'Asia/Bangkok'));
 if (!in_array($appTimezone, timezone_identifiers_list(), true)) {
     error_log('Invalid APP_TIMEZONE, falling back to Asia/Bangkok');
@@ -109,8 +116,12 @@ if (!$conn->set_charset("utf8mb4")) {
 $dbTimezoneOffset = (new DateTimeImmutable('now', new DateTimeZone($appTimezone)))->format('P');
 if (!$conn->query("SET time_zone = '" . $conn->real_escape_string($dbTimezoneOffset) . "'")) {
     error_log('Could not set MySQL session time zone: ' . $conn->error);
+<<<<<<< HEAD
 }
 
 // การปรับแต่งเว็บจากหน้า admin (ธีม ฟอนต์ โลโก้ favicon ข้อความ) — ไม่มีการปรับแต่ง = ไม่ทำอะไร
 require_once __DIR__ . '/includes/site_custom.php';
 site_custom_boot($conn);
+=======
+}
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff

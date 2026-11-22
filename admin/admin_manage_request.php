@@ -1,17 +1,27 @@
 <?php
+<<<<<<< HEAD
 $page_title = 'จัดการคำขอซ่อม';
 $current_page = 'request';
 require_once __DIR__ . '/../includes/admin_auth.php';
 require_once __DIR__ . '/../db_connect.php';
 require_once __DIR__ . '/../includes/ticket_service.php';
+=======
+$page_title = 'Requests';
+$current_page = 'request';
+require_once __DIR__ . '/../includes/admin_auth.php';
+require_once __DIR__ . '/../db_connect.php';
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 
 if (session_status() === PHP_SESSION_NONE) {
    session_start();
 }
 
+<<<<<<< HEAD
 queue_process_expired_tickets($conn);
 ticket_send_sign_reminders($conn); // เตือนผู้แจ้งที่ยังไม่เซ็น ทำงานไม่เกินทุก 10 นาที
 
+=======
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 if (empty($_SESSION['admin_csrf'])) {
    $_SESSION['admin_csrf'] = bin2hex(random_bytes(32));
 }
@@ -19,6 +29,7 @@ if (empty($_SESSION['admin_csrf'])) {
 $message = is_array($_SESSION['admin_flash'] ?? null) ? (string)($_SESSION['admin_flash']['message'] ?? '') : '';
 $message_type = is_array($_SESSION['admin_flash'] ?? null) ? (string)($_SESSION['admin_flash']['type'] ?? 'success') : 'success';
 unset($_SESSION['admin_flash']);
+<<<<<<< HEAD
 // ตัวกรองรับได้ทั้งกลุ่มสถานะ (pending/working/signing/completed/cancelled) และสถานะรายตัว
 $allowed = array_values(array_unique(array_merge(array_keys(TICKET_STATUS_GROUPS), array_keys(TICKET_STATUS_LABELS))));
 // v3: ปิดงานได้ทางเดียวคือเซ็นครบ 3 ฝ่าย (staff/job.php, sign.php, admin_signoff.php)
@@ -27,6 +38,15 @@ $statusTransitions = array_fill_keys(array_keys(TICKET_STATUS_LABELS), []);
 foreach (array_merge(['pending'], TICKET_STAFF_ACTIVE_STATUSES) as $st) {
    $statusTransitions[$st] = ['cancelled'];
 }
+=======
+$allowed = ['pending', 'in_progress', 'completed', 'cancelled'];
+$statusTransitions = [
+   'pending' => ['in_progress', 'cancelled'],
+   'in_progress' => ['completed', 'cancelled'],
+   'completed' => [],
+   'cancelled' => []
+];
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 
 // จัดการหมวดหมู่และอัปเดตสถานะคำขอ
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !hash_equals($_SESSION['admin_csrf'], is_string($_POST['csrf'] ?? null) ? $_POST['csrf'] : '')) {
@@ -185,6 +205,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                error_log('Ticket deletion confirm mismatch for ticket ' . $id . ' by admin ' . (int)($_SESSION['user_id'] ?? 0));
             } else {
                // เก็บตำแหน่งไฟล์แนบไว้ลบทิ้งหลังบันทึกสำเร็จ
+<<<<<<< HEAD
                $fileStmt = $conn->prepare(
                   'SELECT file_path FROM ticket_attachments WHERE ticket_id = ?
                    UNION ALL SELECT completion_image FROM tickets WHERE id = ? AND completion_image IS NOT NULL
@@ -194,6 +215,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                   throw new RuntimeException($conn->error);
                }
                $fileStmt->bind_param('iii', $id, $id, $id);
+=======
+               $fileStmt = $conn->prepare('SELECT file_path FROM ticket_attachments WHERE ticket_id = ?');
+               if (!$fileStmt) {
+                  throw new RuntimeException($conn->error);
+               }
+               $fileStmt->bind_param('i', $id);
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                $fileStmt->execute();
                $fileRows = $fileStmt->get_result()->fetch_all(MYSQLI_ASSOC);
                $fileStmt->close();
@@ -225,7 +253,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                }
                $message = 'ลบใบแจ้งซ่อม #' . $ticket['ticket_no'] . ' เรียบร้อยแล้ว';
 
+<<<<<<< HEAD
                $attachmentFiles = array_column($fileRows, 'file_path');
+=======
+               foreach ($fileRows as $fileRow) {
+                  if (preg_match('#^(?:ticket-private/)?([A-Za-z0-9_-]+\.(?:jpg|png))$#i', (string)$fileRow['file_path'], $m) === 1) {
+                     $attachmentFiles[] = $m[1];
+                  }
+               }
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
             }
          } catch (Throwable $e) {
             $conn->rollback();
@@ -235,6 +271,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
          }
 
          // ลบไฟล์แนบจริงหลังลบข้อมูลในฐานข้อมูลสำเร็จ
+<<<<<<< HEAD
          foreach ($attachmentFiles as $storedPath) {
             try {
                app_delete_private_file((string)$storedPath);
@@ -277,6 +314,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
          $message = 'มอบหมายไม่สำเร็จ กรุณาลองใหม่';
          $message_type = 'error';
       }
+=======
+         if ($attachmentFiles) {
+            require_once __DIR__ . '/../includes/private_storage.php';
+            $uploadDir = app_ticket_upload_dir();
+            $legacyDir = __DIR__ . '/../uploads/tickets';
+            foreach ($attachmentFiles as $filename) {
+               foreach ([$uploadDir . DIRECTORY_SEPARATOR . $filename, $legacyDir . DIRECTORY_SEPARATOR . $filename] as $fileLocation) {
+                  if (is_file($fileLocation)) {
+                     @unlink($fileLocation);
+                  }
+               }
+            }
+         }
+      }
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
    } else {
       $id = filter_input(INPUT_POST, 'ticket_id', FILTER_VALIDATE_INT);
       $status = is_string($_POST['status'] ?? null) ? $_POST['status'] : '';
@@ -314,8 +366,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                $conn->rollback();
                if (in_array($row['status'], ['completed', 'cancelled'], true)) {
                   $message = 'ใบงานนี้ปิดสถานะแล้ว ไม่สามารถเปลี่ยนสถานะได้';
+<<<<<<< HEAD
                } elseif (in_array($row['status'], TICKET_SIGNING_STATUSES, true)) {
                   $message = 'ใบงานอยู่ระหว่างเซ็นส่งคืน จัดการได้ที่หน้ารับรองงาน';
+=======
+               } elseif ($row['status'] === 'in_progress' && $status === 'pending') {
+                  $message = 'ใบงานที่กำลังดำเนินการไม่สามารถเปลี่ยนกลับเป็นรอรับเรื่องได้';
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                } else {
                   $message = 'ไม่สามารถเปลี่ยนสถานะใบงานตามลำดับนี้ได้';
                }
@@ -327,26 +384,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                // อัปเดตสถานะและเวลา
                $u_sql = "UPDATE tickets SET 
                             status = ?, 
+<<<<<<< HEAD
                             stage_since = NOW(),
+=======
+                            assigned_to = CASE WHEN ? = 'in_progress' AND assigned_to IS NULL THEN ? ELSE assigned_to END,
+                            accepted_at = CASE WHEN ? = 'in_progress' AND accepted_at IS NULL THEN NOW() ELSE accepted_at END, 
+                            completed_at = CASE WHEN ? = 'completed' THEN NOW() ELSE NULL END,
+                            resolution_summary = CASE WHEN ? = 'completed' THEN ? ELSE NULL END,
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                             cancel_reason = CASE WHEN ? = 'cancelled' THEN ? ELSE NULL END
                           WHERE id = ?";
                $u_stmt = $conn->prepare($u_sql);
                if (!$u_stmt) {
                   throw new RuntimeException($conn->error);
                }
+<<<<<<< HEAD
                $u_stmt->bind_param('sssi', $status, $status, $statusReason, $id);
+=======
+               $u_stmt->bind_param('ssissssssi', $status, $status, $actor, $status, $status, $status, $statusReason, $status, $statusReason, $id);
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                if (!$u_stmt->execute()) {
                   throw new RuntimeException($u_stmt->error);
                }
                $u_stmt->close();
 
                // บันทึกประวัติลง ticket_logs
+<<<<<<< HEAD
                $log_stmt = $conn->prepare('INSERT INTO ticket_logs (ticket_id, old_status, new_status, action_by, note, created_at) VALUES (?, ?, ?, ?, ?, NOW())');
                if (!$log_stmt) {
                   throw new RuntimeException($conn->error);
                }
                $logNote = $statusReason !== '' ? 'เหตุผล: ' . $statusReason : null;
                $log_stmt->bind_param('issis', $id, $old_status, $status, $actor, $logNote);
+=======
+               $log_stmt = $conn->prepare('INSERT INTO ticket_logs (ticket_id, old_status, new_status, action_by, created_at) VALUES (?, ?, ?, ?, NOW())');
+               if (!$log_stmt) {
+                  throw new RuntimeException($conn->error);
+               }
+               $log_stmt->bind_param('issi', $id, $old_status, $status, $actor);
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                if (!$log_stmt->execute()) {
                   throw new RuntimeException($log_stmt->error);
                }
@@ -371,6 +447,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
    $_SESSION['admin_flash'] = ['message' => $message, 'type' => $message_type];
    $redirect = 'admin_manage_request.php';
+<<<<<<< HEAD
    // กลับไปหน้า/ตัวกรอง/คำค้นเดิม (อ่านจาก Referer ของหน้านี้เท่านั้น และรับเฉพาะพารามิเตอร์ที่รู้จัก)
    $returnParams = [];
    $referer = (string)($_SERVER['HTTP_REFERER'] ?? '');
@@ -383,6 +460,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
    $returnStatus = is_string($_POST['return_status'] ?? null) ? $_POST['return_status'] : '';
    if (!$returnParams && in_array($returnStatus, $allowed, true)) $returnParams['status'] = $returnStatus;
    if ($returnParams) $redirect .= '?' . http_build_query($returnParams);
+=======
+   $returnStatus = is_string($_POST['return_status'] ?? null) ? $_POST['return_status'] : '';
+   if (in_array($returnStatus, $allowed, true)) $redirect .= '?status=' . rawurlencode($returnStatus);
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
    header('Location: ' . $redirect, true, 303);
    exit;
 }
@@ -395,6 +476,7 @@ function app_confirm_normalize(string $value): string
 
 // กรองสถานะและค้นหา (GET)
 $filter = is_string($_GET['status'] ?? null) ? $_GET['status'] : '';
+<<<<<<< HEAD
 $search = mb_substr(trim(is_string($_GET['q'] ?? null) ? $_GET['q'] : ''), 0, 100, 'UTF-8');
 require_once __DIR__ . '/../includes/pager.php';
 $perPageOptions = [10, 30, 50, 100];
@@ -447,18 +529,27 @@ try {
 } catch (Throwable $e) {
    error_log('Staff list failed: ' . $e->getMessage());
 }
+=======
+$where = in_array($filter, $allowed, true) ? 'WHERE t.status = ?' : '';
+
+$tickets = [];
+$counts = ['pending' => 0, 'in_progress' => 0, 'completed' => 0, 'cancelled' => 0];
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 $categoryStats = [];
 
 try {
    $sql = 'SELECT 
                 t.id AS ticket_id, t.ticket_no, NULL AS sub_category, t.symptom AS symptoms, t.urgency, t.status, t.created_at,
                 t.accepted_at, t.completed_at, t.resolution_summary, t.cancel_reason,
+<<<<<<< HEAD
                 t.custom_category, t.device_detail, t.quantity, t.contact_person,
                 t.primary_contact_name, t.primary_contact_phone, t.primary_contact_email,
                 t.secondary_contact_name, t.secondary_contact_phone, t.secondary_contact_email, t.urgency_reason,
                 t.coordinator_teacher, t.coordinator_phone, t.room_caretaker, t.room_caretaker_phone,
                 t.repair_method, t.completion_image, t.queue_assigned_to, t.queue_expires_at, t.assigned_to,
                 qs.first_name AS queue_first, qs.last_name AS queue_last,
+=======
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                 u.user_id AS requester_id, u.first_name, u.last_name, u.id_number, u.user_type, u.phone_number, u.email, d.name AS department_name,
                 t.location_note AS location_name,
                 c.name AS category_name,
@@ -471,6 +562,7 @@ try {
             FROM tickets t
             JOIN users u ON u.user_id = t.requester_id
             LEFT JOIN department d ON d.d_id = u.department_id
+<<<<<<< HEAD
             LEFT JOIN categories c ON c.id = t.category_id
             LEFT JOIN users assignee ON assignee.user_id = t.assigned_to
             LEFT JOIN users qs ON qs.user_id = t.queue_assigned_to
@@ -486,6 +578,22 @@ try {
 
    $attachmentsByTicket = [];
    $helpersByTicket = [];
+=======
+            JOIN categories c ON c.id = t.category_id
+            LEFT JOIN users assignee ON assignee.user_id = t.assigned_to
+            ' . $where . '
+            ORDER BY t.created_at DESC, t.id DESC';
+
+   $stmt = $conn->prepare($sql);
+   if ($where) {
+      $stmt->bind_param('s', $filter);
+   }
+   $stmt->execute();
+   $tickets = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+   $stmt->close();
+
+   $attachmentsByTicket = [];
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
    if ($tickets) {
       $ticketIds = array_map('intval', array_column($tickets, 'ticket_id'));
       $placeholders = implode(',', array_fill(0, count($ticketIds), '?'));
@@ -502,6 +610,7 @@ try {
       }
       $attachmentResult = $attachmentStmt->get_result();
       while ($attachment = $attachmentResult->fetch_assoc()) {
+<<<<<<< HEAD
          $attachmentsByTicket[(int)$attachment['ticket_id']][] = (int)$attachment['id'];
       }
       $attachmentStmt->close();
@@ -518,6 +627,14 @@ try {
       foreach ($helperRows as $hr) {
          $helpersByTicket[(int)$hr['ticket_id']][] = ['id' => (int)$hr['user_id'], 'name' => $hr['first_name'] . ' ' . $hr['last_name']];
       }
+=======
+         $path = $attachment['file_path'];
+         if (preg_match('#^(?:ticket-private/)?[A-Za-z0-9_-]+\.(?:jpg|png)$#i', str_replace('ticket-private/', '', $path))) {
+            $attachmentsByTicket[(int)$attachment['ticket_id']][] = (int)$attachment['id'];
+         }
+      }
+      $attachmentStmt->close();
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
    }
 
    // ดึงจำนวนสถิติแยกตามสถานะ
@@ -527,10 +644,13 @@ try {
          if (isset($counts[$c_row['status']])) {
             $counts[$c_row['status']] = (int)$c_row['total'];
          }
+<<<<<<< HEAD
          $grp = ticket_status_group((string)$c_row['status']);
          if ($grp !== $c_row['status'] && isset($counts[$grp])) {
             $counts[$grp] += (int)$c_row['total'];
          }
+=======
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
       }
       $count_res->free();
    }
@@ -563,6 +683,7 @@ function h($v)
    return htmlspecialchars((string)($v ?? ''), ENT_QUOTES, 'UTF-8');
 }
 
+<<<<<<< HEAD
 // ---------- แถบสรุปสถานะ: แนวโน้ม 14 วัน + งานที่ค้างนานสุด ----------
 $trendDays = 14;
 $trendDates = [];
@@ -642,6 +763,14 @@ function rq_sparkline(array $values, string $label): string
 }
 
 $statusLabel = TICKET_STATUS_LABELS;
+=======
+$statusLabel = [
+   'pending' => 'รอรับเรื่อง',
+   'in_progress' => 'กำลังดำเนินการ',
+   'completed' => 'เสร็จสิ้น',
+   'cancelled' => 'ยกเลิก'
+];
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 $userTypeLabels = ['student' => 'นักศึกษา', 'teacher' => 'ครู/อาจารย์', 'staff' => 'บุคลากร'];
 
 require_once __DIR__ . '/admin_header.php';
@@ -649,12 +778,21 @@ require_once __DIR__ . '/admin_header.php';
 
          <div class="admin-page-head">
             <nav class="admin-crumb">
+<<<<<<< HEAD
                <a href="admin_dashboard.php"><?= tr('แดชบอร์ด', 'Dashboard') ?></a>
                <i class="fa-solid fa-chevron-right"></i>
                <span><?= tr('จัดการคำขอซ่อม', 'Repair requests') ?></span>
             </nav>
             <h1 class="admin-page-title"><?= tr('จัดการคำขอซ่อม', 'Repair requests') ?></h1>
             <p class="admin-page-sub"><?= tr('ค้นหา ติดตาม และปรับสถานะงานซ่อม', 'Search, track and update repair jobs') ?></p>
+=======
+               <a href="admin_dashboard.php">Dashboard</a>
+               <i class="fa-solid fa-chevron-right"></i>
+               <span>จัดการคำขอซ่อม</span>
+            </nav>
+            <h1 class="admin-page-title">จัดการคำขอซ่อม</h1>
+            <p class="admin-page-sub">ค้นหา ติดตาม และปรับสถานะงานซ่อม</p>
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
          </div>
 
          <?php if ($message): ?>
@@ -675,6 +813,7 @@ require_once __DIR__ . '/admin_header.php';
             </div>
          <?php endif; ?>
 
+<<<<<<< HEAD
          <style>
             /* ===== หน้าจัดการคำขอซ่อม: แถบสถานะ + ตาราง ===== */
             .rq-overview { display: grid; gap: 16px; margin-bottom: 24px; }
@@ -832,18 +971,53 @@ require_once __DIR__ . '/admin_header.php';
                      <input id="request-search" type="search" name="q" value="<?= h($search) ?>" maxlength="100" placeholder="ค้นหาเลขใบงาน ผู้แจ้ง สถานที่" class="min-w-[240px] rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:border-gray-900">
                      <label class="sr-only" for="status-filter">กรองสถานะ</label>
                      <select id="status-filter" name="status" data-autosubmit class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:border-gray-900">
+=======
+         <!-- สถิติจำนวนใบงานแยกตามสถานะ -->
+         <div class="grid grid-cols-2 xl:grid-cols-4 gap-3 mb-6">
+            <?php foreach ($statusLabel as $key => $label): ?>
+               <a href="?status=<?= h($key) ?>" class="admin-stat st-<?= h($key) ?> <?= $filter === $key ? 'is-active' : '' ?>">
+                  <div class="admin-stat-label"><?= h($label) ?></div>
+                  <div class="admin-stat-value"><?= number_format((int)($counts[$key] ?? 0)) ?></div>
+               </a>
+            <?php endforeach; ?>
+         </div>
+
+         <!-- ตารางรายการคำขอแจ้งซ่อม -->
+         <div class="admin-tray">
+            <div class="admin-tray-label">
+               <span>Requests</span>
+               <span><?= count($tickets) ?> รายการ</span>
+            </div>
+            <section class="admin-card">
+               <div class="admin-toolbar justify-between">
+                  <div>
+                     <h2 class="font-normal text-gray-900">รายการคำขอ</h2>
+                     <p class="mt-1 text-xs text-gray-500">
+                        ทั้งหมด <?= count($tickets) ?> รายการ<?= $filter ? ' · กรอง: ' . h($statusLabel[$filter] ?? $filter) : '' ?>
+                     </p>
+                  </div>
+                  <form method="get" class="flex flex-wrap items-center gap-2">
+                     <label class="sr-only" for="status-filter">กรองสถานะ</label>
+                     <select id="status-filter" name="status" class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:border-gray-900">
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                         <option value="">ทุกสถานะ</option>
                         <?php foreach ($statusLabel as $key => $label): ?>
                            <option value="<?= h($key) ?>" <?= $filter === $key ? 'selected' : '' ?>><?= h($label) ?></option>
                         <?php endforeach; ?>
                      </select>
+<<<<<<< HEAD
                      <button class="admin-btn">ค้นหา</button>
                      <?php if ($filter || $search !== ''): ?>
+=======
+                     <button class="admin-btn">กรอง</button>
+                     <?php if ($filter): ?>
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                         <a href="admin_manage_request.php" class="admin-reset-link">ล้าง</a>
                      <?php endif; ?>
                   </form>
                </div>
 
+<<<<<<< HEAD
                <div class="overflow-x-auto">
                   <table class="rq-table">
                      <colgroup>
@@ -992,12 +1166,135 @@ require_once __DIR__ . '/admin_header.php';
                                        </button>
                                     </div>
                                  </div>
+=======
+               <div class="overflow-x-auto admin-table-wrap">
+                  <table class="w-full min-w-[1000px] text-left text-sm">
+                     <thead class="bg-gray-50 text-xs text-gray-500">
+                        <tr>
+                           <th class="px-4 py-3 font-medium">รหัส / วันที่</th>
+                           <th class="px-4 py-3 font-medium">ผู้แจ้ง</th>
+                           <th class="px-4 py-3 font-medium">สถานที่</th>
+                           <th class="px-4 py-3 font-medium">รายละเอียด</th>
+                           <th class="px-4 py-3 font-medium">ความเร่งด่วน</th>
+                           <th class="px-4 py-3 font-medium">สถานะ</th>
+                           <th class="px-4 py-3 font-medium">ผู้รับผิดชอบ</th>
+                           <th class="px-4 py-3 font-medium">บันทึก</th>
+                        </tr>
+                     </thead>
+                     <tbody class="divide-y divide-gray-100">
+                        <?php if (!$tickets): ?>
+                           <tr>
+                              <td colspan="8" class="px-4 py-12 text-center text-gray-500">ยังไม่มีคำขอในรายการนี้</td>
+                           </tr>
+                        <?php endif; ?>
+
+                        <?php foreach ($tickets as $t): ?>
+                           <tr class="align-top hover:bg-gray-50/70 transition-colors">
+                              <td class="px-4 py-4">
+                                 <div class="font-mono font-medium text-gray-900">#<?= h($t['ticket_no']) ?></div>
+                                 <div class="mt-1 text-xs text-gray-500"><?= h(date('d/m/Y H:i', strtotime($t['created_at']))) ?></div>
+                              </td>
+                              <td class="px-4 py-4">
+                                 <div class="font-medium text-gray-900"><?= h($t['first_name'] . ' ' . $t['last_name']) ?></div>
+                                 <div class="text-xs text-gray-500">รหัส: <?= h($t['id_number'] ?? '—') ?></div>
+                                 <div class="text-xs text-gray-500"><?= h($t['department_name'] ?? 'ไม่ระบุแผนก') ?></div>
+                              </td>
+                              <td class="px-4 py-4">
+                                 <div class="text-gray-900"><?= h($t['location_name']) ?></div>
+                              </td>
+                              <td class="max-w-xs px-4 py-4">
+                                 <div class="font-medium text-gray-900"><?= h($t['category_name']) ?><?= !empty($t['sub_category']) ? ' · ' . h($t['sub_category']) : '' ?></div>
+                                 <div class="mt-1 whitespace-normal text-xs text-gray-500"><?= h($t['symptoms']) ?></div>
+                                 <?php
+                                 $ticketDetails = [
+                                    'ticketNo' => $t['ticket_no'],
+                                    'createdAt' => date('d/m/Y H:i', strtotime($t['created_at'])),
+                                    'status' => $statusLabel[$t['status']] ?? $t['status'],
+                                    'urgency' => $t['urgency'] === 'urgent' ? 'ด่วน' : ($t['urgency'] === 'low' ? 'ไม่เร่งด่วน' : 'ปกติ'),
+                                    'category' => $t['category_name'],
+                                    'location' => $t['location_name'],
+                                    'requester' => trim($t['first_name'] . ' ' . $t['last_name']),
+                                    'idNumber' => $t['id_number'],
+                                    'userTypeDepartment' => (($userTypeLabels[$t['user_type']] ?? $t['user_type']) . ' · ' . ($t['department_name'] ?? 'ไม่ระบุแผนก')),
+                                    'phone' => $t['phone_number'],
+                                    'email' => $t['email'],
+                                    'assignee' => trim(($t['tech_first'] ?? '') . ' ' . ($t['tech_last'] ?? '')),
+                                    'symptoms' => $t['symptoms'],
+                                    'acceptedAt' => $t['accepted_at'] ? date('d/m/Y H:i', strtotime($t['accepted_at'])) : '',
+                                    'completedAt' => $t['completed_at'] ? date('d/m/Y H:i', strtotime($t['completed_at'])) : '',
+                                    'resolutionSummary' => $t['resolution_summary'],
+                                    'cancelReason' => $t['cancel_reason'],
+                                    'cancelledByRequester' => (int)($t['cancelled_by'] ?? 0) === (int)$t['requester_id'],
+                                    'cancelledByLabel' => $t['cancelled_by'] === null
+                                       ? 'ไม่ทราบผู้ยกเลิก'
+                                       : ((int)$t['cancelled_by'] === (int)$t['requester_id'] ? 'ผู้แจ้งยกเลิก' : 'ผู้ดูแลยกเลิก'),
+                                    'ticket_id' => (int)$t['ticket_id'],
+                                    'attachments' => $attachmentsByTicket[(int)$t['ticket_id']] ?? [],
+                                 ];
+                                 ?>
+                                 <button type="button" data-ticket-details="<?= h(json_encode($ticketDetails, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT | JSON_INVALID_UTF8_SUBSTITUTE)) ?>"
+                                    class="mt-2 inline-flex items-center gap-1.5 rounded-md border border-gray-300 px-2.5 py-1.5 text-xs font-medium text-gray-700 hover:border-gray-500 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400">
+                                    <i class="fa-regular fa-eye" aria-hidden="true"></i> ดูรายละเอียด
+                                 </button>
+                              </td>
+                              <td class="px-4 py-4">
+                                 <span class="admin-chip <?= $t['urgency'] === 'urgent' ? 'is-urgent' : ($t['urgency'] === 'low' ? 'is-low' : '') ?>">
+                                    <?= $t['urgency'] === 'urgent' ? 'ด่วน' : ($t['urgency'] === 'low' ? 'ไม่เร่งด่วน' : 'ปกติ') ?>
+                                 </span>
+                              </td>
+                              <td class="px-4 py-4">
+                                 <span class="admin-chip st-<?= h($t['status']) ?>">
+                                    <?= h($statusLabel[$t['status']] ?? $t['status']) ?>
+                                 </span>
+                                 <?php if ($t['status'] === 'cancelled'): ?>
+                                    <?php
+                                    $cancelledByRequester = (int)($t['cancelled_by'] ?? 0) === (int)$t['requester_id'];
+                                    $cancellationLabel = $t['cancelled_by'] === null
+                                       ? 'ไม่ทราบผู้ยกเลิก'
+                                       : ($cancelledByRequester ? 'ผู้แจ้งยกเลิก' : 'ผู้ดูแลยกเลิก');
+                                    ?>
+                                    <span class="admin-chip is-warning no-dot mt-3 flex w-fit">
+                                       <i class="fa-solid fa-user-xmark" aria-hidden="true"></i>
+                                       <?= h($cancellationLabel) ?>
+                                    </span>
+                                 <?php endif; ?>
+                              </td>
+                              <td class="px-4 py-4 text-xs">
+                                 <?= !empty($t['tech_first']) ? h($t['tech_first'] . ' ' . $t['tech_last']) : '<span class="text-gray-400">ยังไม่มอบหมาย</span>' ?>
+                              </td>
+                              <td class="px-4 py-4">
+                                 <?php if (!empty($statusTransitions[$t['status']])): ?>
+                                    <button type="button" data-open-status-modal
+                                       data-ticket-id="<?= (int)$t['ticket_id'] ?>"
+                                       data-ticket-no="<?= h($t['ticket_no']) ?>"
+                                       data-current-status="<?= h($t['status']) ?>"
+                                       data-current-label="<?= h($statusLabel[$t['status']] ?? $t['status']) ?>"
+                                       data-allowed-statuses="<?= h(json_encode($statusTransitions[$t['status']])) ?>"
+                                       class="inline-flex items-center gap-1.5 rounded-md border border-gray-300 px-2.5 py-1.5 text-xs font-medium text-gray-700 hover:border-gray-500 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400">
+                                       <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i> อัปเดตสถานะ
+                                    </button>
+                                 <?php else: ?>
+                                    <button type="button" disabled
+                                       class="inline-flex cursor-not-allowed items-center gap-1.5 rounded-md border border-gray-200 bg-gray-50 px-2.5 py-1.5 text-xs font-medium text-gray-500"
+                                       title="ไม่สามารถเปลี่ยนสถานะหลังปิดงานได้">
+                                       <i class="fa-solid fa-lock" aria-hidden="true"></i> ล็อกสถานะ
+                                    </button>
+                                 <?php endif; ?>
+                                 <br>
+                                 <button type="button" data-open-ticket-delete
+                                    data-ticket-id="<?= (int)$t['ticket_id'] ?>"
+                                    data-ticket-no="<?= h($t['ticket_no']) ?>"
+                                    class="mt-2 inline-flex items-center gap-1.5 rounded-md border border-red-200 px-2.5 py-1.5 text-xs font-medium text-red-700 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-400">
+                                    <i class="fa-regular fa-trash-can" aria-hidden="true"></i> ลบใบแจ้งซ่อม
+                                 </button>
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                               </td>
                            </tr>
                         <?php endforeach; ?>
                      </tbody>
                   </table>
                </div>
+<<<<<<< HEAD
                <?php pager_render('admin_manage_request.php', $totalFiltered, $page, $perPage, $perPageOptions, static fn(int $p): string => $listUrl(['page' => $p]), ['status' => $filter, 'q' => $search], 'เปลี่ยนหน้ารายการคำขอ'); ?>
             </section>
          </div>
@@ -1184,6 +1481,11 @@ require_once __DIR__ . '/admin_header.php';
             })();
          </script>
 
+=======
+            </section>
+         </div>
+
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
          <dialog id="statusUpdateModal" aria-labelledby="statusUpdateTitle" class="m-auto max-h-[90vh] w-[min(460px,calc(100%-2rem))] overflow-hidden rounded-2xl border border-gray-200 bg-white p-0 shadow-2xl backdrop:bg-gray-950/40 backdrop:backdrop-blur-sm">
             <form method="post" id="statusUpdateForm" class="flex max-h-[90vh] flex-col">
                <input type="hidden" name="csrf" value="<?= h($_SESSION['admin_csrf']) ?>">
@@ -1201,7 +1503,11 @@ require_once __DIR__ . '/admin_header.php';
                         </div>
                      </div>
                   </div>
+<<<<<<< HEAD
                   <button type="button" data-close-status-modal aria-label="ปิด" class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-gray-500 transition hover:bg-gray-100 hover:text-gray-900"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+=======
+                  <button type="button" data-close-status-modal aria-label="ปิด" class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-gray-400 transition hover:bg-gray-100 hover:text-gray-900"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                </div>
                <div class="min-h-0 flex-1 space-y-4 overflow-y-auto px-5 py-5 pb-7 sm:px-6">
                   <div>
@@ -1216,7 +1522,11 @@ require_once __DIR__ . '/admin_header.php';
                   </div>
                   <div class="hidden rounded-xl border border-gray-200 bg-gray-50 p-3.5" data-status-reason-wrap>
                      <label for="statusUpdateReason" class="mb-1.5 block text-sm font-medium text-gray-800" data-status-reason-label></label>
+<<<<<<< HEAD
                      <textarea name="status_reason" id="statusUpdateReason" rows="3" maxlength="255" class="w-full resize-y rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 outline-none transition placeholder:text-gray-500 focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10" data-status-reason></textarea>
+=======
+                     <textarea name="status_reason" id="statusUpdateReason" rows="3" maxlength="255" class="w-full resize-y rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10" data-status-reason></textarea>
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                      <p class="mt-1.5 text-xs text-gray-500">ข้อมูลนี้จะแสดงให้ผู้แจ้งเห็นในหน้าติดตามใบงาน</p>
                   </div>
                </div>
@@ -1289,7 +1599,11 @@ require_once __DIR__ . '/admin_header.php';
                         <h2 id="ticketDeleteTitle" class="mt-0.5 font-semibold text-gray-950">ยืนยันการลบใบแจ้งซ่อม</h2>
                      </div>
                   </div>
+<<<<<<< HEAD
                   <button type="button" data-close-ticket-delete aria-label="ปิด" class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-gray-500 transition hover:bg-gray-100 hover:text-gray-900"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+=======
+                  <button type="button" data-close-ticket-delete aria-label="ปิด" class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-gray-400 transition hover:bg-gray-100 hover:text-gray-900"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                </div>
                <div class="space-y-4 px-5 py-5 sm:px-6">
                   <p class="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">
@@ -1298,7 +1612,11 @@ require_once __DIR__ . '/admin_header.php';
                   <div>
                      <label for="ticketDeleteConfirmInput" class="mb-1.5 block text-sm font-medium text-gray-800">พิมพ์รหัสใบแจ้งซ่อมเพื่อยืนยันการลบ</label>
                      <input type="text" id="ticketDeleteConfirmInput" name="confirm_ticket_no" autocomplete="off" spellcheck="false" autocapitalize="off" autocorrect="off" placeholder="รหัสใบแจ้งซ่อมของใบงานนี้"
+<<<<<<< HEAD
                         class="w-full rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 font-mono text-sm outline-none transition placeholder:font-kanit placeholder:text-gray-500 focus:border-red-600 focus:ring-2 focus:ring-red-600/10">
+=======
+                        class="w-full rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 font-mono text-sm outline-none transition placeholder:font-kanit placeholder:text-gray-400 focus:border-red-600 focus:ring-2 focus:ring-red-600/10">
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                      <p id="ticketDeleteHint" class="mt-1.5 text-xs text-gray-500">ไม่ต้องพิมพ์เครื่องหมาย # และยังไม่ต้องสนใจตัวพิมพ์เล็ก-ใหญ่หรือช่องว่าง</p>
                   </div>
                </div>
@@ -1336,10 +1654,17 @@ require_once __DIR__ . '/admin_header.php';
                         deleteHint.textContent = deleteHintDefault;
                         deleteHint.className = 'mt-1.5 text-xs text-gray-500';
                      } else if (match) {
+<<<<<<< HEAD
                         repsSetIconText(deleteHint, 'check', 'รหัสตรงกันแล้ว กด "ยืนยันลบใบแจ้งซ่อม" เพื่อทำรายการ');
                         deleteHint.className = 'mt-1.5 text-xs font-medium text-emerald-600';
                      } else {
                         repsSetIconText(deleteHint, 'x', 'รหัสที่พิมพ์ยังไม่ตรงกัน กรุณาตรวจสอบอีกครั้ง');
+=======
+                        deleteHint.textContent = 'รหัสตรงกันแล้ว กด "ยืนยันลบใบแจ้งซ่อม" เพื่อทำรายการ';
+                        deleteHint.className = 'mt-1.5 text-xs font-medium text-emerald-600';
+                     } else {
+                        deleteHint.textContent = 'รหัสที่พิมพ์ยังไม่ตรงกัน กรุณาตรวจสอบอีกครั้ง';
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                         deleteHint.className = 'mt-1.5 text-xs font-medium text-amber-600';
                      }
                   }
@@ -1368,7 +1693,11 @@ require_once __DIR__ . '/admin_header.php';
                      if (normalize(deleteConfirmInput.value) !== normalize(expected)) {
                         event.preventDefault();
                         refreshDeleteState();
+<<<<<<< HEAD
                         repsSetIconText(deleteHint, 'x', 'รหัสใบแจ้งซ่อมไม่ตรง จึงยังลบไม่ได้');
+=======
+                        deleteHint && (deleteHint.textContent = '✗ รหัสใบแจ้งซ่อมไม่ตรง จึงยังลบไม่ได้');
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                         return;
                      }
                      deleteSubmit.disabled = true;
@@ -1470,6 +1799,7 @@ require_once __DIR__ . '/admin_header.php';
                      addField(requesterFields, 'รหัสผู้แจ้ง', details.idNumber);
                      addField(requesterFields, 'เบอร์ติดต่อ', details.phone);
                      addField(requesterFields, 'อีเมล', details.email, true);
+<<<<<<< HEAD
                      addField(requesterFields, 'ผู้ติดต่อหลัก (Snapshot)', details.primaryContact, true);
                      addField(locationFields, 'สถานที่ / ห้อง', details.location);
                      addField(locationFields, 'หมวดหมู่', details.category);
@@ -1479,6 +1809,10 @@ require_once __DIR__ . '/admin_header.php';
                      addField(locationFields, 'ผู้ติดต่อสำรอง', details.secondaryContact, true);
                      addField(locationFields, 'ครูผู้ประสานงาน', details.coordinator);
                      addField(locationFields, 'ครูผู้ดูแลห้อง', details.caretaker);
+=======
+                     addField(locationFields, 'สถานที่ / ห้อง', details.location);
+                     addField(locationFields, 'หมวดหมู่', details.category);
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                      addField(statusFields, 'วันที่แจ้ง', details.createdAt);
                      addField(statusFields, 'สถานะ', details.status);
                      addField(statusFields, 'ความเร่งด่วน', details.urgency);
@@ -1486,6 +1820,7 @@ require_once __DIR__ . '/admin_header.php';
                      addField(statusFields, 'เริ่มดำเนินการ', details.acceptedAt);
                      addField(statusFields, 'วันที่เสร็จสิ้น', details.completedAt);
                      symptoms.textContent = details.symptoms || 'ไม่มีรายละเอียด';
+<<<<<<< HEAD
                      addField(resolutionFields, 'วิธีดำเนินการ', details.repairMethod, true);
                      addField(resolutionFields, 'สรุปการแก้ไข', details.resolutionSummary, true);
                      addField(resolutionFields, (details.cancelledByLabel || 'เหตุผลการยกเลิก') + ' · เหตุผล', details.cancelReason, true, true);
@@ -1501,14 +1836,29 @@ require_once __DIR__ . '/admin_header.php';
                         const path = item.url;
                         const link = document.createElement('a');
                         link.href = path;
+=======
+                     addField(resolutionFields, 'สรุปการแก้ไข', details.resolutionSummary, true);
+                     addField(resolutionFields, (details.cancelledByLabel || 'เหตุผลการยกเลิก') + ' · เหตุผล', details.cancelReason, true, true);
+                     attachments.replaceChildren();
+                     const imagePaths = Array.isArray(details.attachments) ? details.attachments : [];
+                     attachmentSection.classList.toggle('hidden', imagePaths.length === 0);
+                     imagePaths.forEach(function (path) {
+                        const link = document.createElement('a');
+                        link.href = 'ticket_attachment.php?id=' + encodeURIComponent(details.ticket_id) + '&attachment=' + encodeURIComponent(path);
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                         link.target = '_blank';
                         link.rel = 'noopener noreferrer';
                         link.className = 'block overflow-hidden rounded-lg border border-gray-200 bg-gray-50';
                         link.setAttribute('aria-label', 'เปิดรูปภาพขนาดเต็ม');
                         const image = document.createElement('img');
+<<<<<<< HEAD
                         image.src = path;
                         image.alt = item.alt;
                         image.title = item.alt;
+=======
+                        image.src = 'ticket_attachment.php?id=' + encodeURIComponent(details.ticket_id) + '&attachment=' + encodeURIComponent(path);
+                        image.alt = 'รูปประกอบคำขอซ่อม';
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                         image.loading = 'eager';
                         image.decoding = 'async';
                         image.className = 'h-40 w-full object-contain';
@@ -1528,7 +1878,10 @@ require_once __DIR__ . '/admin_header.php';
             })();
          </script>
       </div>
+<<<<<<< HEAD
 <?php $footerBase = '../'; $footerVariant = 'app'; require __DIR__ . '/../includes/site_footer.php'; ?>
+=======
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
    </div>
 </body>
 </html>

@@ -20,9 +20,12 @@ function lineConfig(string $key, bool $required = true): string
 
 function lineApiPost(string $url, array $payload): void
 {
+<<<<<<< HEAD
    if (filter_var(getenv('REPS_E2E') ?: 'false', FILTER_VALIDATE_BOOLEAN)) {
       throw new RuntimeException('LINE notifications are disabled in E2E mode');
    }
+=======
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
    if (!function_exists('curl_init')) {
       throw new RuntimeException('The PHP cURL extension is not enabled');
    }
@@ -88,7 +91,11 @@ function lineApiPost(string $url, array $payload): void
 
 function lineBuildTicketText(array $ticket): string
 {
+<<<<<<< HEAD
    $urgencyLabels = ['urgent' => 'ด่วน', 'normal' => 'ปกติ'];
+=======
+   $urgencyLabels = ['urgent' => 'ด่วน', 'normal' => 'ปกติ', 'low' => 'ไม่เร่งด่วน'];
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
    $urgency = (string)$ticket['urgency'];
    $requester = trim((string)$ticket['first_name'] . ' ' . (string)$ticket['last_name']);
    $symptom = lineMainSymptom((string)$ticket['symptom']);
@@ -125,8 +132,13 @@ function lineMainSymptom(string $symptom): string
 
 function lineBuildTicketFlex(array $ticket): array
 {
+<<<<<<< HEAD
    $urgencyLabels = ['urgent' => 'ด่วน', 'normal' => 'ปกติ'];
    $urgencyColors = ['urgent' => '#FCA5A5', 'normal' => '#FDBA74'];
+=======
+   $urgencyLabels = ['urgent' => 'ด่วน', 'normal' => 'ปกติ', 'low' => 'ไม่เร่งด่วน'];
+   $urgencyColors = ['urgent' => '#FCA5A5', 'normal' => '#FDBA74', 'low' => '#CBD5E1'];
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 
    $urgency = (string)$ticket['urgency'];
    $urgencyLabel = $urgencyLabels[$urgency] ?? $urgency;

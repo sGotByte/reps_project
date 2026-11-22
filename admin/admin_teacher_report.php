@@ -3,17 +3,26 @@ declare(strict_types=1);
 
 /**
  * REPS · admin/admin_teacher_report.php
+<<<<<<< HEAD
  * รายงานตามภาคเรียน (ค่าเริ่มต้น = ภาคเรียนปัจจุบัน) หรือทั้งปีการศึกษา + กราฟผลงานของสตาฟแต่ละคน
  *   ?term=<id>        ภาคเรียนที่เลือก: สตาฟ = ทีมของภาคเรียนนั้น · คะแนน = คะแนนในภาคเรียนนั้น
  *   ?term=all&acad_year=2569  ทั้งปีการศึกษา: สตาฟที่มีงานในปีนั้น · คะแนนรวมในช่วงปี
+=======
+ * รายงานประจำปีการศึกษา (สำหรับครู/แอดมิน) + กราฟรายงานผลงานของสตาฟแต่ละคน
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
  */
 
 require_once dirname(__DIR__) . '/db_connect.php';
 require_once dirname(__DIR__) . '/includes/user_auth.php';
 require_once dirname(__DIR__) . '/includes/site_config.php';
+<<<<<<< HEAD
 require_once dirname(__DIR__) . '/includes/terms.php';
 
 $actorId = app_require_active_user($conn, '../login.php?next=teacher_report', ['admin']);
+=======
+
+$actorId = app_require_active_user($conn, '../login.php?next=admin', ['teacher', 'admin']);
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 $siteName = app_site_name($conn);
 $settings = app_get_settings($conn);
 $startMonth = max(1, min(12, (int)($settings['academic_year_start_month'] ?? 5))); // ค่าเริ่มต้นเดือน 5 (พฤษภาคม)
@@ -23,6 +32,7 @@ $currentYearAD = (int)date('Y');
 $currentMonth  = (int)date('n');
 $currentAcadYearBE = ($currentMonth >= $startMonth ? $currentYearAD : $currentYearAD - 1) + 543;
 
+<<<<<<< HEAD
 $allTerms = term_all($conn);
 $termParam = is_string($_GET['term'] ?? null) ? $_GET['term'] : '';
 $selTerm = null;
@@ -52,11 +62,27 @@ if ($selTerm) {
 $rangeTerm = ['start_date' => substr($startDate, 0, 10), 'end_date' => substr($endDate, 0, 10)];
 
 // 1. สรุปภาพรวมของช่วงที่เลือก
+=======
+$selectedAcadYearBE = filter_input(INPUT_GET, 'acad_year', FILTER_VALIDATE_INT) ?: $currentAcadYearBE;
+$startYearAD = $selectedAcadYearBE - 543;
+$endYearAD   = $startYearAD + 1;
+
+// ช่วงวันที่ของปีการศึกษาที่เลือก (เช่น 2026-05-01 00:00:00 ถึง 2027-04-30 23:59:59)
+$startDate = sprintf('%04d-%02d-01 00:00:00', $startYearAD, $startMonth);
+$endTs = strtotime("+1 year -1 second", strtotime($startDate));
+$endDate = date('Y-m-d H:i:s', $endTs);
+
+// 1. สรุปภาพรวมทั้งปีการศึกษา
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 $kpiStmt = $conn->prepare(
     "SELECT
         COUNT(*) AS total_tickets,
         SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) AS completed_tickets,
+<<<<<<< HEAD
         SUM(CASE WHEN status IN ('accepted', 'awaiting_intake_sign', 'in_progress', 'inspected_ready') THEN 1 ELSE 0 END) AS in_progress_tickets,
+=======
+        SUM(CASE WHEN status = 'in_progress' THEN 1 ELSE 0 END) AS in_progress_tickets,
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
         SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) AS pending_tickets
      FROM tickets
      WHERE created_at BETWEEN ? AND ?"
@@ -66,6 +92,7 @@ $kpiStmt->execute();
 $kpi = $kpiStmt->get_result()->fetch_assoc();
 $kpiStmt->close();
 
+<<<<<<< HEAD
 // 2. ผลงานสตาฟ: ภาคเรียน = ทีมของภาคเรียนนั้น (รวมคนที่ถูกปิดบัญชีภายหลัง) · ทั้งปี = สตาฟที่มีงานในช่วงนั้น
 $staffWhere = $selTerm
     ? "u.user_id IN (SELECT ts.user_id FROM term_staff ts WHERE ts.term_id = " . (int)$selTerm['id'] . ")"
@@ -75,25 +102,44 @@ $staffPerfStmt = $conn->prepare(
             COUNT(t.id) AS total_assigned,
             SUM(CASE WHEN t.status = 'completed' THEN 1 ELSE 0 END) AS completed_cnt,
             SUM(CASE WHEN t.status IN ('accepted', 'awaiting_intake_sign', 'in_progress', 'inspected_ready') THEN 1 ELSE 0 END) AS active_cnt,
+=======
+// 2. ข้อมูลเปรียบเทียบสตาฟแต่ละคนในปีการศึกษานี้
+$staffPerfStmt = $conn->prepare(
+    "SELECT u.user_id, u.first_name, u.last_name, u.score,
+            COUNT(t.id) AS total_assigned,
+            SUM(CASE WHEN t.status = 'completed' THEN 1 ELSE 0 END) AS completed_cnt,
+            SUM(CASE WHEN t.status = 'in_progress' THEN 1 ELSE 0 END) AS active_cnt,
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
             ROUND(AVG(CASE WHEN t.status = 'completed' AND t.accepted_at IS NOT NULL AND t.completed_at IS NOT NULL
                 THEN TIMESTAMPDIFF(MINUTE, t.accepted_at, t.completed_at) END), 0) AS avg_minutes
      FROM users u
      LEFT JOIN tickets t ON t.assigned_to = u.user_id AND t.created_at BETWEEN ? AND ?
+<<<<<<< HEAD
      WHERE {$staffWhere}
      GROUP BY u.user_id
      " . ($selTerm ? '' : 'HAVING total_assigned > 0') . "
      ORDER BY completed_cnt DESC, score DESC"
+=======
+     WHERE u.role = 'staff' AND u.status = 'active'
+     GROUP BY u.user_id
+     ORDER BY completed_cnt DESC, u.score DESC"
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 );
 $staffPerfStmt->bind_param('ss', $startDate, $endDate);
 $staffPerfStmt->execute();
 $staffStats = $staffPerfStmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $staffPerfStmt->close();
 
+<<<<<<< HEAD
 // 3. แนวโน้มรายเดือนในช่วงที่เลือก
+=======
+// 3. แนวโน้มรายเดือนตลอดปีการศึกษา (12 เดือน)
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 $monthlyLabels = [];
 $monthlyCreated = [];
 $monthlyCompleted = [];
 $thaiShortMonths = [1=>'ม.ค.',2=>'ก.พ.',3=>'มี.ค.',4=>'เม.ย.',5=>'พ.ค.',6=>'มิ.ย.',7=>'ก.ค.',8=>'ส.ค.',9=>'ก.ย.',10=>'ต.ค.',11=>'พ.ย.',12=>'ธ.ค.'];
+<<<<<<< HEAD
 $monthCursor = strtotime(date('Y-m-01', strtotime($startDate)));
 $monthLast = strtotime(date('Y-m-01', strtotime($endDate)));
 $mStmt = $conn->prepare(
@@ -112,6 +158,31 @@ for ($guard = 0; $monthCursor <= $monthLast && $guard < 24; $guard++, $monthCurs
     $monthlyCompleted[] = (int)($mRow['done_cnt'] ?? 0);
 }
 $mStmt->close();
+=======
+
+for ($mOffset = 0; $mOffset < 12; $mOffset++) {
+    $mTs = strtotime("+{$mOffset} months", strtotime($startDate));
+    $ym = date('Y-m', $mTs);
+    $mIdx = (int)date('n', $mTs);
+    $yShort = substr((string)((int)date('Y', $mTs) + 543), -2);
+    $monthlyLabels[] = $thaiShortMonths[$mIdx] . ' ' . $yShort;
+
+    $mStmt = $conn->prepare(
+        "SELECT
+            COUNT(*) AS created_cnt,
+            SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) AS done_cnt
+         FROM tickets
+         WHERE DATE_FORMAT(created_at, '%Y-%m') = ?"
+    );
+    $mStmt->bind_param('s', $ym);
+    $mStmt->execute();
+    $mRow = $mStmt->get_result()->fetch_assoc();
+    $mStmt->close();
+
+    $monthlyCreated[] = (int)($mRow['created_cnt'] ?? 0);
+    $monthlyCompleted[] = (int)($mRow['done_cnt'] ?? 0);
+}
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 
 // เตรียมข้อมูล JSON สำหรับ Chart.js
 $chartStaffNames = array_map(fn($s) => $s['first_name'], $staffStats);
@@ -123,6 +194,7 @@ function h(mixed $v): string {
     return htmlspecialchars((string)($v ?? ''), ENT_QUOTES, 'UTF-8');
 }
 ?>
+<<<<<<< HEAD
 <?php $adminShell = current_role() === 'admin'; ?>
 <?php if ($adminShell):
     $page_title = 'รายงานปีการศึกษา';
@@ -141,11 +213,14 @@ function h(mixed $v): string {
 <?php $admin_extra_head = ob_get_clean();
     require __DIR__ . '/admin_header.php';
 else: ?>
+=======
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 <!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<<<<<<< HEAD
     <title>รายงานสรุป<?= h($periodLabel) ?> | <?= h($siteName) ?></title>
     <link rel="icon" type="image/svg+xml" href="../assets/images/logo/reps-icon.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -158,11 +233,28 @@ else: ?>
     <?= app_theme_css($conn) ?>
     <style>
         body { background: #FAFAF8; color: #161616; font-family: 'Kanit', sans-serif; }
+=======
+    <title>รายงานประจำปีการศึกษา <?= $selectedAcadYearBE ?> | <?= h($siteName) ?></title>
+    <link rel="icon" type="image/svg+xml" href="../assets/images/logo/reps-icon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/vendor/fontawesome/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>tailwind.config = { theme: { extend: { fontFamily: { kanit: ['Kanit', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] } } } };</script>
+    <?= app_theme_css($conn) ?>
+    <style>
+        body { background: #FAFAF8; color: #161616; font-family: 'Kanit', 'Inter', sans-serif; }
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
         .tray { padding: 6px; border: 1px solid #EAE8E4; border-radius: 20px; background: #F7F6F4; }
         .tray-card { border: 1px solid #ECEAE6; border-radius: 14px; background: #FFFFFF; }
         @media print { .no-print { display: none !important; } body { background: #FFF; } }
     </style>
+<<<<<<< HEAD
    <link rel="stylesheet" href="../assets/css/base.css?v=18">
+=======
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 </head>
 <body class="min-h-screen flex flex-col antialiased">
 
@@ -180,6 +272,7 @@ else: ?>
             </div>
         </div>
     </header>
+<<<<<<< HEAD
 <?php endif; ?>
 
     <main class="<?= $adminShell ? 'w-full space-y-6' : 'flex-1 max-w-6xl w-full mx-auto px-4 sm:px-7 py-7 space-y-6' ?>">
@@ -210,6 +303,26 @@ else: ?>
                         <?php endfor; ?>
                     </select>
                 <?php endif; ?>
+=======
+
+    <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-7 py-7 space-y-6">
+
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-normal tracking-tight">รายงานสรุปประจำปีการศึกษา <?= $selectedAcadYearBE ?></h1>
+                <p class="text-xs text-[#8E8B85] mt-1">
+                    ช่วงเวลา: <?= date('d/m/Y', strtotime($startDate)) ?> ถึง <?= date('d/m/Y', $endTs) ?> · ประเมินผลปฏิบัติงานฝ่ายซ่อมรายบุคคล
+                </p>
+            </div>
+
+            <form method="GET" class="no-print flex items-center gap-2 bg-white p-2 rounded-xl border border-[#EAE8E4] text-xs">
+                <label class="text-neutral-500 pl-2">ปีการศึกษา:</label>
+                <select name="acad_year" onchange="this.form.submit()" class="rounded-lg border border-neutral-300 px-3 py-1.5 font-mono font-semibold bg-white">
+                    <?php for ($y = $currentAcadYearBE; $y >= $currentAcadYearBE - 4; $y--): ?>
+                        <option value="<?= $y ?>" <?= $selectedAcadYearBE === $y ? 'selected' : '' ?>>ปีการศึกษา <?= $y ?></option>
+                    <?php endfor; ?>
+                </select>
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
             </form>
         </div>
 
@@ -236,14 +349,22 @@ else: ?>
         <!-- กราฟเปรียบเทียบผลงานสตาฟ & แนวโน้มรายเดือน -->
         <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div class="tray">
+<<<<<<< HEAD
                 <div class="px-4 py-2 text-xs font-semibold text-neutral-800">กราฟเปรียบเทียบผลงานสตาฟแต่ละคน (<?= h($periodLabel) ?>)</div>
+=======
+                <div class="px-4 py-2 text-xs font-semibold text-neutral-800">กราฟเปรียบเทียบผลงานสตาฟแต่ละคน (ปีการศึกษา <?= $selectedAcadYearBE ?>)</div>
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                 <div class="tray-card p-4">
                     <canvas id="staffBarChart" height="220"></canvas>
                 </div>
             </div>
 
             <div class="tray">
+<<<<<<< HEAD
                 <div class="px-4 py-2 text-xs font-semibold text-neutral-800">สถิติการแจ้งซ่อมและปิดงานรายเดือน (<?= h($periodLabel) ?>)</div>
+=======
+                <div class="px-4 py-2 text-xs font-semibold text-neutral-800">สถิติการแจ้งซ่อมและปิดงานรายเดือนตลอดปีการศึกษา</div>
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                 <div class="tray-card p-4">
                     <canvas id="monthlyLineChart" height="220"></canvas>
                 </div>
@@ -254,7 +375,11 @@ else: ?>
         <section class="tray">
             <div class="px-4 py-2.5 text-xs font-semibold text-neutral-800">ตารางสรุปผลการปฏิบัติงานและคะแนนสะสมของสตาฟรายบุคคล</div>
             <div class="tray-card overflow-x-auto">
+<<<<<<< HEAD
                 <table class="w-full text-left text-xs border-collapse" data-pager id="staffStats">
+=======
+                <table class="w-full text-left text-xs border-collapse">
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                     <thead>
                         <tr class="border-b border-neutral-200 bg-[#FAFAF8] text-neutral-500">
                             <th class="py-3 px-4">ชื่อ-นามสกุล สตาฟ</th>
@@ -284,6 +409,7 @@ else: ?>
     </main>
 
     <script>
+<<<<<<< HEAD
     // กราฟวาดบน canvas จึงไม่ใช้ฟอนต์จาก CSS: ตั้ง Kanit ให้ Chart.js และรอโหลดฟอนต์ก่อนวาด
     Chart.defaults.font.family = "'Kanit', sans-serif";
     Chart.defaults.font.size = 13;
@@ -292,6 +418,8 @@ else: ?>
     Chart.defaults.plugins.tooltip.titleFont = { family: "'Kanit', sans-serif", size: 13, weight: '500' };
     Chart.defaults.plugins.tooltip.bodyFont = { family: "'Kanit', sans-serif", size: 13 };
     function drawReportCharts() {
+=======
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
         new Chart(document.getElementById('staffBarChart'), {
             type: 'bar',
             data: {
@@ -309,12 +437,17 @@ else: ?>
             data: {
                 labels: <?= json_encode($monthlyLabels, JSON_UNESCAPED_UNICODE) ?>,
                 datasets: [
+<<<<<<< HEAD
                     { label: 'แจ้งซ่อมทั้งหมด', data: <?= json_encode($monthlyCreated) ?>, borderColor: '#6B6862', backgroundColor: 'rgba(142,139,133,0.1)', tension: 0.3, fill: true },
+=======
+                    { label: 'แจ้งซ่อมทั้งหมด', data: <?= json_encode($monthlyCreated) ?>, borderColor: '#8E8B85', backgroundColor: 'rgba(142,139,133,0.1)', tension: 0.3, fill: true },
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                     { label: 'ซ่อมเสร็จสิ้น', data: <?= json_encode($monthlyCompleted) ?>, borderColor: '#12A150', backgroundColor: 'rgba(18,161,80,0.1)', tension: 0.3, fill: true }
                 ]
             },
             options: { responsive: true, plugins: { legend: { position: 'bottom' } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
         });
+<<<<<<< HEAD
     }
     Promise.all([document.fonts.load("400 13px Kanit"), document.fonts.load("500 13px Kanit")])
         .catch(function () {})
@@ -327,5 +460,8 @@ else: ?>
 <?php else: ?>
 <?php $footerBase = '../'; $footerVariant = 'light'; require __DIR__ . '/../includes/site_footer.php'; ?>
 <?php endif; ?>
+=======
+    </script>
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 </body>
 </html>

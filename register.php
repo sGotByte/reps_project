@@ -1,10 +1,15 @@
 <?php
 require_once __DIR__ . '/db_connect.php';
 require_once __DIR__ . '/includes/csrf.php';
+<<<<<<< HEAD
 require_once __DIR__ . '/includes/site_config.php';
 $csrfToken = app_csrf_token();
 require __DIR__ . '/includes/registration_handler.php';
 $siteName = function_exists('app_site_name') ? app_site_name($conn) : 'REPS';
+=======
+$csrfToken = app_csrf_token();
+require __DIR__ . '/includes/registration_handler.php';
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 $inputClass  = 'auth-field';
 $pwdClass    = 'auth-field auth-field-pad';
 $eyeBtnClass = 'auth-eye';
@@ -15,12 +20,18 @@ $eyeBtnClass = 'auth-eye';
 <head>
    <meta charset="UTF-8">
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<<<<<<< HEAD
    <meta name="theme-color" content="#FFFFFF">
    <title>สร้างบัญชี | <?= htmlspecialchars($siteName, ENT_QUOTES, 'UTF-8') ?></title>
+=======
+   <meta name="theme-color" content="#0A0A0A">
+   <title>สร้างบัญชี | REPS</title>
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
    <link rel="icon" type="image/svg+xml" href="assets/images/logo/reps-icon.svg">
    <link rel="alternate icon" type="image/png" sizes="32x32" href="assets/images/logo/favicon-32.png">
    <link rel="apple-touch-icon" href="assets/images/logo/apple-touch-icon.png">
 
+<<<<<<< HEAD
    <!-- Google Fonts: Kanit -->
    <link rel="preconnect" href="https://fonts.googleapis.com">
    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -30,6 +41,12 @@ $eyeBtnClass = 'auth-eye';
    <link rel="stylesheet" href="assets/css/auth.css?v=<?= (int)@filemtime(__DIR__ . '/assets/css/auth.css') ?>">
    <link rel="stylesheet" href="assets/vendor/fontawesome/css/all.min.css">
    <link rel="stylesheet" href="assets/css/base.css?v=18">
+=======
+   <!-- Google Fonts: Google Sans, Kanit -->
+   <link rel="preconnect" href="https://fonts.googleapis.com">
+   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+   <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 
    <style>
       .form-row-2 {
@@ -43,6 +60,7 @@ $eyeBtnClass = 'auth-eye';
             grid-template-columns: 1fr;
          }
       }
+<<<<<<< HEAD
 
       /* Light Theme (No Grid / No Dashed Rails) */
       body.auth-light {
@@ -204,6 +222,28 @@ $eyeBtnClass = 'auth-eye';
       <div class="auth-header-inner">
          <a class="auth-logo-link focus:outline-none" href="index.php" aria-label="<?= htmlspecialchars($siteName, ENT_QUOTES, 'UTF-8') ?> หน้าหลัก">
             <img src="<?= htmlspecialchars(app_logo_url($conn), ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($siteName, ENT_QUOTES, 'UTF-8') ?>" class="auth-logo">
+=======
+   </style>
+
+   <link rel="stylesheet" href="assets/css/app.css?v=<?= (int)@filemtime(__DIR__ . '/assets/css/app.css') ?>">
+   <link rel="stylesheet" href="assets/css/auth.css?v=<?= (int)@filemtime(__DIR__ . '/assets/css/auth.css') ?>">
+   <link rel="stylesheet" href="assets/vendor/fontawesome/css/all.min.css">
+</head>
+
+<body class="auth-dark antialiased min-h-screen flex flex-col justify-between relative overflow-x-hidden font-sans">
+
+   <!-- เส้นประแนวตั้งสองเส้นวิ่งตลอดหน้า + กริดพื้นหลังบาง ๆ -->
+   <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden auth-fade-mask" aria-hidden="true">
+      <div class="absolute inset-0 auth-grid"></div>
+   </div>
+   <div class="auth-rails" aria-hidden="true"></div>
+
+   <!-- Header -->
+   <header class="auth-header">
+      <div class="max-w-6xl mx-auto h-16 px-6 flex items-center justify-between">
+         <a class="flex items-center gap-3 focus:outline-none" href="index.php" aria-label="REPS หน้าหลัก">
+            <img src="assets/images/logo/reps-logo.svg" alt="REPS" class="auth-logo h-6 sm:h-7 w-auto">
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
          </a>
 
          <a href="login.php" class="auth-btn auth-btn-inline rounded-lg">เข้าสู่ระบบ</a>
@@ -211,7 +251,11 @@ $eyeBtnClass = 'auth-eye';
    </header>
 
    <!-- Main Content -->
+<<<<<<< HEAD
    <main id="main" class="w-full relative z-10 flex-1 flex flex-col items-center justify-center px-6 py-12 sm:py-16">
+=======
+   <main id="main" class="w-full relative z-10 flex-1 flex flex-col items-center justify-center px-4 py-12 sm:py-16">
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
       <div class="w-full max-w-md mx-auto flex flex-col items-center">
 
          <div class="auth-card">
@@ -221,6 +265,7 @@ $eyeBtnClass = 'auth-eye';
                <p>กรอกข้อมูลเพื่อเริ่มใช้งานระบบแจ้งซ่อมออนไลน์</p>
             </div>
 
+<<<<<<< HEAD
             <div class="auth-alert-new is-info" role="note">
                <div class="alert-icon"><i class="fa-solid fa-user-clock" aria-hidden="true"></i></div>
                <div class="alert-content">
@@ -229,6 +274,8 @@ $eyeBtnClass = 'auth-eye';
                </div>
             </div>
 
+=======
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
             <form action="register.php" method="POST" id="registerForm" class="space-y-4" novalidate>
                <input type="hidden" name="csrf" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
                <?php require __DIR__ . '/includes/registration_fields.php'; ?>
@@ -248,8 +295,21 @@ $eyeBtnClass = 'auth-eye';
    </main>
 
    <!-- Footer -->
+<<<<<<< HEAD
    <?php $footerBase = ''; $footerVariant = 'light'; require __DIR__ . '/includes/site_footer.php'; ?>
 
 </body>
 
 </html>
+=======
+   <footer class="auth-footer">
+      <div class="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+         <span>แผนกเทคโนโลยีธุรกิจดิจิทัล</span>
+         <span>&copy; <?= date('Y'); ?> Developed by Digital Business Technology.</span>
+      </div>
+   </footer>
+
+</body>
+
+</html>
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff

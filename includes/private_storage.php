@@ -1,5 +1,6 @@
 <?php
 
+<<<<<<< HEAD
 /**
  * ที่เก็บไฟล์ส่วนตัว (รูปแนบใบงาน รูปปิดงาน ลายเซ็น โลโก้ QR)
  * - ไฟล์ทุกชนิดเก็บใน <TICKET_UPLOAD_DIR>/tickets และอ้างอิงในฐานข้อมูลเป็น "ticket-private/<ชื่อไฟล์>"
@@ -19,6 +20,8 @@ function app_path_is_absolute(string $path): bool
    return str_starts_with($path, '/') || str_starts_with($path, '\\') || preg_match('/^[A-Za-z]:[\\\\\/]/', $path) === 1;
 }
 
+=======
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 /** Return a persistent attachment directory outside the public document root. */
 function app_ticket_upload_dir(): string
 {
@@ -26,10 +29,17 @@ function app_ticket_upload_dir(): string
    $base = $configured !== '' ? $configured : sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'reps_private_uploads';
 
    // Relative paths are resolved against the project root so shared hosts without shell access do not need absolute paths.
+<<<<<<< HEAD
    if (!app_path_is_absolute($base)) {
       $base = dirname(__DIR__) . DIRECTORY_SEPARATOR . $base;
    }
    $base = rtrim($base, '/\\');
+=======
+   if (!str_starts_with($base, DIRECTORY_SEPARATOR)) {
+      $base = dirname(__DIR__) . DIRECTORY_SEPARATOR . $base;
+   }
+   $base = rtrim($base, DIRECTORY_SEPARATOR);
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
    if ($base === '') {
       throw new RuntimeException('TICKET_UPLOAD_DIR is not a valid path');
    }
@@ -39,10 +49,17 @@ function app_ticket_upload_dir(): string
       $parent = realpath(dirname($base));
       $resolvedBase = ($parent !== false ? $parent : dirname($base)) . DIRECTORY_SEPARATOR . basename($base);
    }
+<<<<<<< HEAD
    $candidate = rtrim($resolvedBase, '/\\') . DIRECTORY_SEPARATOR . 'tickets';
    $documentRoot = realpath((string)($_SERVER['DOCUMENT_ROOT'] ?? ''));
    if ($documentRoot !== false && $documentRoot !== '') {
       $normalizedRoot = rtrim($documentRoot, '/\\');
+=======
+   $candidate = rtrim($resolvedBase, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'tickets';
+   $documentRoot = realpath((string)($_SERVER['DOCUMENT_ROOT'] ?? ''));
+   if ($documentRoot !== false) {
+      $normalizedRoot = rtrim($documentRoot, DIRECTORY_SEPARATOR);
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
       if ($resolvedBase === $normalizedRoot || str_starts_with($resolvedBase, $normalizedRoot . DIRECTORY_SEPARATOR)) {
          // Shared hosting such as InfinityFree cannot write outside htdocs on the main domain.
          // In that case the directory must be explicitly allowed and protected by its own .htaccess.
@@ -59,6 +76,7 @@ function app_ticket_upload_dir(): string
    }
    return $candidate;
 }
+<<<<<<< HEAD
 
 function app_ensure_upload_dir(): string
 {
@@ -247,3 +265,5 @@ function app_serve_private_image(?string $absPath, bool $publicCache = false, ?s
    readfile($absPath);
    exit;
 }
+=======
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff

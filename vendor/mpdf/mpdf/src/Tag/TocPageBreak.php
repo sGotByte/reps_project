@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <?php
 
 namespace Mpdf\Tag;
@@ -14,3 +15,21 @@ class TocPageBreak extends FormFeed
 		parent::open($attr, $ahtml, $ihtml);
 	}
 }
+=======
+<?php
+
+namespace Mpdf\Tag;
+
+class TocPageBreak extends FormFeed
+{
+	public function open($attr, &$ahtml, &$ihtml)
+	{
+		list($isbreak, $toc_id) = $this->tableOfContents->openTagTOCPAGEBREAK($attr);
+		$this->toc_id = $toc_id;
+		if ($isbreak) {
+			return;
+		}
+		parent::open($attr, $ahtml, $ihtml);
+	}
+}
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff

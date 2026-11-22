@@ -6,10 +6,17 @@
     --portal-line: #ECEAE6;
     --portal-line-strong: #D9D6D0;
     --portal-ink: #161616;
+<<<<<<< HEAD
     --portal-muted: #6B6862;
     background: var(--portal-bg) !important;
     color: var(--portal-ink);
     font-family: 'Kanit', sans-serif !important;
+=======
+    --portal-muted: #8E8B85;
+    background: var(--portal-bg) !important;
+    color: var(--portal-ink);
+    font-family: 'Inter', 'Kanit', sans-serif !important;
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 }
 
 .portal-page .portal-header {
@@ -44,7 +51,11 @@
 
 .portal-page .portal-page-title {
     color: var(--portal-ink) !important;
+<<<<<<< HEAD
     font-family: 'Kanit', sans-serif;
+=======
+    font-family: 'Inter', 'Kanit', sans-serif;
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
     font-size: 28px;
     font-weight: 400;
     letter-spacing: -.025em;
@@ -52,8 +63,13 @@
 
 .portal-page .portal-eyebrow {
     color: var(--portal-muted) !important;
+<<<<<<< HEAD
     font-family: 'Kanit', sans-serif;
     font-size: 11px;
+=======
+    font-family: 'JetBrains Mono', 'Kanit', monospace;
+    font-size: 10px;
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
     font-weight: 600;
     letter-spacing: .12em;
     text-transform: uppercase;

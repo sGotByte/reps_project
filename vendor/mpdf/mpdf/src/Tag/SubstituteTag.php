@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <?php
 
 namespace Mpdf\Tag;
@@ -16,3 +17,23 @@ abstract class SubstituteTag extends Tag
 		$this->mpdf->$ltag = false;
 	}
 }
+=======
+<?php
+
+namespace Mpdf\Tag;
+
+abstract class SubstituteTag extends Tag
+{
+
+	public function close(&$ahtml, &$ihtml)
+	{
+		$tag = $this->getTagName();
+		if ($this->mpdf->InlineProperties[$tag]) {
+			$this->mpdf->restoreInlineProperties($this->mpdf->InlineProperties[$tag]);
+		}
+		unset($this->mpdf->InlineProperties[$tag]);
+		$ltag = strtolower($tag);
+		$this->mpdf->$ltag = false;
+	}
+}
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff

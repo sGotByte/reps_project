@@ -1,7 +1,11 @@
 <?php
 require_once __DIR__ . '/db_connect.php';
 require_once __DIR__ . '/includes/csrf.php';
+<<<<<<< HEAD
 require_once __DIR__ . '/includes/mailer.php';
+=======
+require_once __DIR__ . '/includes/gmail_smtp.php';
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 
 $csrfToken = app_csrf_token();
 $message = '';
@@ -62,8 +66,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                            && !isset($baseParts['query'])
                            && !isset($baseParts['fragment']);
 
+<<<<<<< HEAD
                         if (!$validBaseUrl || !app_mail_is_configured()) {
                            error_log('Password reset email is not configured (check APP_BASE_URL and mail transport settings)');
+=======
+                        if (!$validBaseUrl || !gmailSmtpIsConfigured()) {
+                           error_log('Password reset email is not configured (check APP_BASE_URL and Gmail SMTP credentials)');
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                            $message = 'พบอีเมลในระบบ แต่บริการส่งเมลยังไม่พร้อม กรุณาติดต่อผู้ดูแลระบบ';
                         } else {
                            $conn->query('DELETE FROM password_reset_tokens WHERE expires_at < DATE_SUB(NOW(), INTERVAL 1 DAY) OR (used_at IS NOT NULL AND created_at < DATE_SUB(NOW(), INTERVAL 1 DAY))');
@@ -100,7 +109,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                           . $resetUrl . "\n\n"
                                           . "หากคุณไม่ได้เป็นผู้ขอ สามารถเพิกเฉยต่ออีเมลนี้ได้\n";
                                        try {
+<<<<<<< HEAD
                                           app_mail_send($account['email'], 'ตั้งรหัสผ่าน REPS ใหม่', $body);
+=======
+                                          sendGmailSmtpMail($account['email'], 'ตั้งรหัสผ่าน REPS ใหม่', $body);
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                                           $message = 'พบอีเมลในระบบและส่งลิงก์ตั้งรหัสผ่านแล้ว กรุณาตรวจ Inbox และ Spam';
                                        } catch (Throwable $mailError) {
                                           $consume = $conn->prepare('UPDATE password_reset_tokens SET used_at = NOW() WHERE token_hash = ?');
@@ -153,6 +166,7 @@ function forgot_h($value): string
    <link rel="apple-touch-icon" href="assets/images/logo/apple-touch-icon.png">
    <link rel="preconnect" href="https://fonts.googleapis.com">
    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<<<<<<< HEAD
    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
    <link rel="stylesheet" href="assets/css/app.css?v=<?= (int)@filemtime(__DIR__ . '/assets/css/app.css') ?>">
    <link rel="stylesheet" href="assets/vendor/fontawesome/css/all.min.css">
@@ -162,6 +176,16 @@ function forgot_h($value): string
    <div class="flex flex-1 items-center justify-center px-4 py-10">
    <main class="w-full max-w-md rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
       <h1 class="text-center text-2xl font-medium">ลืมรหัสผ่าน?</h1>
+=======
+   <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+   <link rel="stylesheet" href="assets/css/app.css?v=<?= (int)@filemtime(__DIR__ . '/assets/css/app.css') ?>">
+   <link rel="stylesheet" href="assets/vendor/fontawesome/css/all.min.css">
+</head>
+<body class="flex min-h-screen items-center justify-center bg-[#f6f6f4] px-4 py-10 font-kanit text-gray-900">
+   <main class="w-full max-w-md rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
+      <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-neutral-900 text-white"><i class="fa-solid fa-key"></i></div>
+      <h1 class="mt-5 text-center text-2xl font-medium">ลืมรหัสผ่าน?</h1>
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
       <p class="mt-2 text-center text-sm leading-6 text-gray-500">กรอกอีเมลที่ใช้กับบัญชี ระบบจะส่งลิงก์ตั้งรหัสผ่านใหม่ให้</p>
 
       <?php if ($message !== ''): ?>
@@ -177,7 +201,10 @@ function forgot_h($value): string
 
       </form>
    </main>
+<<<<<<< HEAD
    </div>
 <?php $footerBase = ''; $footerVariant = 'light'; require __DIR__ . '/includes/site_footer.php'; ?>
+=======
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 </body>
 </html>

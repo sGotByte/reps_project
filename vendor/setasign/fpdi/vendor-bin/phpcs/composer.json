@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {
     "require-dev": {
         "squizlabs/php_codesniffer": "^4.0",
@@ -17,3 +18,24 @@
         }
     }
 }
+=======
+{
+    "require-dev": {
+        "squizlabs/php_codesniffer": "^4.0",
+        "slevomat/coding-standard": "~8.0",
+        "setasign/phpcs-teamcity-report": "^1.1"
+    },
+
+
+    "config": {
+        "process-timeout": 600,
+        "secure-http": false,
+        "platform": {
+            "php": "8.5.8"
+        },
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    }
+}
+>>>>>>> c08963be28603300a3a15f3774c665c05d933fff
