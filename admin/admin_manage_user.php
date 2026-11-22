@@ -1,19 +1,12 @@
 <?php
 declare(strict_types=1);
 
-<<<<<<< HEAD
 $page_title = 'จัดการผู้ใช้';
 $current_page = 'users';
 require_once __DIR__ . '/../includes/admin_auth.php';
 require_once __DIR__ . '/../db_connect.php';
 require_once __DIR__ . '/../includes/permissions.php';
 require_once __DIR__ . '/../includes/user_admin.php';
-=======
-$page_title = 'Users';
-$current_page = 'users';
-require_once __DIR__ . '/../includes/admin_auth.php';
-require_once __DIR__ . '/../db_connect.php';
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -34,10 +27,7 @@ $roleLabels = [
     'user'      => 'User',
     'requester' => 'User',
 ];
-<<<<<<< HEAD
 $userStatusLabels = ['pending' => 'รออนุมัติ', 'active' => 'ใช้งานได้', 'disabled' => 'ระงับใช้งาน', 'rejected' => 'ปฏิเสธการสมัคร'];
-=======
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 
 $message = is_array($_SESSION['admin_flash'] ?? null) ? (string)($_SESSION['admin_flash']['message'] ?? '') : '';
 $messageType = is_array($_SESSION['admin_flash'] ?? null) ? (string)($_SESSION['admin_flash']['type'] ?? 'success') : 'success';
@@ -148,10 +138,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $isActiveQueue
                         );
                         if ($insStmt->execute()) {
-<<<<<<< HEAD
                             audit_user($conn, (int)$insStmt->insert_id, $actorId, "เพิ่มบัญชี {$idNumber} {$firstName} {$lastName} role {$newRole}");
-=======
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                             $message = "เพิ่มบัญชีผู้ใช้ {$firstName} {$lastName} ({$roleLabels[$newRole]}) เรียบร้อยแล้ว";
                         } else {
                             $message = 'เพิ่มบัญชีผู้ใช้ไม่สำเร็จ กรุณาตรวจสอบข้อมูลอีกครั้ง';
@@ -202,7 +189,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $updateStmt = $conn->prepare('UPDATE users SET role = ? WHERE user_id = ?');
                 $updateStmt->bind_param('si', $role, $id);
                 if ($updateStmt->execute()) {
-<<<<<<< HEAD
                     if ($updateStmt->affected_rows > 0) {
                         audit_user($conn, $id, $actorId, 'เปลี่ยน role: ' . $target['role'] . ' → ' . $role);
                         if ($role !== 'staff') {
@@ -210,8 +196,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $conn->query("UPDATE tickets SET queue_assigned_to = NULL, queue_expires_at = NULL WHERE status = 'pending' AND queue_assigned_to = " . (int)$id);
                         }
                     }
-=======
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                     $message = $updateStmt->affected_rows > 0 ? 'เปลี่ยน Role เรียบร้อยแล้ว' : 'Role ไม่มีการเปลี่ยนแปลง';
                 } else {
                     $message = 'เปลี่ยน Role ไม่สำเร็จ';
@@ -239,12 +223,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (!$target) {
                     $message = 'ไม่พบผู้ใช้ที่เลือก';
                     $messageType = 'error';
-<<<<<<< HEAD
                 } elseif ($target['status'] === 'pending') {
                     $message = 'บัญชีนี้รออนุมัติอยู่ กรุณาใช้ปุ่มอนุมัติหรือปฏิเสธ';
                     $messageType = 'error';
-=======
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                 } elseif ($target['role'] === 'admin' && $target['status'] === 'active' && $status === 'disabled') {
                     $activeAdmins = $conn->query("SELECT COUNT(*) AS total FROM users WHERE role = 'admin' AND status = 'active'");
                     $activeAdminCount = $activeAdmins ? (int)$activeAdmins->fetch_assoc()['total'] : 0;
@@ -258,7 +239,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $stmt = $conn->prepare('UPDATE users SET status = ? WHERE user_id = ?');
                     $stmt->bind_param('si', $status, $id);
                     if ($stmt->execute()) {
-<<<<<<< HEAD
                         if ($stmt->affected_rows > 0) {
                             audit_user($conn, $id, $actorId, 'เปลี่ยนสถานะบัญชี: ' . $target['status'] . ' → ' . $status);
                             if ($status === 'disabled') {
@@ -267,8 +247,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 $conn->query("UPDATE tickets SET queue_assigned_to = NULL, queue_expires_at = NULL WHERE status = 'pending' AND queue_assigned_to = " . (int)$id);
                             }
                         }
-=======
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                         $message = $stmt->affected_rows > 0 ? 'ปรับสถานะผู้ใช้แล้ว' : 'สถานะไม่มีการเปลี่ยนแปลง';
                     } else {
                         $message = 'ปรับสถานะไม่สำเร็จ';
@@ -301,7 +279,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $message = 'รหัสประจำตัวที่พิมพ์ไม่ตรงกับบัญชีนี้ การลบไม่ถูกดำเนินการ';
                     $messageType = 'error';
                 } else {
-<<<<<<< HEAD
                     try {
                         $referenceCount = user_reference_count($conn, $id);
                     } catch (Throwable $e) {
@@ -326,35 +303,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         if ($deleteStmt->execute() && $deleteStmt->affected_rows === 1) {
                             user_delete_private_files($avatarBeforeDelete);
                             audit_user($conn, null, $actorId, 'ลบบัญชี #' . $id . ' ' . $target['id_number'] . ' (role ' . $target['role'] . ')');
-=======
-                    $referenceStmt = $conn->prepare(
-                        'SELECT
-                            (SELECT COUNT(*) FROM tickets WHERE requester_id = ?) AS requester_tickets,
-                            (SELECT COUNT(*) FROM tickets WHERE assigned_to = ?) AS assigned_tickets,
-                            (SELECT COUNT(*) FROM ticket_logs WHERE action_by = ?) AS action_logs'
-                    );
-                    $referenceStmt->bind_param('iii', $id, $id, $id);
-                    $referenceStmt->execute();
-                    $references = $referenceStmt->get_result()->fetch_assoc();
-                    $referenceStmt->close();
-
-                    if (!$references || (int)$references['requester_tickets'] + (int)$references['assigned_tickets'] + (int)$references['action_logs'] > 0) {
-                        $message = 'ลบไม่ได้ เนื่องจากบัญชีนี้มีใบงานหรือประวัติที่ระบบต้องเก็บไว้';
-                        $messageType = 'error';
-                    } elseif ($target['role'] === 'admin' && $target['status'] === 'active') {
-                        $activeAdmins = $conn->query("SELECT COUNT(*) AS total FROM users WHERE role = 'admin' AND status = 'active'");
-                        $activeAdminCount = $activeAdmins ? (int)$activeAdmins->fetch_assoc()['total'] : 0;
-                        if ($activeAdminCount <= 1) {
-                            $message = 'ไม่สามารถลบ Admin ที่ใช้งานอยู่คนสุดท้ายได้';
-                            $messageType = 'error';
-                        }
-                    }
-
-                    if ($message === '') {
-                        $deleteStmt = $conn->prepare('DELETE FROM users WHERE user_id = ?');
-                        $deleteStmt->bind_param('i', $id);
-                        if ($deleteStmt->execute() && $deleteStmt->affected_rows === 1) {
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                             $message = 'ลบบัญชีผู้ใช้เรียบร้อยแล้ว';
                         } else {
                             $message = 'ลบบัญชีผู้ใช้ไม่สำเร็จ';
@@ -365,7 +313,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
         }
-<<<<<<< HEAD
     } elseif ($action === 'approve_selected') {
         // อนุมัติหลายบัญชีพร้อมกัน (ช่วงเปิดภาคเรียนที่มีผู้สมัครจำนวนมาก)
         $ids = array_values(array_unique(array_filter(array_map('intval', is_array($_POST['user_ids'] ?? null) ? $_POST['user_ids'] : []), static fn($v) => $v > 0)));
@@ -418,8 +365,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
         }
-=======
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
     }
 
     $conn->query("SELECT RELEASE_LOCK('reps_active_admin_guard')");
@@ -428,11 +373,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $returnStatus = is_string($_POST['return_status'] ?? null) ? $_POST['return_status'] : '';
     $returnParams = [];
     if ($returnQuery !== '') $returnParams['q'] = $returnQuery;
-<<<<<<< HEAD
     if (isset($userStatusLabels[$returnStatus])) $returnParams['status'] = $returnStatus;
-=======
-    if (in_array($returnStatus, ['active', 'disabled'], true)) $returnParams['status'] = $returnStatus;
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
     $redirect = 'admin_manage_user.php' . ($returnParams ? '?' . http_build_query($returnParams) : '');
     header('Location: ' . $redirect, true, 303);
     exit;
@@ -452,11 +393,7 @@ if ($search !== '') {
     $types .= 'sssss';
 }
 
-<<<<<<< HEAD
 if (isset($userStatusLabels[$statusFilter])) {
-=======
-if (in_array($statusFilter, ['active', 'disabled'], true)) {
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
     $where[] = 'u.status = ?';
     $params[] = $statusFilter;
     $types .= 's';
@@ -484,7 +421,6 @@ if ($stmt) {
     $loadError = 'โหลดข้อมูลผู้ใช้ไม่ได้ กรุณาตรวจสอบฐานข้อมูล';
 }
 
-<<<<<<< HEAD
 $pendingUsers = [];
 try {
     $pendingUsers = db_all(
@@ -497,8 +433,6 @@ try {
     error_log('Pending users query failed: ' . $e->getMessage());
 }
 
-=======
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 $statQuery = $conn->query('SELECT status, COUNT(*) AS total FROM users GROUP BY status');
 if ($statQuery) {
     while ($row = $statQuery->fetch_assoc()) {
@@ -536,31 +470,18 @@ require_once __DIR__ . '/admin_header.php';
 <div class="admin-page-head flex flex-col sm:flex-row sm:items-end justify-between gap-4">
     <div>
         <nav class="admin-crumb">
-<<<<<<< HEAD
             <a href="admin_dashboard.php"><?= tr('แดชบอร์ด', 'Dashboard') ?></a>
             <i class="fa-solid fa-chevron-right"></i>
             <span><?= tr('จัดการผู้ใช้', 'Users') ?></span>
         </nav>
         <h1 class="admin-page-title"><?= tr('จัดการผู้ใช้', 'Users') ?></h1>
         <p class="admin-page-sub"><?= tr('เพิ่มบัญชีผู้ใช้ใหม่ จัดการสถานะการเข้าใช้งาน และกำหนดสิทธิ์ (Admin สิทธิ์สูงสุด / Staff / User)', 'Add accounts, manage access status and assign roles (Admin has full access / Staff / User)') ?></p>
-=======
-            <a href="admin_dashboard.php">Dashboard</a>
-            <i class="fa-solid fa-chevron-right"></i>
-            <span>จัดการผู้ใช้</span>
-        </nav>
-        <h1 class="admin-page-title">จัดการผู้ใช้</h1>
-        <p class="admin-page-sub">เพิ่มบัญชีผู้ใช้ใหม่ จัดการสถานะการเข้าใช้งาน และกำหนดสิทธิ์ (Admin สิทธิ์สูงสุด / Staff / User)</p>
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
     </div>
 
     <?php if ($actorRole === 'admin'): ?>
         <button type="button" id="openAddUserModalBtn" class="admin-btn inline-flex items-center gap-2 self-start sm:self-auto cursor-pointer">
             <i class="fa-solid fa-user-plus" aria-hidden="true"></i>
-<<<<<<< HEAD
             <span><?= tr('เพิ่มผู้ใช้งาน', 'Add user') ?></span>
-=======
-            <span>เพิ่มผู้ใช้งาน</span>
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
         </button>
     <?php endif; ?>
 </div>
@@ -578,7 +499,6 @@ require_once __DIR__ . '/admin_header.php';
 <?php endif; ?>
 
 <!-- การ์ดแสดงสถิติสถานะ -->
-<<<<<<< HEAD
 <div class="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
     <?php foreach ($userStatusLabels as $key => $label): ?>
         <a href="?status=<?= h($key) ?>" class="admin-stat st-<?= h($key) ?> <?= $statusFilter === $key ? 'is-active' : '' ?>">
@@ -764,21 +684,6 @@ require_once __DIR__ . '/admin_header.php';
 <div class="admin-tray">
     <div class="admin-tray-label">
         <span>รายชื่อผู้ใช้</span>
-=======
-<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-    <?php foreach (['active' => 'ใช้งานได้', 'disabled' => 'ระงับใช้งาน'] as $key => $label): ?>
-        <div class="admin-stat st-<?= h($key) ?>">
-            <div class="admin-stat-label"><?= h($label) ?></div>
-            <div class="admin-stat-value"><?= number_format((int)($stats[$key] ?? 0)) ?></div>
-        </div>
-    <?php endforeach; ?>
-</div>
-
-<!-- ตารางรายชื่อผู้ใช้และแถบค้นหา -->
-<div class="admin-tray">
-    <div class="admin-tray-label">
-        <span>User Directory</span>
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
         <span><?= count($users) ?> บัญชี</span>
     </div>
     <section class="admin-card">
@@ -786,13 +691,8 @@ require_once __DIR__ . '/admin_header.php';
             <input name="q" value="<?= h($search) ?>" placeholder="ค้นหาชื่อ รหัส อีเมล หรือแผนก" class="min-w-[220px] flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:border-gray-900">
             <select name="status" class="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:border-gray-900">
                 <option value="">ทุกสถานะ</option>
-<<<<<<< HEAD
                 <?php foreach ($userStatusLabels as $key => $label): ?>
                     <option value="<?= h($key) ?>" <?= $statusFilter === $key ? 'selected' : '' ?>><?= h($label) ?></option>
-=======
-                <?php foreach (['active' => 'ใช้งานได้', 'disabled' => 'ระงับใช้งาน'] as $key => $label): ?>
-                    <option value="<?= $key ?>" <?= $statusFilter === $key ? 'selected' : '' ?>><?= $label ?></option>
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                 <?php endforeach; ?>
             </select>
             <div class="admin-toolbar-actions">
@@ -801,7 +701,6 @@ require_once __DIR__ . '/admin_header.php';
             </div>
         </form>
 
-<<<<<<< HEAD
         <style>
             .ud-table { width: 100%; min-width: 900px; table-layout: fixed; border-collapse: collapse; font-size: 14px; }
             .ud-table th { padding: 10px 16px; background: #FAFAF8; border-bottom: 1px solid #EFEDE9; text-align: left; font-size: 13px; font-weight: 500; color: #6B6862; white-space: nowrap; }
@@ -908,101 +807,12 @@ require_once __DIR__ . '/admin_header.php';
                                         <i class="fa-regular fa-trash-can" aria-hidden="true"></i>
                                     </button>
                                 </div>
-=======
-        <div class="overflow-x-auto admin-table-wrap">
-            <table class="w-full min-w-[1000px] text-left text-sm">
-                <thead class="bg-gray-50 text-xs text-gray-500">
-                    <tr>
-                        <th class="px-4 py-3 font-medium">ชื่อผู้ใช้</th>
-                        <th class="px-4 py-3 font-medium">รหัส / ประเภท</th>
-                        <th class="px-4 py-3 font-medium">แผนก / ติดต่อ</th>
-                        <th class="px-4 py-3 font-medium">สมัครเมื่อ</th>
-                        <th class="px-4 py-3 font-medium">Role</th>
-                        <th class="px-4 py-3 font-medium">สถานะ</th>
-                        <th class="px-4 py-3 font-medium">จัดการ</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-100">
-                    <?php if (!$users): ?>
-                        <tr>
-                            <td colspan="7" class="px-4 py-12 text-center text-gray-500">ไม่พบผู้ใช้</td>
-                        </tr>
-                    <?php endif; ?>
-
-                    <?php foreach ($users as $u):
-                      $roleChipClass = [
-                     'admin' => 'role-admin role-dark',
-                     'staff' => 'role-staff role-pink',
-                     ][$u['role']] ?? '';
-                    ?>
-                        <tr class="hover:bg-gray-50/70 transition-colors">
-                            <td class="px-4 py-4">
-                                <div class="font-medium text-gray-900"><?= h($u['first_name'] . ' ' . $u['last_name']) ?></div>
-                                <div class="text-xs text-gray-500"><?= h($u['email']) ?></div>
-                            </td>
-                            <td class="px-4 py-4">
-                                <div class="text-gray-900 font-mono text-xs"><?= h($u['id_number']) ?></div>
-                                <div class="text-xs text-gray-500"><?= ['student' => 'นักศึกษา', 'teacher' => 'อาจารย์', 'staff' => 'บุคลากร'][$u['user_type']] ?? h($u['user_type']) ?></div>
-                            </td>
-                            <td class="px-4 py-4">
-                                <div class="text-gray-900"><?= h($u['department_name'] ?? 'ไม่ระบุแผนก') ?></div>
-                                <div class="text-xs text-gray-500"><?= h($u['phone_number']) ?></div>
-                            </td>
-                            <td class="px-4 py-4 text-xs text-gray-600">
-                                <?= h(date('d/m/Y', strtotime($u['created_at']))) ?>
-                            </td>
-                            <td class="px-4 py-4">
-                              <span class="admin-chip <?= $roleChipClass ?>">                                    
-                              <?= $roleLabels[$u['role']] ?? h($u['role']) ?>
-                              </span>
-                            </td>
-                            <td class="px-4 py-4">
-                                <span class="admin-chip st-<?= h($u['status']) ?>">
-                                    <?= ['active' => 'ใช้งานได้', 'disabled' => 'ระงับใช้งาน'][$u['status']] ?? h($u['status']) ?>
-                                </span>
-                            </td>
-                            <td class="px-4 py-4">
-                                <div class="flex w-fit flex-wrap items-center gap-1.5">
-                                    <a href="admin_edit_user.php?user_id=<?= (int)$u['user_id'] ?>" class="inline-flex items-center gap-1.5 rounded-md border border-gray-300 px-2.5 py-1.5 text-xs font-medium text-gray-700 hover:border-gray-500 hover:bg-gray-50 transition-colors" title="แก้ไขข้อมูลผู้ใช้">
-                                        <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
-                                    </a>
-
-                                    <form method="post" class="inline-flex">
-                                        <input type="hidden" name="csrf" value="<?= h($_SESSION['admin_csrf']) ?>">
-                                        <input type="hidden" name="return_q" value="<?= h($search) ?>">
-                                        <input type="hidden" name="return_status" value="<?= h($statusFilter) ?>">
-                                        <input type="hidden" name="action" value="change_status">
-                                        <input type="hidden" name="user_id" value="<?= (int)$u['user_id'] ?>">
-                                        <input type="hidden" name="status" value="<?= $u['status'] === 'active' ? 'disabled' : 'active' ?>">
-                                        <?php if ($u['status'] === 'active'): ?>
-                                            <button class="inline-flex items-center gap-1.5 rounded-md border border-amber-200 px-2.5 py-1.5 text-xs font-medium text-amber-700 hover:bg-amber-50 transition-colors disabled:opacity-40" onclick="return confirm('ยืนยันการระงับบัญชีนี้หรือไม่?')" <?= (int)$u['user_id'] === $actorId ? 'disabled' : '' ?> title="ระงับการใช้งาน">
-                                                <i class="fa-solid fa-user-slash" aria-hidden="true"></i>
-                                            </button>
-                                        <?php else: ?>
-                                            <button class="inline-flex items-center gap-1.5 rounded-md border border-emerald-200 px-2.5 py-1.5 text-xs font-medium text-emerald-700 hover:bg-emerald-50 transition-colors disabled:opacity-40" onclick="return confirm('ยืนยันการเปิดใช้งานบัญชีนี้หรือไม่?')" <?= (int)$u['user_id'] === $actorId ? 'disabled' : '' ?>>
-                                                <i class="fa-solid fa-user-check" aria-hidden="true"></i> เปิดใช้งาน
-                                            </button>
-                                        <?php endif; ?>
-                                    </form>
-                                </div>
-                                <button type="button" data-open-user-delete
-                                    data-user-id="<?= (int)$u['user_id'] ?>"
-                                    data-id-number="<?= h($u['id_number']) ?>"
-                                    data-user-name="<?= h($u['first_name'] . ' ' . $u['last_name']) ?>"
-                                    class="mt-2 inline-flex items-center gap-1.5 rounded-md border border-red-200 px-2.5 py-1.5 text-xs font-medium text-red-700 hover:bg-red-50 transition-colors disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-red-400" <?= (int)$u['user_id'] === $actorId ? 'disabled' : '' ?>>
-                                    <i class="fa-regular fa-trash-can" aria-hidden="true"></i> ลบผู้ใช้
-                                </button>
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                             </td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>
             </table>
         </div>
-<<<<<<< HEAD
-=======
-        <div class="border-t px-5 py-3 text-xs text-gray-500">แสดง <?= count($users) ?> บัญชี</div>
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
     </section>
 </div>
 
@@ -1024,11 +834,7 @@ require_once __DIR__ . '/admin_header.php';
                     <h2 id="addUserTitle" class="mt-0.5 font-semibold text-gray-950">เพิ่มผู้ใช้งานใหม่</h2>
                 </div>
             </div>
-<<<<<<< HEAD
             <button type="button" data-close-add-user aria-label="ปิด" class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-gray-500 transition hover:bg-gray-200/70 hover:text-gray-900">
-=======
-            <button type="button" data-close-add-user aria-label="ปิด" class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-gray-400 transition hover:bg-gray-200/70 hover:text-gray-900">
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                 <i class="fa-solid fa-xmark" aria-hidden="true"></i>
             </button>
         </div>
@@ -1122,11 +928,7 @@ require_once __DIR__ . '/admin_header.php';
                     <h2 id="userDeleteTitle" class="mt-0.5 font-semibold text-gray-950">ยืนยันการลบบัญชี</h2>
                 </div>
             </div>
-<<<<<<< HEAD
             <button type="button" data-close-user-delete aria-label="ปิด" class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-gray-500 transition hover:bg-gray-100 hover:text-gray-900"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
-=======
-            <button type="button" data-close-user-delete aria-label="ปิด" class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-gray-400 transition hover:bg-gray-100 hover:text-gray-900"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
         </div>
         <div class="space-y-4 px-5 py-5 sm:px-6">
             <p class="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">
@@ -1136,11 +938,7 @@ require_once __DIR__ . '/admin_header.php';
             <div>
                 <label for="userDeleteConfirmInput" class="mb-1.5 block text-sm font-medium text-gray-800">พิมพ์รหัสประจำตัวเพื่อยืนยันการลบ</label>
                 <input type="text" id="userDeleteConfirmInput" name="confirm_id_number" autocomplete="off" spellcheck="false" autocapitalize="off" autocorrect="off" placeholder="รหัสประจำตัวของบัญชีนี้"
-<<<<<<< HEAD
                     class="w-full rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 font-mono text-sm outline-none transition placeholder:font-kanit placeholder:text-gray-500 focus:border-red-600 focus:ring-2 focus:ring-red-600/10">
-=======
-                    class="w-full rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 font-mono text-sm outline-none transition placeholder:font-kanit placeholder:text-gray-400 focus:border-red-600 focus:ring-2 focus:ring-red-600/10">
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                 <p id="userDeleteHint" class="mt-1.5 text-xs text-gray-500">บัญชีที่มีใบงานหรือประวัติจะลบไม่ได้ ยังไม่ต้องสนใจตัวพิมพ์เล็ก-ใหญ่และช่องว่าง</p>
             </div>
         </div>
@@ -1193,17 +991,10 @@ require_once __DIR__ . '/admin_header.php';
                     hint.textContent = hintDefault;
                     hint.className = 'mt-1.5 text-xs text-gray-500';
                 } else if (match) {
-<<<<<<< HEAD
                     repsSetIconText(hint, 'check', 'รหัสตรงกันแล้ว กด "ยืนยันลบบัญชี" เพื่อทำรายการ');
                     hint.className = 'mt-1.5 text-xs font-medium text-emerald-600';
                 } else {
                     repsSetIconText(hint, 'x', 'รหัสที่พิมพ์ยังไม่ตรงกัน กรุณาตรวจสอบอีกครั้ง');
-=======
-                    hint.textContent = '✓ รหัสตรงกันแล้ว กด "ยืนยันลบบัญชี" เพื่อทำรายการ';
-                    hint.className = 'mt-1.5 text-xs font-medium text-emerald-600';
-                } else {
-                    hint.textContent = '✗ รหัสที่พิมพ์ยังไม่ตรงกัน กรุณาตรวจสอบอีกครั้ง';
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                     hint.className = 'mt-1.5 text-xs font-medium text-amber-600';
                 }
             }
@@ -1230,11 +1021,7 @@ require_once __DIR__ . '/admin_header.php';
             if (normalize(confirmInput.value) !== normalize(expected)) {
                 event.preventDefault();
                 refreshConfirmState();
-<<<<<<< HEAD
                 repsSetIconText(hint, 'x', 'รหัสประจำตัวไม่ตรง จึงยังลบบัญชีไม่ได้');
-=======
-                hint && (hint.textContent = '✗ รหัสประจำตัวไม่ตรง จึงยังลบบัญชีไม่ได้');
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                 return;
             }
             submitButton.disabled = true;
@@ -1249,10 +1036,7 @@ require_once __DIR__ . '/admin_header.php';
     })();
 </script>
 </div>
-<<<<<<< HEAD
 <?php $footerBase = '../'; $footerVariant = 'app'; require __DIR__ . '/../includes/site_footer.php'; ?>
-=======
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 </div>
 </body>
 </html>

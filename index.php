@@ -15,7 +15,6 @@ if (session_status() === PHP_SESSION_NONE && isset($_COOKIE[session_name()])) {
 
 // ตรวจสอบสถานะการเข้าสู่ระบบเพื่อปรับเมนูบนหน้าแรก (ไม่บังคับให้เข้าสู่ระบบ)
 $sessionUserId = filter_var($_SESSION['user_id'] ?? null, FILTER_VALIDATE_INT);
-<<<<<<< HEAD
 $APP_SKIP_SESSION = true;
 require_once __DIR__ . '/db_connect.php';
 require_once __DIR__ . '/includes/permissions.php';
@@ -30,10 +29,6 @@ $homeIntro = trim((string)($siteSettings['homepage_intro'] ?? ''));
 $footerText = trim((string)($siteSettings['footer_text'] ?? ''));
 
 if ($sessionUserId && $sessionUserId > 0) {
-=======
-if ($sessionUserId && $sessionUserId > 0) {
-   require_once __DIR__ . '/db_connect.php';
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 
    $account = null;
    $accountStmt = $conn->prepare('SELECT first_name, last_name, role, status, password FROM users WHERE user_id = ? LIMIT 1');
@@ -46,24 +41,15 @@ if ($sessionUserId && $sessionUserId > 0) {
    }
 
    $validSession = $account && $account['status'] === 'active'
-<<<<<<< HEAD
       && is_valid_role(normalize_role((string)$account['role']))
-=======
-      && in_array($account['role'], ['admin', 'requester'], true)
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
       && isset($_SESSION['auth_password_hash'])
       && hash_equals((string)$account['password'], (string)$_SESSION['auth_password_hash']);
 
    if ($validSession) {
       $currentUser = [
          'name' => trim($account['first_name'] . ' ' . $account['last_name']),
-<<<<<<< HEAD
          'role' => normalize_role((string)$account['role']),
          'dashboard' => role_home_url((string)$account['role']),
-=======
-         'role' => $account['role'],
-         'dashboard' => $account['role'] === 'admin' ? 'admin/admin_dashboard.php' : 'dashboard.php',
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
       ];
    } else {
       // เซสชันหมดอายุหรือไม่ถูกต้อง — เปิด session แบบเขียนได้อีกครั้งเพื่อล้างทิ้ง
@@ -87,11 +73,7 @@ $assetVersion = static function (string $relativePath): int {
 <head>
    <meta charset="UTF-8">
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<<<<<<< HEAD
    <meta name="description" content="ระบบบริหารจัดการและแจ้งซ่อมอุปกรณ์คอมพิวเตอร์ของห้องปฏิบัติการกลางคอมพิวเตอร์ แผนกเทคโนโลยีธุรกิจดิจิทัล — แจ้งซ่อม ติดตามสถานะงานซ่อมได้ทุกขั้นตอน">
-=======
-   <meta name="description" content="ระบบบริหารจัดการและแจ้งซ่อมอุปกรณ์คอมพิวเตอร์ของห้องปฏิบัติการกลางคอมพิวเตอร์ แผนกเทคโนโลยีธุรกิจดิจิทัล — แจ้งซ่อม ติดตามสถานะงานซ่อมได้แบบ Real-time">
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
    <meta name="theme-color" content="#111827">
    <title>REPS - ระบบแจ้งซ่อมอุปกรณ์คอมพิวเตอร์</title>
    <link rel="icon" type="image/svg+xml" href="assets/images/logo/reps-icon.svg">
@@ -104,12 +86,7 @@ $assetVersion = static function (string $relativePath): int {
    <link rel="preconnect" href="https://fonts.googleapis.com">
    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
    <!-- แยก request: ถ้า family ใดโหลดไม่ได้ จะไม่ลากตัวอื่นล้มไปด้วย -->
-<<<<<<< HEAD
    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
-=======
-   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-   <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap" rel="stylesheet">
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 
    <!-- home.css ต้องมาก่อน app.css เพื่อคงลำดับ cascade -->
    <link rel="stylesheet" href="assets/css/home.css?v=<?= $assetVersion('assets/css/home.css') ?>">
@@ -135,10 +112,7 @@ $assetVersion = static function (string $relativePath): int {
          opacity: 1;
       }
    </style>
-<<<<<<< HEAD
    <link rel="stylesheet" href="assets/css/base.css?v=18">
-=======
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 </head>
 
 <body class="public-page bg-white text-muted antialiased">
@@ -151,19 +125,11 @@ $assetVersion = static function (string $relativePath): int {
 
          <!-- Logo (ใส่ width/height ตามขนาดจริงของไฟล์ เพื่อกัน layout shift) -->
          <a class="flex items-center shrink-0" href="index.php" aria-label="REPS หน้าหลัก">
-<<<<<<< HEAD
             <img src="<?= htmlspecialchars($siteLogoUrl, ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars(app_site_name($conn), ENT_QUOTES, 'UTF-8') ?>" class="h-6 sm:h-7 w-auto">
          </a>
 
          <!-- Navigation Links -->
          <nav data-main-nav aria-label="เมนูหลัก" class="font-kanit hidden lg:flex items-center gap-8 text-sm text-muted whitespace-nowrap">
-=======
-            <img src="assets/images/logo/reps-logo.svg" alt="REPS" class="h-6 sm:h-7 w-auto">
-         </a>
-
-         <!-- Navigation Links -->
-         <nav aria-label="เมนูหลัก" class="font-kanit hidden lg:flex items-center gap-8 text-sm text-muted whitespace-nowrap">
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
             <a href="#services" class="nav-link hover:text-ink transition-colors">บริการแจ้งซ่อม</a>
             <a href="#how" class="nav-link hover:text-ink transition-colors">ขั้นตอนการให้บริการ</a>
             <a href="#showcase" class="nav-link hover:text-ink transition-colors">ฟีเจอร์</a>
@@ -181,14 +147,10 @@ $assetVersion = static function (string $relativePath): int {
                   แดชบอร์ด
                </a>
             <?php else: ?>
-<<<<<<< HEAD
                <a href="login.php" class="font-kanit hidden sm:inline-flex items-center min-h-[44px] text-sm text-ink font-medium px-4 rounded-lg hover:bg-neutral-100 transition-colors duration-150 whitespace-nowrap">
                   เข้าสู่ระบบ
                </a>
                <a href="register.php" class="font-kanit inline-flex items-center min-h-[44px] text-sm bg-[#171717] text-white font-medium px-5 rounded-lg hover:bg-[#262626] transition-colors duration-150 whitespace-nowrap">
-=======
-               <a href="register.php" class="font-kanit text-sm bg-[#171717] text-white font-medium px-5 py-2.5 rounded-lg hover:bg-[#262626] transition-colors duration-150 whitespace-nowrap">
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                   สมัครสมาชิก
                </a>
             <?php endif; ?>
@@ -230,7 +192,6 @@ $assetVersion = static function (string $relativePath): int {
                ระบบบริหารจัดการ<br class="hidden sm:inline" />และแจ้งซ่อมอุปกรณ์คอมพิวเตอร์
             </h1>
 
-<<<<<<< HEAD
             <?php if ($showAnnouncement): ?>
                <div class="mt-4 max-w-xl rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 whitespace-pre-line" role="note">
                   <i class="fa-solid fa-bullhorn mr-1" aria-hidden="true"></i><?= htmlspecialchars((string)$siteSettings['homepage_announcement'], ENT_QUOTES, 'UTF-8') ?>
@@ -239,10 +200,6 @@ $assetVersion = static function (string $relativePath): int {
 
             <p class="mt-4 mb-2 text-muted text-base sm:text-lg max-w-xl mx-auto leading-relaxed text-pretty whitespace-pre-line">
                <?= $homeIntro !== '' ? htmlspecialchars($homeIntro, ENT_QUOTES, 'UTF-8') : 'แจ้งซ่อมคอมพิวเตอร์ อุปกรณ์ไอที และระบบเครือข่าย ติดตามสถานะงานซ่อมได้ทุกขั้นตอน ตั้งแต่เข้าคิวจนครูรับรองงานเสร็จ' ?>
-=======
-            <p class="mt-4 mb-2 text-muted text-base sm:text-lg max-w-xl mx-auto leading-relaxed text-pretty">
-               แจ้งซ่อมคอมพิวเตอร์ อุปกรณ์ไอที และระบบเครือข่าย ติดตามสถานะงานซ่อมได้แบบ Real-time รวดเร็ว แม่นยำ ครบจบในที่เดียว
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
             </p>
 
             <div class="w-full mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -258,11 +215,7 @@ $assetVersion = static function (string $relativePath): int {
 
             <div class="mt-10 inline-flex items-center gap-2 bg-white px-4 py-2 font-kanit text-xs sm:text-sm text-muted">
                <i class="fa-regular fa-clock text-ink" aria-hidden="true"></i>
-<<<<<<< HEAD
                <span>เวลาทำการ: <span class="text-ink tabular-nums"><?= htmlspecialchars(trim((string)($siteSettings['office_hours'] ?? '')) ?: 'จันทร์–ศุกร์ 08:30–16:30 น.', ENT_QUOTES, 'UTF-8') ?></span></span>
-=======
-               <span>เวลาทำการ: <span class="text-ink font-mono tabular-nums">จันทร์ - ศุกร์ 08:30 - 16:30 น.</span></span>
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
             </div>
          </div>
 
@@ -296,10 +249,6 @@ $assetVersion = static function (string $relativePath): int {
                   <div class="service-card cell group relative">
                      <div class="flex items-center justify-between mb-4">
                         <i class="fa-solid fa-laptop text-xl text-ink" aria-hidden="true"></i>
-<<<<<<< HEAD
-=======
-                        <span class="font-mono text-xs tabular-nums text-neutral-400 transition-colors group-hover:text-ink" aria-hidden="true">01</span>
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                      </div>
                      <h3 class="font-kanit text-lg font-normal text-ink leading-snug mb-3">คอมพิวเตอร์และฮาร์ดแวร์</h3>
                      <p class="text-sm text-muted leading-relaxed">ตรวจเช็กเครื่องเปิดไม่ติด อุปกรณ์ชำรุด หรืออัปเกรดชิ้นส่วนต่าง ๆ</p>
@@ -308,10 +257,6 @@ $assetVersion = static function (string $relativePath): int {
                   <div class="service-card cell group relative">
                      <div class="flex items-center justify-between mb-4">
                         <i class="fa-brands fa-windows text-xl text-ink" aria-hidden="true"></i>
-<<<<<<< HEAD
-=======
-                        <span class="font-mono text-xs tabular-nums text-neutral-400 transition-colors group-hover:text-ink" aria-hidden="true">02</span>
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                      </div>
                      <h3 class="font-kanit text-lg font-normal text-ink leading-snug mb-3">ระบบปฏิบัติการและซอฟต์แวร์</h3>
                      <p class="text-sm text-muted leading-relaxed">ติดตั้งโปรแกรม แก้ไขปัญหาระบบ Windows ติดไวรัส หรือข้อผิดพลาดการใช้งาน</p>
@@ -320,10 +265,6 @@ $assetVersion = static function (string $relativePath): int {
                   <div class="service-card cell group relative">
                      <div class="flex items-center justify-between mb-4">
                         <i class="fa-solid fa-print text-xl text-ink" aria-hidden="true"></i>
-<<<<<<< HEAD
-=======
-                        <span class="font-mono text-xs tabular-nums text-neutral-400 transition-colors group-hover:text-ink" aria-hidden="true">03</span>
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                      </div>
                      <h3 class="font-kanit text-lg font-normal text-ink leading-snug mb-3">อุปกรณ์ต่อพ่วงและเครื่องพิมพ์</h3>
                      <p class="text-sm text-muted leading-relaxed">ซ่อมบำรุงเครื่องพิมพ์ สแกนเนอร์ และโปรเจกเตอร์ในห้องเรียน/ห้องปฏิบัติการ</p>
@@ -332,10 +273,6 @@ $assetVersion = static function (string $relativePath): int {
                   <div class="service-card cell group relative">
                      <div class="flex items-center justify-between mb-4">
                         <i class="fa-solid fa-globe text-xl text-ink" aria-hidden="true"></i>
-<<<<<<< HEAD
-=======
-                        <span class="font-mono text-xs tabular-nums text-neutral-400 transition-colors group-hover:text-ink" aria-hidden="true">04</span>
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                      </div>
                      <h3 class="font-kanit text-lg font-normal text-ink leading-snug mb-3">ระบบเครือข่ายและอินเทอร์เน็ต</h3>
                      <p class="text-sm text-muted leading-relaxed">แก้ปัญหาสาย LAN เชื่อมต่อ Wi-Fi ไม่ได้ หรือสัญญาณขัดข้อง</p>
@@ -348,10 +285,7 @@ $assetVersion = static function (string $relativePath): int {
       <div class="divider" aria-hidden="true"></div>
 
       <!-- SECTION HOW (Stepper) -->
-<<<<<<< HEAD
       <?php if ($showSteps): ?>
-=======
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
       <section id="how" class="bg-gray-50 w-full px-6 py-24 scroll-mt-20">
          <div class="max-w-6xl mx-auto">
             <div data-reveal class="section-head">
@@ -378,11 +312,7 @@ $assetVersion = static function (string $relativePath): int {
                      <span class="step-num" aria-hidden="true">2</span>
                      <div class="step-body">
                         <span class="font-kanit font-normal text-base text-ink leading-snug">รับเรื่องและส่งต่อช่าง</span>
-<<<<<<< HEAD
                         <span class="mt-1 font-sans text-sm text-muted leading-relaxed max-w-[220px]">ใบงานเข้าคิว สตาฟฝ่ายซ่อมคนถัดไปกดรับงาน</span>
-=======
-                        <span class="mt-1 font-sans text-sm text-muted leading-relaxed max-w-[220px]">ผู้ดูแลระบบรับเรื่องและมอบหมายช่างผู้รับผิดชอบ</span>
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                      </div>
                   </li>
                   <li class="step">
@@ -396,10 +326,7 @@ $assetVersion = static function (string $relativePath): int {
             </div>
          </div>
       </section>
-<<<<<<< HEAD
       <?php endif; ?>
-=======
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 
       <div class="divider" aria-hidden="true"></div>
 
@@ -424,11 +351,7 @@ $assetVersion = static function (string $relativePath): int {
                   </p>
                </div>
 
-<<<<<<< HEAD
                <!-- Card 1: ติดตามสถานะ -->
-=======
-               <!-- Card 1: Real-time Status Tracking -->
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                <article class="feature-item showcase-slot-1">
                   <div class="feature-stage" aria-hidden="true">
                      <div class="ui-window">
@@ -453,17 +376,10 @@ $assetVersion = static function (string $relativePath): int {
                   </div>
                   <div class="feature-meta">
                      <h3 class="feature-title">
-<<<<<<< HEAD
                         ติดตามสถานะทุกขั้นตอน <span class="feature-arrow"><?= app_icon('arrow-right') ?></span>
                      </h3>
                      <p class="feature-desc">
                         เช็กสถานะได้ตั้งแต่เข้าคิว กำลังซ่อม รอครูรับรอง ไปจนถึงเสร็จสมบูรณ์ พร้อมรูปหลังซ่อม
-=======
-                        Real-time Status <span class="feature-arrow" aria-hidden="true">&rarr;</span>
-                     </h3>
-                     <p class="feature-desc">
-                        เช็กสถานะงานซ่อมได้ทันทีตั้งแต่รอรับเรื่อง กำลังดำเนินการ ไปจนถึงซ่อมเสร็จสิ้น
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                      </p>
                   </div>
                </article>
@@ -497,17 +413,10 @@ $assetVersion = static function (string $relativePath): int {
                   </div>
                   <div class="feature-meta">
                      <h3 class="feature-title">
-<<<<<<< HEAD
                         แจ้งเตือนทีมช่างทันที <span class="feature-arrow"><?= app_icon('arrow-right') ?></span>
                      </h3>
                      <p class="feature-desc">
                         แจ้งเตือนทีมช่างผ่าน LINE ทันทีที่มีใบแจ้งซ่อมใหม่ และส่งอีเมลถึงผู้แจ้งเมื่องานเสร็จ
-=======
-                        Instant Notification <span class="feature-arrow" aria-hidden="true">&rarr;</span>
-                     </h3>
-                     <p class="feature-desc">
-                        แจ้งเตือนอัตโนมัติผ่าน LINE ทันทีที่มีการเปิดใบงานใหม่หรืออัปเดตความคืบหน้า
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                      </p>
                   </div>
                </article>
@@ -539,17 +448,10 @@ $assetVersion = static function (string $relativePath): int {
                   </div>
                   <div class="feature-meta">
                      <h3 class="feature-title">
-<<<<<<< HEAD
                         หน้าจอตามบทบาท <span class="feature-arrow"><?= app_icon('arrow-right') ?></span>
                      </h3>
                      <p class="feature-desc">
                         แยกหน้าจอสำหรับผู้แจ้ง สตาฟฝ่ายซ่อม และครูผู้ดูแล แต่ละคนเห็นเฉพาะสิ่งที่ต้องทำ
-=======
-                        Role-Based Dashboard <span class="feature-arrow" aria-hidden="true">&rarr;</span>
-                     </h3>
-                     <p class="feature-desc">
-                        แยกหน้าจอจัดการชัดเจนระหว่างผู้แจ้งซ่อมและผู้ดูแลระบบ ดูภาพรวมงานซ่อมได้ในที่เดียว
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                      </p>
                   </div>
                </article>
@@ -561,26 +463,16 @@ $assetVersion = static function (string $relativePath): int {
                         <div class="ui-window-bar"><span></span><span></span><span></span></div>
                         <div class="ui-window-body">
                            <div class="anim-dropzone flex-1 rounded-md border border-dashed border-neutral-300 bg-neutral-50 flex flex-col items-center justify-center gap-1 p-2 transition-all">
-<<<<<<< HEAD
                               <i class="fa-regular fa-image text-base text-neutral-500 anim-upload-icon transition-all"></i>
                               <div class="ui-bar w-16 !h-1.5"></div>
                               <span class="font-mono text-[9px] text-neutral-500">JPG, PNG, WEBP</span>
-=======
-                              <i class="fa-regular fa-image text-base text-neutral-400 anim-upload-icon transition-all"></i>
-                              <div class="ui-bar w-16 !h-1.5"></div>
-                              <span class="font-mono text-[9px] text-neutral-400">JPG, PNG, WEBP</span>
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                            </div>
                         </div>
                      </div>
                   </div>
                   <div class="feature-meta">
                      <h3 class="feature-title">
-<<<<<<< HEAD
                         แนบรูปประกอบ <span class="feature-arrow"><?= app_icon('arrow-right') ?></span>
-=======
-                        Visual Attachment <span class="feature-arrow" aria-hidden="true">&rarr;</span>
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                      </h3>
                      <p class="feature-desc">
                         แนบภาพถ่ายอาการเสียหรือหน้าจอ Error เพื่อให้ช่างวิเคราะห์และเตรียมอะไหล่ได้ตรงจุด
@@ -611,11 +503,7 @@ $assetVersion = static function (string $relativePath): int {
                   </div>
                   <div class="feature-meta">
                      <h3 class="feature-title">
-<<<<<<< HEAD
                         Lab &amp; Asset History <span class="feature-arrow"><?= app_icon('arrow-right') ?></span>
-=======
-                        Lab &amp; Asset History <span class="feature-arrow" aria-hidden="true">&rarr;</span>
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                      </h3>
                      <p class="feature-desc">
                         บันทึกประวัติการซ่อมบำรุงรายเครื่องและรายห้องปฏิบัติการ ตรวจสอบย้อนหลังได้แม่นยำ
@@ -630,10 +518,7 @@ $assetVersion = static function (string $relativePath): int {
       <div class="divider" aria-hidden="true"></div>
 
       <!-- SECTION FAQ -->
-<<<<<<< HEAD
       <?php if ($showFaq): ?>
-=======
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
       <section id="faq" class="bg-[#F6F6F4] w-full px-6 py-24 scroll-mt-20">
          <div class="max-w-6xl mx-auto">
             <div data-reveal class="section-head">
@@ -733,21 +618,14 @@ $assetVersion = static function (string $relativePath): int {
                         </span>
                      </summary>
                      <div class="faq-answer">
-<<<<<<< HEAD
                         สามารถเข้าสู่ระบบแล้วดูที่หน้า <strong>แดชบอร์ด</strong> ของคุณได้ตลอดเวลา ระบบจะแสดงสถานะล่าสุด (รอรับเรื่อง / กำลังดำเนินการ / รอครูรับรอง / เสร็จสมบูรณ์) พร้อมรายละเอียดการแก้ไขจากช่างผู้รับผิดชอบ
-=======
-                        สามารถเข้าสู่ระบบแล้วดูที่หน้า <strong>แดชบอร์ด</strong> ของคุณได้ตลอดเวลา ระบบจะแสดงสถานะล่าสุด (รอรับเรื่อง / กำลังดำเนินการ / เสร็จสิ้น) พร้อมรายละเอียดการแก้ไขจากช่างผู้รับผิดชอบ
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                      </div>
                   </details>
                </div>
             </div>
          </div>
       </section>
-<<<<<<< HEAD
       <?php endif; ?>
-=======
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 
       <div class="divider" aria-hidden="true"></div>
 
@@ -786,11 +664,7 @@ $assetVersion = static function (string $relativePath): int {
                         <i class="fa-solid fa-bolt text-white/80" aria-hidden="true"></i>
                         <span class="font-kanit text-xs text-white/75">สถานะงานซ่อม</span>
                      </div>
-<<<<<<< HEAD
                      <p class="mt-1.5 font-kanit text-sm font-medium text-white">ติดตามได้ทุกขั้นตอน</p>
-=======
-                     <p class="mt-1.5 font-kanit text-sm font-medium text-white">ติดตามได้แบบ Real-time</p>
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                   </div>
                   <div class="bg-white/[0.06] backdrop-blur px-6 py-5">
                      <div class="flex items-center gap-3">
@@ -827,40 +701,7 @@ $assetVersion = static function (string $relativePath): int {
    </main>
 
    <!-- FOOTER -->
-<<<<<<< HEAD
     <?php $footerBase = ''; $footerVariant = 'light'; require __DIR__ . '/includes/site_footer.php'; ?>
-=======
-   <footer class="footer-dashed border-t border-line bg-white">
-      <div class="max-w-6xl mx-auto px-6 py-12">
-         <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-sm text-muted">
-            <div class="flex flex-col items-start text-left gap-1">
-               <span class="font-kanit text-base font-normal text-ink">REPS</span>
-               <p class="text-xs sm:text-sm text-muted font-normal">
-                  แผนกเทคโนโลยีธุรกิจดิจิทัล ห้องปฏิบัติการกลางคอมพิวเตอร์
-               </p>
-            </div>
-
-            <nav aria-label="ลิงก์ด่วน" class="flex flex-col items-start gap-1 font-kanit">
-               <span class="font-kanit text-xs font-medium text-ink">เมนู</span>
-               <a href="#services" class="py-0.5 text-muted hover:text-ink transition-colors">บริการแจ้งซ่อม</a>
-               <a href="#how" class="py-0.5 text-muted hover:text-ink transition-colors">ขั้นตอนการให้บริการ</a>
-               <a href="#showcase" class="py-0.5 text-muted hover:text-ink transition-colors">ฟีเจอร์</a>
-               <a href="#faq" class="py-0.5 text-muted hover:text-ink transition-colors">คำถามที่พบบ่อย</a>
-            </nav>
-
-            <div class="flex flex-col items-start gap-1 font-kanit text-left">
-               <span class="font-kanit text-xs font-medium text-ink">ติดต่อ</span>
-               <span class="py-0.5 text-muted tabular-nums">จันทร์ - ศุกร์ 08:30 - 16:30 น.</span>
-               <a href="request_form.php" class="py-0.5 text-muted hover:text-ink transition-colors">แจ้งซ่อมอุปกรณ์ผ่านระบบออนไลน์</a>
-            </div>
-         </div>
-
-         <div class="footer-base mt-8 pt-6 border-t border-line flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 font-normal text-xs sm:text-sm text-muted text-left sm:text-center">
-            <span>&copy; <?= date('Y'); ?> Developed by Digital Business Technology.</span>
-         </div>
-      </div>
-   </footer>
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 
    <script>
       // ---- Mobile menu ----
@@ -912,11 +753,7 @@ $assetVersion = static function (string $relativePath): int {
       }
 
       // ---- Scrollspy: ไฮไลต์ลิงก์เมนูของ section ที่กำลังดู (desktop nav เท่านั้น) ----
-<<<<<<< HEAD
       const spyLinks = Array.from(document.querySelectorAll('nav[data-main-nav] a[href^="#"]'));
-=======
-      const spyLinks = Array.from(document.querySelectorAll('nav[aria-label="เมนูหลัก"] a[href^="#"]'));
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
       const spySections = [];
       spyLinks.forEach((link) => {
          const section = document.getElementById(link.getAttribute('href').slice(1));

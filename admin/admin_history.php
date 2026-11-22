@@ -1,9 +1,5 @@
 <?php
-<<<<<<< HEAD
 $page_title = 'ประวัติ';
-=======
-$page_title = 'History';
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 $current_page = 'history';
 require_once __DIR__ . '/../includes/admin_auth.php';
 require_once __DIR__ . '/../db_connect.php';
@@ -78,13 +74,9 @@ try {
 
 $labels = [
    'pending'     => 'รอรับเรื่อง',
-<<<<<<< HEAD
    'pending' => 'รอรับเรื่อง', 'accepted' => 'รับแล้ว รอบันทึกเช็คลิสต์', 'awaiting_intake_sign' => 'รอผู้แจ้งเซ็นรับทราบ',
    'in_progress' => 'กำลังซ่อม', 'inspected_ready' => 'ตรวจซ้ำแล้ว รอส่งมอบ', 'awaiting_requester_sign' => 'รอผู้แจ้งเซ็นรับคืน',
    'awaiting_admin_sign' => 'รอครูรับรอง', 'disputed' => 'ผู้แจ้งไม่ยอมรับ',
-=======
-   'in_progress' => 'กำลังดำเนินการ',
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
    'completed'   => 'เสร็จสิ้น',
    'cancelled'   => 'ยกเลิก'
 ];
@@ -93,21 +85,12 @@ require_once __DIR__ . '/admin_header.php';
 
          <div class="admin-page-head">
             <nav class="admin-crumb">
-<<<<<<< HEAD
                <a href="admin_dashboard.php"><?= tr('แดชบอร์ด', 'Dashboard') ?></a>
                <i class="fa-solid fa-chevron-right"></i>
                <span><?= tr('ประวัติ', 'History') ?></span>
             </nav>
             <h1 class="admin-page-title"><?= tr('ประวัติการดำเนินงาน', 'Activity history') ?></h1>
             <p class="admin-page-sub"><?= tr('ตรวจสอบบันทึกการเปลี่ยนสถานะคำขอย้อนหลัง', 'Review past status changes on repair requests') ?></p>
-=======
-               <a href="admin_dashboard.php">Dashboard</a>
-               <i class="fa-solid fa-chevron-right"></i>
-               <span>ประวัติ</span>
-            </nav>
-            <h1 class="admin-page-title">ประวัติการดำเนินงาน</h1>
-            <p class="admin-page-sub">ตรวจสอบบันทึกการเปลี่ยนสถานะคำขอย้อนหลัง</p>
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
          </div>
 
          <?php if (isset($loadError)): ?>
@@ -144,11 +127,7 @@ require_once __DIR__ . '/admin_header.php';
                </form>
 
                <div class="overflow-x-auto admin-table-wrap">
-<<<<<<< HEAD
                   <table class="w-full min-w-[750px] text-left text-sm" data-pager id="historyLogs">
-=======
-                  <table class="w-full min-w-[750px] text-left text-sm">
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                      <thead class="bg-gray-50 text-xs text-gray-500">
                         <tr>
                            <th class="px-5 py-3 font-medium">วันและเวลา</th>
@@ -174,11 +153,7 @@ require_once __DIR__ . '/admin_header.php';
                                  <span class="admin-chip st-<?= h($log['old_status']) ?>">
                                     <?= h($labels[$log['old_status']] ?? $log['old_status'] ?? 'เริ่มต้น') ?>
                                  </span>
-<<<<<<< HEAD
                                  <i class="fa-solid fa-arrow-right mx-2 text-[10px] text-gray-500"></i>
-=======
-                                 <i class="fa-solid fa-arrow-right mx-2 text-[10px] text-gray-400"></i>
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                                  <span class="admin-chip st-<?= h($log['new_status']) ?>">
                                     <?= h($labels[$log['new_status']] ?? $log['new_status']) ?>
                                  </span>
@@ -192,10 +167,7 @@ require_once __DIR__ . '/admin_header.php';
             </section>
          </div>
       </div>
-<<<<<<< HEAD
 <?php $footerBase = '../'; $footerVariant = 'app'; require __DIR__ . '/../includes/site_footer.php'; ?>
-=======
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
    </div>
 </body>
 </html>

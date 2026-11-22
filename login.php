@@ -8,7 +8,6 @@ if (is_file(__DIR__ . '/includes/site_config.php')) {
     require_once __DIR__ . '/includes/site_config.php';
 }
 
-<<<<<<< HEAD
 $siteName = function_exists('app_site_name') ? app_site_name($conn) : 'REPS';$error_msg = '';
 $csrfToken = app_csrf_token();$usernameInput = is_string($_POST['username'] ?? null) ? $_POST['username'] : '';
 
@@ -17,23 +16,12 @@ $next =$_SERVER['REQUEST_METHOD'] === 'POST' ? ($_POST['next'] ?? '') : ($_GET['
 // ลิงก์จากอีเมลขั้นตอนใบงาน: next=sign.php?id=<เลข> (รับเฉพาะรูปแบบนี้ กัน open redirect)
 $nextTicket = is_string($next) && preg_match('/^sign\.php\?id=([1-9][0-9]{0,9})$/',$next, $nm) === 1 ? (int)$nm[1] : 0;
 $next = $nextTicket > 0 ? 'sign.php?id=' . $nextTicket : (is_string($next) && in_array($next, $allowedNext, true) ?$next : '');
-=======
-$siteName = function_exists('app_site_name') ? app_site_name($conn) : 'REPS';
-$error_msg = '';
-$csrfToken = app_csrf_token();
-$usernameInput = is_string($_POST['username'] ?? null) ? $_POST['username'] : '';
-
-$allowedNext = ['admin', 'war_room', 'teacher_report', 'staff', 'dashboard', 'request_form', 'profile', 'track'];
-$next = $_SERVER['REQUEST_METHOD'] === 'POST' ? ($_POST['next'] ?? '') : ($_GET['next'] ?? '');
-$next = is_string($next) && in_array($next, $allowedNext, true) ? $next : '';
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!app_csrf_is_valid($_POST['csrf'] ?? null)) {
         http_response_code(403);
         $error_msg = 'คำขอหมดอายุ กรุณาโหลดหน้าใหม่แล้วลองอีกครั้ง';
     } else {
-<<<<<<< HEAD
         $username = trim(is_string($_POST['username'] ?? null) ? $_POST['username'] : '');$password = is_string($_POST['password'] ?? null) ? $_POST['password'] : '';
 
         if ($username !== '' && $password !== '' && strlen($username) <= 20) {
@@ -62,62 +50,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         if ($nextTicket > 0) {
                             $target = 'sign.php?id=' . $nextTicket; // sign.php ส่งต่อไปหน้าตามบทบาทเอง
                         }
-=======
-        $username = trim(is_string($_POST['username'] ?? null) ? $_POST['username'] : '');
-        $password = is_string($_POST['password'] ?? null) ? $_POST['password'] : '';
-
-        if ($username !== '' && $password !== '' && strlen($username) <= 20) {
-            if (appLoginIsRateLimited($username)) {
-                $error_msg = 'พยายามเข้าสู่ระบบหลายครั้งเกินไป กรุณารอ 15 นาทีแล้วลองใหม่';
-            } else {
-                $stmt = $conn->prepare('SELECT user_id, id_number, first_name, last_name, email, password, role, status FROM users WHERE id_number = ? LIMIT 1');
-                if ($stmt) {
-                    $stmt->bind_param('s', $username);
-                    $stmt->execute();
-                    $user = $stmt->get_result()->fetch_assoc();
-                    $stmt->close();
-
-                    $allowedRoles = ['admin', 'staff', 'user'];
-
-                    if ($user && password_verify($password, $user['password']) && $user['status'] === 'active' && in_array($user['role'], $allowedRoles, true)) {
-                        appLoginClearAccountFailures($username);
-                        session_regenerate_id(true);
-                        $_SESSION = [];
-                        $_SESSION['user_id'] = (int)$user['user_id'];
-                        $_SESSION['u_id'] = (int)$user['user_id'];
-                        $_SESSION['username'] = $user['id_number'];
-                        $_SESSION['id_number'] = $user['id_number'];
-                        $_SESSION['role'] = $user['role'];
-                        $_SESSION['u_role'] = $user['role'];
-                        $_SESSION['auth_password_hash'] = $user['password'];
-                        $_SESSION['user_name'] = trim($user['first_name'] . ' ' . $user['last_name']);
-                        app_csrf_token();
-
-                        if ($user['role'] === 'admin') {
-                            $adminTargets = [
-                                'war_room'       => 'admin/admin_war_room.php',
-                                'teacher_report' => 'admin/admin_teacher_report.php',
-                                'admin'          => 'admin/admin_dashboard.php',
-                            ];
-                            $target = $adminTargets[$next] ?? 'admin/admin_dashboard.php';
-                        } elseif ($user['role'] === 'staff') {
-                            $target = 'staff/staff_dashboard.php';
-                        } else {
-                            $userTargets = [
-                                'request_form' => 'request_form.php',
-                                'profile'      => 'profile.php',
-                                'track'        => 'dashboard.php',
-                                'dashboard'    => 'dashboard.php',
-                            ];
-                            $target = $userTargets[$next] ?? 'dashboard.php';
-                        }
-
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                         header('Location: ' . $target, true, 303);
                         exit;
                     }
 
-<<<<<<< HEAD
                     // แจ้งสถานะบัญชีเฉพาะเมื่อรหัสผ่านถูกต้อง (ไม่เปิดเผยว่ามีบัญชีนี้อยู่ให้คนที่ไม่รู้รหัส)
                     if ($user && password_verify($password, $user['password']) &&$user['status'] !== 'active') {
                         $error_msg = match ($user['status']) {
@@ -128,21 +64,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     } else {
                         appLoginRecordFailure($username);$error_msg = 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง';
                     }
-=======
-                    appLoginRecordFailure($username);
-                    $error_msg = 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง หรือบัญชีถูกระงับการใช้งาน';
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                 } else {
                     $error_msg = 'เกิดข้อผิดพลาดในการตรวจสอบข้อมูลกับฐานข้อมูล';
                 }
             }
         } else {
-<<<<<<< HEAD
             appLoginRecordFailure($username);$error_msg = 'กรุณากรอกชื่อผู้ใช้ (ไม่เกิน 20 ตัวอักษร) และรหัสผ่านให้ครบถ้วน';
-=======
-            appLoginRecordFailure($username);
-            $error_msg = 'กรุณากรอกชื่อผู้ใช้ (ไม่เกิน 20 ตัวอักษร) และรหัสผ่านให้ครบถ้วน';
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
         }
     }
 }
@@ -153,11 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<<<<<<< HEAD
     <meta name="theme-color" content="#FFFFFF">
-=======
-    <meta name="theme-color" content="#0A0A0A">
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
     <title>เข้าสู่ระบบ | <?= htmlspecialchars($siteName, ENT_QUOTES, 'UTF-8') ?></title>
     <link rel="icon" type="image/svg+xml" href="assets/images/logo/reps-icon.svg">
     <link rel="alternate icon" type="image/png" sizes="32x32" href="assets/images/logo/favicon-32.png">
@@ -165,16 +88,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<<<<<<< HEAD
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-=======
-    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 
     <link rel="stylesheet" href="assets/css/app.css?v=<?= (int)@filemtime(__DIR__ . '/assets/css/app.css') ?>">
     <link rel="stylesheet" href="assets/css/auth.css?v=<?= (int)@filemtime(__DIR__ . '/assets/css/auth.css') ?>">
     <link rel="stylesheet" href="assets/vendor/fontawesome/css/all.min.css">
-<<<<<<< HEAD
     <link rel="stylesheet" href="assets/css/base.css?v=18">
 
     <style>
@@ -330,30 +248,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="auth-header-inner">
             <a class="auth-logo-link focus:outline-none" href="index.php" aria-label="<?= htmlspecialchars($siteName, ENT_QUOTES, 'UTF-8') ?> หน้าหลัก">
                 <img src="<?= htmlspecialchars(app_logo_url($conn), ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($siteName, ENT_QUOTES, 'UTF-8') ?>" class="auth-logo">
-=======
-</head>
-
-<body class="auth-dark antialiased min-h-screen flex flex-col justify-between relative overflow-x-hidden font-sans">
-
-    <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden auth-fade-mask" aria-hidden="true">
-        <div class="absolute inset-0 auth-grid"></div>
-    </div>
-    <div class="auth-rails" aria-hidden="true"></div>
-
-    <header class="auth-header">
-        <div class="max-w-6xl mx-auto h-16 px-6 flex items-center justify-between">
-            <a class="flex items-center gap-3 focus:outline-none" href="index.php" aria-label="<?= htmlspecialchars($siteName, ENT_QUOTES, 'UTF-8') ?> หน้าหลัก">
-                <img src="assets/images/logo/reps-logo.svg" alt="<?= htmlspecialchars($siteName, ENT_QUOTES, 'UTF-8') ?>" class="auth-logo h-6 sm:h-7 w-auto">
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
             </a>
         </div>
     </header>
 
-<<<<<<< HEAD
     <main id="main" class="w-full relative z-10 flex-1 flex flex-col items-center justify-center px-6 py-12 sm:py-16">
-=======
-    <main id="main" class="w-full relative z-10 flex-1 flex flex-col items-center justify-center px-4 py-12 sm:py-16">
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
         <div class="w-full max-w-md mx-auto flex flex-col items-center">
 
             <div class="auth-card">
@@ -364,7 +263,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
 
                 <?php if (isset($_GET['registered'])): ?>
-<<<<<<< HEAD
                     <div class="auth-alert-new is-success" role="status">
                         <div class="alert-icon"><i class="fa-solid fa-check" aria-hidden="true"></i></div>
                         <div class="alert-content">
@@ -379,16 +277,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <span class="alert-title">กรุณาเข้าสู่ระบบก่อนแจ้งซ่อม</span>
                             <span>หากยังไม่มีบัญชี สามารถสมัครสมาชิกได้ที่ด้านล่าง (บัญชีใหม่ต้องรอครูอนุมัติก่อนใช้งาน)</span>
                         </div>
-=======
-                    <div class="auth-alert auth-alert-ok">
-                        <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
-                        <span>สร้างบัญชีสำเร็จแล้ว กรุณาเข้าสู่ระบบ</span>
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                     </div>
                 <?php endif; ?>
 
                 <?php if (!empty($error_msg)): ?>
-<<<<<<< HEAD
                     <div class="auth-alert-new is-error" role="alert">
                         <div class="alert-icon"><i class="fa-solid fa-exclamation" aria-hidden="true"></i></div>
                         <div class="alert-content">
@@ -404,17 +296,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <span class="alert-title">ข้อมูลไม่ครบถ้วน</span>
                         <span>กรุณากรอกชื่อผู้ใช้และรหัสผ่านให้ครบถ้วน</span>
                     </div>
-=======
-                    <div class="auth-alert auth-alert-error" role="alert">
-                        <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
-                        <span><?= htmlspecialchars($error_msg, ENT_QUOTES, 'UTF-8') ?></span>
-                    </div>
-                <?php endif; ?>
-
-                <div id="errorMessage" class="auth-alert auth-alert-error hidden" role="alert">
-                    <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
-                    <span>กรุณากรอกชื่อผู้ใช้และรหัสผ่าน</span>
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                 </div>
 
                 <form action="login.php" method="POST" id="loginForm" class="space-y-4" novalidate>
@@ -436,11 +317,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <label class="auth-label" for="password">
                                 รหัสผ่าน
                             </label>
-<<<<<<< HEAD
                             <a class="text-xs text-gray-500 hover:text-gray-900 transition-colors underline-offset-4 hover:underline" href="forgot_password.php">
-=======
-                            <a class="auth-label hover:text-white transition-colors underline-offset-4 hover:underline" href="forgot_password.php">
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                                 ลืมรหัสผ่าน?
                             </a>
                         </div>
@@ -469,16 +346,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </main>
 
-<<<<<<< HEAD
     <?php $footerBase = '';$footerVariant = 'light'; require __DIR__ . '/includes/site_footer.php'; ?>
-=======
-    <footer class="auth-footer">
-        <div class="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <span>แผนกเทคโนโลยีธุรกิจดิจิทัล</span>
-            <span>&copy; <?= date('Y'); ?> Developed by Digital Business Technology.</span>
-        </div>
-    </footer>
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 
     <script>
         function togglePasswordVisibility() {
@@ -501,7 +369,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if (!username || !password) {
                 e.preventDefault();
-<<<<<<< HEAD
                 if (errorMessage) {
                     errorMessage.classList.remove('hidden');
                     errorMessage.setAttribute('aria-hidden', 'false');
@@ -513,13 +380,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 errorMessage.classList.add('hidden');
                 errorMessage.setAttribute('aria-hidden', 'true');
             }
-=======
-                errorMessage?.classList.remove('hidden');
-                return;
-            }
-
-            errorMessage?.classList.add('hidden');
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
             if (btnText) btnText.disabled = true;
         });
     </script>

@@ -1,9 +1,5 @@
 <?php
-<<<<<<< HEAD
 $page_title = 'รายงาน';
-=======
-$page_title = 'Reports';
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 $current_page = 'reports';
 require_once __DIR__ . '/../includes/admin_auth.php';
 require_once __DIR__ . '/../db_connect.php';
@@ -34,13 +30,9 @@ try {
 
 $labels = [
    'pending'     => 'รอรับเรื่อง',
-<<<<<<< HEAD
    'pending' => 'รอรับเรื่อง', 'accepted' => 'รับแล้ว รอบันทึกเช็คลิสต์', 'awaiting_intake_sign' => 'รอผู้แจ้งเซ็นรับทราบ',
    'in_progress' => 'กำลังซ่อม', 'inspected_ready' => 'ตรวจซ้ำแล้ว รอส่งมอบ', 'awaiting_requester_sign' => 'รอผู้แจ้งเซ็นรับคืน',
    'awaiting_admin_sign' => 'รอครูรับรอง', 'disputed' => 'ผู้แจ้งไม่ยอมรับ',
-=======
-   'in_progress' => 'กำลังดำเนินการ',
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
    'completed'   => 'เสร็จสิ้น',
    'cancelled'   => 'ยกเลิก'
 ];
@@ -50,21 +42,12 @@ require_once __DIR__ . '/admin_header.php';
 
          <div class="admin-page-head">
             <nav class="admin-crumb">
-<<<<<<< HEAD
                <a href="admin_dashboard.php"><?= tr('แดชบอร์ด', 'Dashboard') ?></a>
                <i class="fa-solid fa-chevron-right"></i>
                <span><?= tr('รายงาน', 'Reports') ?></span>
             </nav>
             <h1 class="admin-page-title"><?= tr('รายงานคำขอซ่อม', 'Repair request report') ?></h1>
             <p class="admin-page-sub"><?= tr('สรุปปริมาณงานและผลการดำเนินงานตามช่วงวันที่', 'Workload and performance summary for a date range') ?></p>
-=======
-               <a href="admin_dashboard.php">Dashboard</a>
-               <i class="fa-solid fa-chevron-right"></i>
-               <span>รายงาน</span>
-            </nav>
-            <h1 class="admin-page-title">รายงานคำขอซ่อม</h1>
-            <p class="admin-page-sub">สรุปปริมาณงานและผลการดำเนินงานตามช่วงวันที่</p>
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
          </div>
 
          <div class="admin-tray">
@@ -172,11 +155,7 @@ require_once __DIR__ . '/admin_header.php';
                   <h2 class="font-medium text-gray-900">จำนวนคำขอรายวัน</h2>
                </div>
                <div class="overflow-x-auto admin-table-wrap">
-<<<<<<< HEAD
                   <table class="w-full text-sm" data-pager id="dailyCounts">
-=======
-                  <table class="w-full text-sm">
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                      <thead class="bg-gray-50 text-xs text-gray-500">
                         <tr>
                            <th class="px-5 py-3 text-left font-medium">วันที่</th>
@@ -203,22 +182,14 @@ require_once __DIR__ . '/admin_header.php';
 
          <!-- ตารางรายการคำขอล่าสุด 100 รายการ -->
          <div class="admin-tray">
-<<<<<<< HEAD
             <div class="admin-tray-label">คำขอล่าสุด</div>
-=======
-            <div class="admin-tray-label">Recent Requests</div>
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
             <section class="admin-card">
                <div class="border-b border-[#ECEAE6] p-5">
                   <h2 class="font-medium text-gray-900">รายการคำขอ</h2>
                   <p class="mt-1 text-xs text-gray-500">แสดงสูงสุด 100 รายการ</p>
                </div>
                <div class="overflow-x-auto admin-table-wrap">
-<<<<<<< HEAD
                   <table class="w-full min-w-[700px] text-sm" data-pager id="reportTickets">
-=======
-                  <table class="w-full min-w-[700px] text-sm">
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                      <thead class="bg-gray-50 text-xs text-gray-500">
                         <tr>
                            <th class="px-4 py-3 text-left font-medium">รหัส</th>
@@ -282,10 +253,7 @@ require_once __DIR__ . '/admin_header.php';
             }
          </style>
       </div>
-<<<<<<< HEAD
 <?php $footerBase = '../'; $footerVariant = 'app'; require __DIR__ . '/../includes/site_footer.php'; ?>
-=======
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
    </div>
 </body>
 </html>

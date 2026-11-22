@@ -49,13 +49,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                $message = 'ลิงก์นี้ไม่ถูกต้องหรือหมดอายุแล้ว กรุณาขอลิงก์ใหม่';
             } else {
                $userId = (int)$tokenRow['user_id'];
-<<<<<<< HEAD
                // ตั้งรหัสใหม่ด้วยลิงก์ = ไม่ต้องเปลี่ยนรหัสชั่วคราวอีก (fallback ถ้ายังไม่ได้รัน migration 20261120)
                $update = $conn->prepare('UPDATE users SET password = ?, must_change_password = 0 WHERE user_id = ?')
                   ?: $conn->prepare('UPDATE users SET password = ? WHERE user_id = ?');
-=======
-               $update = $conn->prepare('UPDATE users SET password = ? WHERE user_id = ?');
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                if (!$update) {
                   throw new RuntimeException($conn->error);
                }

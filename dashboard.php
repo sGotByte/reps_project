@@ -10,40 +10,28 @@ declare(strict_types=1);
 require_once __DIR__ . '/db_connect.php';
 require_once __DIR__ . '/includes/user_auth.php';
 require_once __DIR__ . '/includes/csrf.php';
-<<<<<<< HEAD
 require_once __DIR__ . '/includes/queue_manager.php';
 require_once __DIR__ . '/includes/icons.php';
-=======
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 
 /* ================================================================
  * ZONE A · Config
  * ================================================================ */
 
-<<<<<<< HEAD
 require_once __DIR__ . '/includes/pager.php';
 const TICKETS_PER_PAGE_OPTIONS = [10, 25, 50];
 define('TICKETS_PER_PAGE', pager_per_page(TICKETS_PER_PAGE_OPTIONS, 10));
-=======
-const TICKETS_PER_PAGE = 10;
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 const MAX_PAGE_NUMBER = 100000;
 const SEARCH_MAX_LENGTH = 100;
 const LOCATION_MAX_LENGTH = 255;
 const SYMPTOM_MAX_LENGTH = 5000;
 const CANCEL_REASON_MAX_LENGTH = 255;
 
-<<<<<<< HEAD
 const URGENCY_LABELS = ['urgent' => 'ด่วน', 'normal' => 'ปกติ'];
-=======
-const URGENCY_LABELS = ['urgent' => 'ด่วน', 'normal' => 'ปกติ', 'low' => 'ไม่เร่งด่วน'];
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 const USER_TYPE_LABELS = ['student' => 'นักศึกษา', 'teacher' => 'ครู/อาจารย์', 'staff' => 'บุคลากร'];
 
 /** สถานะใบงาน */
 enum TicketStatus: string
 {
-<<<<<<< HEAD
     // ช่วงหลักที่ผู้แจ้งเห็น (ใช้เป็นตัวกรองและขั้นใน tracker) — ค่า in_progress/awaiting_signoff ใช้เป็นชื่อช่วง
     case Pending = 'pending';
     case InProgress = 'in_progress';
@@ -57,19 +45,12 @@ enum TicketStatus: string
     case AwaitingRequesterSign = 'awaiting_requester_sign';
     case AwaitingAdminSign = 'awaiting_admin_sign';
     case Disputed = 'disputed';
-=======
-    case Pending = 'pending';
-    case InProgress = 'in_progress';
-    case Completed = 'completed';
-    case Cancelled = 'cancelled';
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 
     public function label(): string
     {
         return match ($this) {
             self::Pending => 'รอรับเรื่อง',
             self::InProgress => 'กำลังดำเนินการ',
-<<<<<<< HEAD
             self::AwaitingSignoff => 'รอเซ็นรับรอง',
             self::Completed => 'เสร็จสิ้น',
             self::Cancelled => 'ยกเลิก',
@@ -105,10 +86,6 @@ enum TicketStatus: string
             'in_progress' => ['accepted', 'awaiting_intake_sign', 'in_progress', 'inspected_ready'],
             'awaiting_signoff' => ['awaiting_requester_sign', 'awaiting_admin_sign', 'disputed'],
             default => [$phase],
-=======
-            self::Completed => 'เสร็จสิ้น',
-            self::Cancelled => 'ยกเลิก',
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
         };
     }
 }
@@ -145,11 +122,7 @@ function request_status_filter(): string
         return '';
     }
 
-<<<<<<< HEAD
     return in_array($status, [TicketStatus::Pending->value, TicketStatus::InProgress->value, TicketStatus::AwaitingSignoff->value], true)
-=======
-    return in_array($status, [TicketStatus::Pending->value, TicketStatus::InProgress->value], true)
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
         ? $status
         : '';
 }
@@ -172,12 +145,9 @@ function escape_like(string $value): string
 
 function page_url(array $params): string
 {
-<<<<<<< HEAD
     if (TICKETS_PER_PAGE !== 10 && !array_key_exists('per', $params)) {
         $params['per'] = TICKETS_PER_PAGE;
     }
-=======
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
     $params = array_filter($params, static fn($v) => $v !== '' && $v !== null && $v !== 1);
     return 'dashboard.php' . ($params !== [] ? '?' . http_build_query($params) : '');
 }
@@ -259,15 +229,10 @@ function fetch_status_counts(mysqli $conn, int $userId): array
     $stmt->execute();
     $result = $stmt->get_result();
     while ($row = $result->fetch_assoc()) {
-<<<<<<< HEAD
         // นับรวมเข้าช่วงหลัก (สถานะละเอียดของ v3 รวมอยู่ใน in_progress / awaiting_signoff)
         $phase = TicketStatus::tryFrom((string)$row['status'])?->phase()->value;
         if ($phase !== null && isset($counts[$phase])) {
             $counts[$phase] += (int)$row['cnt'];
-=======
-        if (isset($counts[$row['status']])) {
-            $counts[$row['status']] = (int)$row['cnt'];
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
         }
     }
     $stmt->close();
@@ -276,25 +241,15 @@ function fetch_status_counts(mysqli $conn, int $userId): array
 
 function build_ticket_filter(int $userId, string $status, string $search): array
 {
-<<<<<<< HEAD
     $clauses = ["t.requester_id = ?", "t.status IN ('pending', 'accepted', 'awaiting_intake_sign', 'in_progress', 'inspected_ready', 'awaiting_requester_sign', 'awaiting_admin_sign', 'disputed')"];
-=======
-    $clauses = ["t.requester_id = ?", "t.status IN ('pending', 'in_progress')"];
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
     $types = 'i';
     $params = [$userId];
 
     if ($status !== '') {
-<<<<<<< HEAD
         $phaseStatuses = TicketStatus::statusesOfPhase($status);
         $clauses[] = 't.status IN (' . implode(',', array_fill(0, count($phaseStatuses), '?')) . ')';
         $types .= str_repeat('s', count($phaseStatuses));
         array_push($params, ...$phaseStatuses);
-=======
-        $clauses[] = 't.status = ?';
-        $types .= 's';
-        $params[] = $status;
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
     }
 
     if ($search !== '') {
@@ -322,11 +277,7 @@ function fetch_tickets(mysqli $conn, string $whereSql, string $types, array $par
 {
     $sql = "SELECT t.id AS ticket_id, t.ticket_no, t.category_id, t.symptom AS symptoms,
                    t.urgency, t.status, t.created_at, t.accepted_at, t.completed_at,
-<<<<<<< HEAD
                    t.resolution_summary, t.cancel_reason, t.completion_image,
-=======
-                   t.resolution_summary, t.cancel_reason,
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                    c.name AS category_name,
                    t.location_note AS location_name,
                    CONCAT(tech.first_name, ' ', tech.last_name) AS tech_name
@@ -400,7 +351,6 @@ function handle_update_ticket(mysqli $conn, int $userId, array $categories): arr
         return flash('error', 'ข้อมูลใบแจ้งซ่อมไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง');
     }
 
-<<<<<<< HEAD
     // งานด่วนต้องมีเหตุผลเสมอ (ใช้เหตุผลเดิมได้ถ้าเคยระบุไว้)
     $urgencyReason = mb_substr(trim(post_string('urgency_reason')), 0, 500, 'UTF-8');
     if ($urgency === 'urgent' && $urgencyReason === '') {
@@ -422,15 +372,6 @@ function handle_update_ticket(mysqli $conn, int $userId, array $categories): arr
          WHERE id = ? AND requester_id = ? AND status = 'pending'"
     );
     $stmt->bind_param('sisssii', $location, $categoryId, $symptoms, $urgency, $urgencyReasonValue, $ticketId, $userId);
-=======
-    $stmt = db_prepare(
-        $conn,
-        "UPDATE tickets
-         SET location_note = ?, category_id = ?, symptom = ?, urgency = ?
-         WHERE id = ? AND requester_id = ? AND status = 'pending'"
-    );
-    $stmt->bind_param('sissii', $location, $categoryId, $symptoms, $urgency, $ticketId, $userId);
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
     $executed = $stmt->execute();
     $affectedRows = $stmt->affected_rows;
     $stmt->close();
@@ -565,7 +506,6 @@ function build_tracker(array $ticket, array $logs): array
         ];
     }
 
-<<<<<<< HEAD
     $index = match ($status?->phase()) {
         TicketStatus::InProgress => 1,
         TicketStatus::AwaitingSignoff => 2,
@@ -578,23 +518,12 @@ function build_tracker(array $ticket, array $logs): array
             $submittedAt = $log['created_at'] ?? null;
         }
     }
-=======
-    $index = match ($status) {
-        TicketStatus::InProgress => 1,
-        TicketStatus::Completed => 2,
-        default => 0,
-    };
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 
     return [
         tracker_step(TicketStatus::Pending, $createdAt, true, $index === 0),
         tracker_step(TicketStatus::InProgress, $ticket['accepted_at'] ?? null, $index >= 1, $index === 1),
-<<<<<<< HEAD
         tracker_step(TicketStatus::AwaitingSignoff, $submittedAt, $index >= 2, $index === 2),
         tracker_step(TicketStatus::Completed, $ticket['completed_at'] ?? null, $index >= 3, $index === 3),
-=======
-        tracker_step(TicketStatus::Completed, $ticket['completed_at'] ?? null, $index >= 2, $index === 2),
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
     ];
 }
 
@@ -675,11 +604,7 @@ $search = request_search_term();
 $page = request_page_number();
 
 $counts = fetch_status_counts($conn, $user_id);
-<<<<<<< HEAD
 $total_tickets = $counts['pending'] + $counts['in_progress'] + $counts['awaiting_signoff'];
-=======
-$total_tickets = $counts['pending'] + $counts['in_progress'];
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 
 [$where_sql, $bind_types, $bind_params] = build_ticket_filter($user_id, $filter, $search);
 $total_filtered = count_tickets($conn, $where_sql, $bind_types, $bind_params);
@@ -691,7 +616,6 @@ $offset = ($page - 1) * TICKETS_PER_PAGE;
 $tickets = fetch_tickets($conn, $where_sql, $bind_types, $bind_params, $offset);
 $logs_by_ticket = fetch_logs_by_ticket($conn, array_map('intval', array_column($tickets, 'ticket_id')));
 
-<<<<<<< HEAD
 // งานที่เพิ่งซ่อมเสร็จ (7 วันล่าสุด) ให้ผู้แจ้งเห็นตอนจบงาน พร้อมรูปหลังซ่อมและใบรับรอง
 $recent_done_stmt = db_prepare(
     $conn,
@@ -705,8 +629,6 @@ $recent_done_stmt->execute();
 $recent_done = $recent_done_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $recent_done_stmt->close();
 
-=======
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 $initial = mb_strtoupper(mb_substr(trim((string)$user['first_name']), 0, 1, 'UTF-8'), 'UTF-8');
 $profileMeta = trim((USER_TYPE_LABELS[$user['user_type']] ?? (string)$user['user_type'])
     . (!empty($user['department_name']) ? ' · ' . $user['department_name'] : ''));
@@ -725,20 +647,12 @@ $hasFilter = ($filter !== '' || $search !== '');
     <!-- Shared Typography Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<<<<<<< HEAD
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-=======
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 
     <link rel="stylesheet" href="assets/css/app.css?v=<?= (int)filemtime(__DIR__ . '/assets/css/app.css') ?>">
     <link rel="stylesheet" href="assets/vendor/fontawesome/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
-<<<<<<< HEAD
     <script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Kanit', 'sans-serif'], kanit: ['Kanit', 'sans-serif'] } } } };</script>
-=======
-    <script>tailwind.config = { theme: { extend: { fontFamily: { kanit: ['Kanit', 'sans-serif'] } } } };</script>
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 
     <style>
         :root {
@@ -749,22 +663,14 @@ $hasFilter = ($filter !== '' || $search !== '');
             --admin-line: #ECEAE6;
             --admin-line-strong: #D9D6D0;
             --admin-ink: #161616;
-<<<<<<< HEAD
             --admin-muted: #6B6862;
-=======
-            --admin-muted: #8E8B85;
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
             --admin-soft: #F7F6F4;
         }
 
         body.admin-shell {
             background: var(--admin-bg);
             color: var(--admin-ink);
-<<<<<<< HEAD
             font-family: 'Kanit', sans-serif;
-=======
-            font-family: 'Inter', 'Kanit', sans-serif;
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
         }
 
 
@@ -782,24 +688,14 @@ $hasFilter = ($filter !== '' || $search !== '');
             max-width: 72rem;
             margin: 0 auto;
             padding: 20px 28px;
-<<<<<<< HEAD
             color: #6B6862;
             font-family: 'Kanit', sans-serif;
-=======
-            color: #8E8B85;
-            font-family: 'Kanit', 'Inter', sans-serif;
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
             font-size: 12px;
             line-height: 1.5;
         }
         .reps-footer-tag {
-<<<<<<< HEAD
             font-family: 'Kanit', sans-serif;
             font-size: 11px;
-=======
-            font-family: 'JetBrains Mono', 'Kanit', monospace;
-            font-size: 10.5px;
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
             letter-spacing: .06em;
             text-transform: uppercase;
             white-space: nowrap;
@@ -827,13 +723,8 @@ $hasFilter = ($filter !== '' || $search !== '');
 
         .admin-topbar .admin-brand-label {
             color: var(--admin-ink);
-<<<<<<< HEAD
             font-family: 'Kanit', sans-serif;
             font-size: 11px;
-=======
-            font-family: 'Kanit', monospace;
-            font-size: 10.5px;
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
             font-weight: 600;
             letter-spacing: .14em;
             text-transform: uppercase;
@@ -843,13 +734,8 @@ $hasFilter = ($filter !== '' || $search !== '');
             display: block;
             margin-top: 2px;
             color: var(--admin-muted);
-<<<<<<< HEAD
             font-family: 'Kanit', sans-serif;
             font-size: 11px;
-=======
-            font-family: 'Kanit', monospace;
-            font-size: 9px;
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
             font-weight: 400;
             letter-spacing: .12em;
         }
@@ -862,13 +748,8 @@ $hasFilter = ($filter !== '' || $search !== '');
 
         .admin-topbar .admin-user-role {
             color: var(--admin-muted);
-<<<<<<< HEAD
             font-family: 'Kanit', sans-serif;
             font-size: 11px;
-=======
-            font-family: 'Kanit', monospace;
-            font-size: 9.5px;
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
             letter-spacing: .1em;
             text-transform: uppercase;
         }
@@ -877,11 +758,7 @@ $hasFilter = ($filter !== '' || $search !== '');
             background: var(--admin-soft);
             border-color: var(--admin-line);
             color: #55534F;
-<<<<<<< HEAD
             font-family: 'Kanit', sans-serif;
-=======
-            font-family: 'Kanit', monospace;
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
             font-size: 13px;
             font-weight: 600;
             box-shadow: inset 0 0 0 3px #fff;
@@ -952,11 +829,7 @@ $hasFilter = ($filter !== '' || $search !== '');
             justify-content: space-between;
             padding: 8px 14px 6px;
             font-size: 11px;
-<<<<<<< HEAD
             color: #6B6862;
-=======
-            color: #8E8B85;
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
         }
 
         /* ===== Stat Dots ===== */
@@ -1061,11 +934,7 @@ $hasFilter = ($filter !== '' || $search !== '');
             top: 50%;
             left: 13px;
             z-index: 1;
-<<<<<<< HEAD
             color: #6B6862;
-=======
-            color: #A7A39C;
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
             font-size: 12px;
             pointer-events: none;
             transform: translateY(-50%);
@@ -1083,11 +952,7 @@ $hasFilter = ($filter !== '' || $search !== '');
             font-size: 12px;
             transition: border-color .15s ease, box-shadow .15s ease;
         }
-<<<<<<< HEAD
         .dashboard-search-input::placeholder { color: #6B6862; }
-=======
-        .dashboard-search-input::placeholder { color: #A7A39C; }
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
         .dashboard-search-input:hover { border-color: #B9B5AE; }
         .dashboard-search-input:focus { border-color: #161616; box-shadow: 0 0 0 3px rgba(22, 22, 22, .08); }
         .dashboard-search-key {
@@ -1099,15 +964,9 @@ $hasFilter = ($filter !== '' || $search !== '');
             border: 1px solid #EAE8E4;
             border-radius: 5px;
             background: #FAFAF8;
-<<<<<<< HEAD
             color: #6B6862;
             font-family: 'Kanit', sans-serif;
             font-size: 11px;
-=======
-            color: #8E8B85;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 10px;
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
             line-height: 1.2;
             text-align: center;
             transform: translateY(-50%);
@@ -1125,11 +984,7 @@ $hasFilter = ($filter !== '' || $search !== '');
             border: 0;
             border-radius: 6px;
             background: transparent;
-<<<<<<< HEAD
             color: #6B6862;
-=======
-            color: #8E8B85;
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
             cursor: pointer;
             transform: translateY(-50%);
         }
@@ -1164,7 +1019,6 @@ $hasFilter = ($filter !== '' || $search !== '');
         }
 
         .st-pending { --c: #D97706; }
-<<<<<<< HEAD
         .st-in_progress, .st-accepted, .st-awaiting_intake_sign, .st-inspected_ready { --c: #2563EB; }
         .st-awaiting_signoff, .st-awaiting_requester_sign, .st-awaiting_admin_sign { --c: #0E7490; }
         .st-disputed { --c: #B45309; }
@@ -1172,11 +1026,6 @@ $hasFilter = ($filter !== '' || $search !== '');
         .sign-cta-btn { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 14px; border-radius: 10px; background: var(--theme-primary, #161616); color: #fff; font-weight: 500; }
         .st-completed { --c: #12A150; }
         .st-cancelled { --c: #6B6862; }
-=======
-        .st-in_progress { --c: #2563EB; }
-        .st-completed { --c: #12A150; }
-        .st-cancelled { --c: #8E8B85; }
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 
         /* ===== Urgency Chips (ปรับใหม่สไตล์มินิมอล) ===== */
         .admin-chip.urgency-urgent {
@@ -1196,21 +1045,13 @@ $hasFilter = ($filter !== '' || $search !== '');
             font-weight: 500;
         }
         .admin-chip.urgency-normal::before {
-<<<<<<< HEAD
             background: #6B6862;
-=======
-            background: #8E8B85;
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
         }
 
         .admin-chip.urgency-low {
             background: #FAFAF8;
             border-color: #EAE8E4;
-<<<<<<< HEAD
             color: #6B6862;
-=======
-            color: #8E8B85;
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
             font-weight: 400;
         }
         .admin-chip.urgency-low::before {
@@ -1274,11 +1115,7 @@ $hasFilter = ($filter !== '' || $search !== '');
             border-radius: 50%;
             background: #FFFFFF;
             border: 2px solid #D9D6D0;
-<<<<<<< HEAD
             color: #6B6862;
-=======
-            color: #8E8B85;
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1304,13 +1141,8 @@ $hasFilter = ($filter !== '' || $search !== '');
 
         /* Cancelled step */
         .visual-step.is-cancelled .visual-step-node {
-<<<<<<< HEAD
             border-color: #6B6862;
             background: #6B6862;
-=======
-            border-color: #8E8B85;
-            background: #8E8B85;
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
             color: #FFFFFF;
         }
 
@@ -1321,11 +1153,7 @@ $hasFilter = ($filter !== '' || $search !== '');
         .visual-step-title {
             font-size: 12px;
             font-weight: 400;
-<<<<<<< HEAD
             color: #6B6862;
-=======
-            color: #8E8B85;
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
             line-height: 1.3;
         }
 
@@ -1336,21 +1164,12 @@ $hasFilter = ($filter !== '' || $search !== '');
         }
 
         .visual-step.is-cancelled .visual-step-title {
-<<<<<<< HEAD
             color: #6B6862;
         }
 
         .visual-step-time {
             font-family: 'Kanit', sans-serif;
             font-size: 11px;
-=======
-            color: #8E8B85;
-        }
-
-        .visual-step-time {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 10px;
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
             color: #B9B5AE;
             margin-top: 2px;
             overflow-wrap: anywhere;
@@ -1358,11 +1177,7 @@ $hasFilter = ($filter !== '' || $search !== '');
 
         .visual-step.is-on .visual-step-time,
         .visual-step.is-now .visual-step-time {
-<<<<<<< HEAD
             color: #6B6862;
-=======
-            color: #8E8B85;
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
         }
 
         /* Progress line */
@@ -1487,11 +1302,7 @@ $hasFilter = ($filter !== '' || $search !== '');
          .log-step-body { min-width: 0; padding-top: 1px; line-height: 1.45; }
          .log-step-title { color: #161616; font-size: 12px; font-weight: 500; line-height: 1.35; }
          .log-step-meta { margin-top: 3px; color: #73706A; font-size: 11px; overflow-wrap: anywhere; }
-<<<<<<< HEAD
          .log-step-time { margin-top: 4px; color: #6B6862; font-family: 'Kanit', sans-serif; font-size: 11px; }
-=======
-         .log-step-time { margin-top: 4px; color: #A7A39C; font-family: 'JetBrains Mono', monospace; font-size: 10px; }
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 
          @media (max-width: 480px) {
             .log-step { grid-template-columns: 14px minmax(0, 1fr); column-gap: 9px; padding-bottom: 16px; }
@@ -1552,30 +1363,7 @@ $hasFilter = ($filter !== '' || $search !== '');
             overscroll-behavior: contain;
             -webkit-overflow-scrolling: touch;
             padding: 24px;
-<<<<<<< HEAD
             /* แถบเลื่อนใช้สไตล์กลางจาก base.css */
-=======
-            scrollbar-width: thin;
-            scrollbar-color: #D9D6D0 #F7F6F4;
-        }
-
-        .edit-modal-body::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .edit-modal-body::-webkit-scrollbar-track {
-            background: #F7F6F4;
-            border-radius: 3px;
-        }
-
-        .edit-modal-body::-webkit-scrollbar-thumb {
-            background: #D9D6D0;
-            border-radius: 3px;
-        }
-
-        .edit-modal-body::-webkit-scrollbar-thumb:hover {
-            background: #C9C6C0;
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
         }
 
         .edit-modal-header {
@@ -1597,15 +1385,9 @@ $hasFilter = ($filter !== '' || $search !== '');
 
         .edit-modal-title-row { justify-content: space-between; gap: 16px; }
         .edit-modal-eyebrow {
-<<<<<<< HEAD
             color: #6B6862;
             font-family: 'Kanit', sans-serif;
             font-size: 11px;
-=======
-            color: #8E8B85;
-            font-family: 'JetBrains Mono', 'Kanit', monospace;
-            font-size: 10px;
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
             font-weight: 600;
             letter-spacing: .12em;
             text-transform: uppercase;
@@ -1633,11 +1415,7 @@ $hasFilter = ($filter !== '' || $search !== '');
             border: 1px solid #EAE8E4;
             border-radius: 10px;
             background: #FFFFFF;
-<<<<<<< HEAD
             color: #6B6862;
-=======
-            color: #8E8B85;
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
             cursor: pointer;
             transition: .15s ease;
         }
@@ -1651,13 +1429,8 @@ $hasFilter = ($filter !== '' || $search !== '');
             font-size: 11px;
         }
         .edit-modal-meta-item { display: inline-flex; align-items: center; gap: 6px; }
-<<<<<<< HEAD
         .edit-modal-meta-item i { color: #6B6862; font-size: 11px; }
         .edit-modal-ticket-no { color: #161616; font-family: 'Kanit', sans-serif; font-weight: 600; }
-=======
-        .edit-modal-meta-item i { color: #A7A39C; font-size: 10px; }
-        .edit-modal-ticket-no { color: #161616; font-family: 'JetBrains Mono', monospace; font-weight: 600; }
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
         .edit-modal-status {
             display: inline-flex;
             align-items: center;
@@ -1675,15 +1448,9 @@ $hasFilter = ($filter !== '' || $search !== '');
         .edit-modal-progress {
             gap: 8px;
             margin-top: 20px;
-<<<<<<< HEAD
             color: #6B6862;
             font-family: 'Kanit', sans-serif;
             font-size: 11px;
-=======
-            color: #8E8B85;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 9px;
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
             letter-spacing: .04em;
             text-transform: uppercase;
         }
@@ -1712,13 +1479,8 @@ $hasFilter = ($filter !== '' || $search !== '');
         .edit-modal-section:first-of-type { margin-top: 0; }
         .edit-modal-section-head { justify-content: space-between; gap: 12px; margin-bottom: 12px; }
         .edit-modal-section-title { display: flex; align-items: center; gap: 9px; color: #161616; font-size: 13px; font-weight: 600; }
-<<<<<<< HEAD
         .edit-modal-section-title i { color: #6B6862; font-size: 12px; }
         .edit-modal-section-note { color: #6B6862; font-size: 11px; }
-=======
-        .edit-modal-section-title i { color: #8E8B85; font-size: 12px; }
-        .edit-modal-section-note { color: #A7A39C; font-size: 10px; }
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
         .edit-modal-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
         .edit-modal-field { min-width: 0; }
         .edit-modal-field.is-full { grid-column: 1 / -1; }
@@ -1743,15 +1505,9 @@ $hasFilter = ($filter !== '' || $search !== '');
         .edit-modal-control:hover { border-color: #B9B5AE; }
         .edit-modal-control:focus { border-color: #161616; box-shadow: 0 0 0 3px rgba(22, 22, 22, .08); }
         .edit-modal-control.is-invalid { border-color: #C2413A; box-shadow: 0 0 0 3px rgba(194, 65, 58, .08); }
-<<<<<<< HEAD
         .edit-modal-help { margin-top: 6px; color: #6B6862; font-size: 11px; line-height: 1.5; }
         .edit-modal-help i { margin-right: 4px; color: #AAA69F; }
         .edit-modal-counter { color: #6B6862; font-family: 'Kanit', sans-serif; font-size: 11px; font-weight: 400; }
-=======
-        .edit-modal-help { margin-top: 6px; color: #8E8B85; font-size: 10.5px; line-height: 1.5; }
-        .edit-modal-help i { margin-right: 4px; color: #AAA69F; }
-        .edit-modal-counter { color: #8E8B85; font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 400; }
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
         .edit-modal-counter.is-near-limit { color: #B45309; }
         .edit-modal-counter.is-limit { color: #B42318; }
 
@@ -1856,11 +1612,7 @@ $hasFilter = ($filter !== '' || $search !== '');
             border-top: 1px solid #ECEAE6;
             background: #FAFAF8;
         }
-<<<<<<< HEAD
         .edit-modal-footer-note { display: flex; align-items: center; gap: 7px; color: #6B6862; font-size: 11px; line-height: 1.45; }
-=======
-        .edit-modal-footer-note { display: flex; align-items: center; gap: 7px; color: #8E8B85; font-size: 10px; line-height: 1.45; }
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
         .edit-modal-footer-note i { color: #7C7973; }
         .edit-modal-actions { display: flex; align-items: center; gap: 8px; flex: none; }
         .edit-modal-actions .admin-btn { min-height: 40px; }
@@ -1874,11 +1626,7 @@ $hasFilter = ($filter !== '' || $search !== '');
             .edit-modal-actions .admin-btn { flex: 1; }
             .edit-modal-grid, .edit-modal-urgency-grid { grid-template-columns: 1fr; }
             .edit-modal-field.is-full { grid-column: auto; }
-<<<<<<< HEAD
             .edit-modal-progress { gap: 5px; font-size: 11px; }
-=======
-            .edit-modal-progress { gap: 5px; font-size: 8px; }
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
             .edit-modal-progress-line { min-width: 8px; }
         }
 
@@ -1890,10 +1638,7 @@ $hasFilter = ($filter !== '' || $search !== '');
         /* Dropdown reset */
         details summary::-webkit-details-marker { display: none; }
     </style>
-<<<<<<< HEAD
    <link rel="stylesheet" href="assets/css/base.css?v=18">
-=======
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 </head>
 
 <body class="admin-shell min-h-screen flex flex-col antialiased">
@@ -1908,49 +1653,10 @@ $hasFilter = ($filter !== '' || $search !== '');
             <div class="flex items-center gap-3">
 				 <a href="request_form.php" class="admin-btn rounded-full">
                  	<i class="fa-solid fa-plus text-xs rounded-full" aria-hidden="true"></i>
-<<<<<<< HEAD
                  	<span><?php require_once __DIR__ . '/includes/i18n.php'; echo tr('แจ้งซ่อมใหม่', 'New request'); ?></span>
                	</a>
                   <?php require_once __DIR__ . '/includes/notifications.php'; echo notif_bell($conn, ''); ?>
                   <?php require_once __DIR__ . '/includes/user_menu.php'; echo user_menu_render($conn, ''); ?>
-=======
-                 	<span>แจ้งซ่อมใหม่</span>
-               	</a>
-                  <!-- User Menu -->
-                  <details class="relative" id="userMenu">
-                     <summary class="flex items-center gap-2.5 cursor-pointer select-none p-1 pr-2.5 rounded-full border border-neutral-200 hover:border-neutral-300 transition">
-                        <div class="admin-user-avatar w-8 h-8 rounded-full flex items-center justify-center text-xs flex-none">
-                              <?= h($initial) ?>
-                        </div>
-                        <span class="admin-user-name max-w-[120px] truncate hidden sm:inline"><?= h($user['first_name']) ?></span>
-                        <i class="fa-solid fa-chevron-down text-[10px] text-neutral-400" aria-hidden="true"></i>
-                     </summary>
-
-                     <div class="absolute right-0 mt-2 w-56 rounded-xl border border-neutral-200 bg-white p-2 shadow-lg z-50">
-                        <div class="border-b border-neutral-100 px-3 py-2.5">
-                              <div class="admin-user-name truncate"><?= h($full_name) ?></div>
-                              <?php if ($profileMeta !== ''): ?>
-                                 <div class="admin-user-role truncate mt-0.5"><?= h($profileMeta) ?></div>
-                              <?php endif; ?>
-                        </div>
-                        <div class="py-1">
-                              <a href="profile.php" class="flex items-center justify-between px-3 py-2 rounded-lg text-xs text-neutral-700 hover:bg-neutral-50 transition no-underline">
-                                 <span>ตั้งค่าโปรไฟล์</span>
-                                 <i class="fa-solid fa-user-gear text-[10px] text-neutral-400" aria-hidden="true"></i>
-                              </a>
-                              <a href="history.php" class="flex items-center justify-between px-3 py-2 rounded-lg text-xs text-neutral-700 hover:bg-neutral-50 transition no-underline">
-                                 <span>ประวัติการแจ้งซ่อม</span>
-                                 <i class="fa-solid fa-clock-rotate-left text-[10px] text-neutral-400" aria-hidden="true"></i>
-                              </a>
-                              <div class="border-t border-neutral-100 my-1"></div>
-                              <a href="logout.php" class="flex items-center justify-between px-3 py-2 rounded-lg text-xs text-rose-600 hover:bg-rose-50 transition no-underline">
-                                 <span>ออกจากระบบ</span>
-                                 <i class="fa-solid fa-right-from-bracket text-[10px]" aria-hidden="true"></i>
-                              </a>
-                        </div>
-                     </div>
-                  </details>
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
             </div>
          </div>
       </header>
@@ -1960,22 +1666,13 @@ $hasFilter = ($filter !== '' || $search !== '');
 
         <!-- Page Title & Breadcrumb -->
         <header class="admin-page-head">
-<<<<<<< HEAD
             <h1 class="admin-page-title"><?= tr('สวัสดีคุณ', 'Hello,') ?> <span><?= h($user['first_name']) ?></span></h1>
             <p class="admin-page-sub"><?= tr('จัดการและติดตามสถานะใบแจ้งซ่อมอุปกรณ์คอมพิวเตอร์และไอทีของคุณ', 'Manage and track your computer and IT repair requests') ?></p>
-=======
-            <h1 class="admin-page-title">สวัสดีคุณ <span><?= h($user['first_name']) ?></span></h1>
-            <p class="admin-page-sub">จัดการและติดตามสถานะใบแจ้งซ่อมอุปกรณ์คอมพิวเตอร์และไอทีของคุณ</p>
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
         </header>
 
         <!-- Flash Notice -->
         <?php if ($flash !== ''): ?>
-<<<<<<< HEAD
             <div role="status" class="mb-6 flex items-center gap-3 p-4 rounded-xl border text-sm font-medium <?= $flashType === 'error' ? 'border-rose-200 bg-rose-50 text-rose-900' : ($flashType === 'success' ? 'border-emerald-200 bg-emerald-50 text-emerald-900' : 'border-neutral-200 bg-white text-neutral-800') ?>">
-=======
-            <div class="mb-6 flex items-center gap-3 p-4 rounded-xl border text-xs <?= $flashType === 'error' ? 'border-rose-200 bg-rose-50 text-rose-900' : ($flashType === 'success' ? 'border-emerald-200 bg-emerald-50 text-emerald-900' : 'border-neutral-200 bg-white text-neutral-800') ?>">
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                 <i class="fa-solid <?= $flashType === 'error' ? 'fa-circle-exclamation text-rose-600' : ($flashType === 'success' ? 'fa-circle-check text-emerald-600' : 'fa-circle-info text-neutral-500') ?>" aria-hidden="true"></i>
                 <span><?= h($flash) ?></span>
             </div>
@@ -1984,40 +1681,24 @@ $hasFilter = ($filter !== '' || $search !== '');
         <!-- Stat Cards Section -->
         <section class="mb-6" aria-labelledby="stats-heading">
             <h2 id="stats-heading" class="sr-only">สรุปสถานะใบงานซ่อม</h2>
-<<<<<<< HEAD
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-=======
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 
                 <!-- Card 1: ใบงานเปิดอยู่ -->
                 <a href="<?= h(page_url(['q' => $search])) ?>" class="admin-stat-card-wrapper <?= $filter === '' ? 'is-active' : '' ?>">
                     <div class="admin-stat-inner">
                         <div class="flex items-center justify-between mb-3">
-<<<<<<< HEAD
                             <span class="text-xs text-[#6B6862] font-normal">ใบงานเปิดอยู่</span>
-=======
-                            <span class="text-xs text-[#8E8B85] font-normal">ใบงานเปิดอยู่</span>
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                             <span class="stat-dot dot-black"></span>
                         </div>
                         <div class="flex items-baseline justify-between">
                             <div class="flex items-baseline gap-1.5">
                                 <span class="font-mono text-3xl font-semibold text-[#161616] leading-none"><?= number_format($total_tickets) ?></span>
-<<<<<<< HEAD
                                 <span class="text-xs text-[#6B6862]">เคส</span>
-=======
-                                <span class="text-xs text-[#8E8B85]">เคส</span>
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                             </div>
                         </div>
                     </div>
                     <div class="admin-stat-footer">
-<<<<<<< HEAD
                         <span class="ml-auto text-[#161616] font-normal">ยังไม่เสร็จทั้งหมด</span>
-=======
-                        <span class="ml-auto text-[#161616] font-normal">รายการที่รอดำเนินการ</span>
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                     </div>
                 </a>
 
@@ -2025,30 +1706,18 @@ $hasFilter = ($filter !== '' || $search !== '');
                 <a href="<?= h(page_url(['status' => 'pending', 'q' => $search])) ?>" class="admin-stat-card-wrapper <?= $filter === 'pending' ? 'is-active' : '' ?>">
                     <div class="admin-stat-inner">
                         <div class="flex items-center justify-between mb-3">
-<<<<<<< HEAD
                             <span class="text-xs text-[#6B6862] font-normal">รอรับเรื่อง</span>
-=======
-                            <span class="text-xs text-[#8E8B85] font-normal">รอรับเรื่อง</span>
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                             <span class="stat-dot dot-amber"></span>
                         </div>
                         <div class="flex items-baseline justify-between">
                             <div class="flex items-baseline gap-1.5">
                                 <span class="font-mono text-3xl font-semibold text-[#161616] leading-none"><?= number_format($counts['pending']) ?></span>
-<<<<<<< HEAD
                                 <span class="text-xs text-[#6B6862]">เคส</span>
-=======
-                                <span class="text-xs text-[#8E8B85]">เคส</span>
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                             </div>
                         </div>
                     </div>
                     <div class="admin-stat-footer">
-<<<<<<< HEAD
                         <span class="ml-auto text-[#B45309] font-normal">รอสตาฟกดรับงาน</span>
-=======
-                        <span class="ml-auto text-[#D97706] font-normal">รอตรวจสอบ</span>
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                     </div>
                 </a>
 
@@ -2056,26 +1725,17 @@ $hasFilter = ($filter !== '' || $search !== '');
                 <a href="<?= h(page_url(['status' => 'in_progress', 'q' => $search])) ?>" class="admin-stat-card-wrapper <?= $filter === 'in_progress' ? 'is-active' : '' ?>">
                     <div class="admin-stat-inner">
                         <div class="flex items-center justify-between mb-3">
-<<<<<<< HEAD
                             <span class="text-xs text-[#6B6862] font-normal">กำลังดำเนินการ</span>
-=======
-                            <span class="text-xs text-[#8E8B85] font-normal">กำลังดำเนินการ</span>
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                             <span class="stat-dot dot-blue"></span>
                         </div>
                         <div class="flex items-baseline justify-between">
                             <div class="flex items-baseline gap-1.5">
                                 <span class="font-mono text-3xl font-semibold text-[#161616] leading-none"><?= number_format($counts['in_progress']) ?></span>
-<<<<<<< HEAD
                                 <span class="text-xs text-[#6B6862]">เคส</span>
-=======
-                                <span class="text-xs text-[#8E8B85]">เคส</span>
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                             </div>
                         </div>
                     </div>
                     <div class="admin-stat-footer">
-<<<<<<< HEAD
                         <span class="ml-auto text-[#1D4ED8] font-normal">ช่างกำลังซ่อม</span>
                     </div>
                 </a>
@@ -2096,9 +1756,6 @@ $hasFilter = ($filter !== '' || $search !== '');
                     </div>
                     <div class="admin-stat-footer">
                         <span class="ml-auto text-[#161616] font-normal">ซ่อมแล้ว รอตรวจรับ</span>
-=======
-                        <span class="ml-auto text-[#2563EB] font-normal">Lab Boy กำลังดูแล</span>
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                     </div>
                 </a>
             </div>
@@ -2114,11 +1771,7 @@ $hasFilter = ($filter !== '' || $search !== '');
                         <h3 id="tickets-heading" class="admin-section-title">รายการใบแจ้งซ่อมของฉัน</h3>
                         <p class="admin-section-sub">ติดตามสถานะความคืบหน้าและประวัติของแต่ละใบงาน</p>
                     </div>
-<<<<<<< HEAD
                     <span class="font-mono text-xs text-neutral-500">ทั้งหมด <?= number_format($total_filtered) ?> รายการ</span>
-=======
-                    <span class="font-mono text-xs text-neutral-400">ทั้งหมด <?= number_format($total_filtered) ?> รายการ</span>
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                 </div>
 
                 <!-- Toolbar: Search & Filters -->
@@ -2137,26 +1790,9 @@ $hasFilter = ($filter !== '' || $search !== '');
                         <?php endif; ?>
                     </form>
 
-<<<<<<< HEAD
                     <?php if ($hasFilter): ?>
                         <a href="dashboard.php" class="inline-flex items-center min-h-[44px] px-3 text-sm text-neutral-700 hover:text-neutral-900 underline underline-offset-4 whitespace-nowrap">ล้างตัวกรอง</a>
                     <?php endif; ?>
-=======
-                    <div class="flex items-center gap-2 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0">
-                        <a href="<?= h(page_url(['q' => $search])) ?>" class="admin-btn admin-btn-secondary text-xs <?= $filter === '' ? '!border-neutral-900 !text-neutral-900 font-medium' : '' ?>">
-                            ทั้งหมด (<?= number_format($total_tickets) ?>)
-                        </a>
-                        <a href="<?= h(page_url(['status' => 'pending', 'q' => $search])) ?>" class="admin-btn admin-btn-secondary text-xs <?= $filter === 'pending' ? '!border-neutral-900 !text-neutral-900 font-medium' : '' ?>">
-                            รอรับเรื่อง (<?= number_format($counts['pending']) ?>)
-                        </a>
-                        <a href="<?= h(page_url(['status' => 'in_progress', 'q' => $search])) ?>" class="admin-btn admin-btn-secondary text-xs <?= $filter === 'in_progress' ? '!border-neutral-900 !text-neutral-900 font-medium' : '' ?>">
-                            กำลังดำเนินการ (<?= number_format($counts['in_progress']) ?>)
-                        </a>
-                        <?php if ($hasFilter): ?>
-                            <a href="dashboard.php" class="text-xs text-neutral-500 hover:text-neutral-900 ml-2 whitespace-nowrap">ล้างตัวกรอง</a>
-                        <?php endif; ?>
-                    </div>
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                 </div>
             </div>
 
@@ -2204,10 +1840,6 @@ $hasFilter = ($filter !== '' || $search !== '');
                         $timelineLast = count($timeline) - 1;
                         $urgencyClass = match ($t['urgency'] ?? 'normal') {
                             'urgent' => 'urgency-urgent',
-<<<<<<< HEAD
-=======
-                            'low' => 'urgency-low',
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                             default => 'urgency-normal',
                         };
                     ?>
@@ -2219,17 +1851,12 @@ $hasFilter = ($filter !== '' || $search !== '');
                                         #<?= h($t['ticket_no']) ?>
                                     </a>
                                     <span class="text-neutral-300">·</span>
-<<<<<<< HEAD
                                     <span class="font-mono text-[11px] text-neutral-500"><?= h(fmt($t['created_at'])) ?></span>
-=======
-                                    <span class="font-mono text-[11px] text-neutral-400"><?= h(fmt($t['created_at'])) ?></span>
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                                 </div>
                                 <span class="admin-chip st-<?= h($t['status']) ?>">
                                     <?= h(status_label($t['status'])) ?>
                                 </span>
                             </div>
-<<<<<<< HEAD
                             <?php if ($status?->needsRequesterSign()): ?>
                                 <a href="sign.php?id=<?= (int)$t['ticket_id'] ?>" class="sign-cta">
                                     <span><b><?= $status === TicketStatus::AwaitingIntakeSign ? 'ช่างรับอุปกรณ์แล้ว กรุณาเซ็นรับทราบรายการ' : 'ซ่อมเสร็จแล้ว กรุณาตรวจและเซ็นรับอุปกรณ์คืน' ?></b></span>
@@ -2238,8 +1865,6 @@ $hasFilter = ($filter !== '' || $search !== '');
                             <?php elseif ($status !== null && $status->phase() !== TicketStatus::Pending): ?>
                                 <a href="sign.php?id=<?= (int)$t['ticket_id'] ?>" class="text-xs underline text-neutral-600">ดูเช็คลิสต์และลายเซ็น</a>
                             <?php endif; ?>
-=======
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 
                             <h3 class="text-lg font-semibold text-neutral-900 mb-1 flex items-center gap-2">
                                 <span><?= h($t['category_name'] ?? 'ไม่ระบุหมวดหมู่') ?></span>
@@ -2253,7 +1878,6 @@ $hasFilter = ($filter !== '' || $search !== '');
                             </p>
 
                             <div class="flex flex-wrap items-center gap-6 text-xs text-neutral-500 mb-3">
-<<<<<<< HEAD
                                 <span><i class="fa-solid fa-location-dot text-neutral-500 mr-2" aria-hidden="true"></i><?= h($t['location_name']) ?></span>
                                 <span><i class="fa-solid fa-user-gear text-neutral-500 mr-2" aria-hidden="true"></i>ผู้รับผิดชอบ: <strong class="text-neutral-700 font-medium"><?= $hasTech ? h($t['tech_name']) : 'ยังไม่มีผู้รับงาน' ?></strong></span>
                                 <?php if ($t['status'] === 'pending'):
@@ -2265,10 +1889,6 @@ $hasFilter = ($filter !== '' || $search !== '');
                                 <?php if (!empty($t['completion_image'])): ?>
                                     <a class="underline text-neutral-700" href="file.php?t=<?= (int)$t['ticket_id'] ?>&amp;k=completion" target="_blank" rel="noopener"><i class="fa-regular fa-image mr-1" aria-hidden="true"></i>รูปหลังซ่อม</a>
                                 <?php endif; ?>
-=======
-                                <span><i class="fa-solid fa-location-dot text-neutral-400 mr-2" aria-hidden="true"></i><?= h($t['location_name']) ?></span>
-                                <span><i class="fa-solid fa-user-gear text-neutral-400 mr-2" aria-hidden="true"></i>ผู้รับผิดชอบ: <strong class="text-neutral-700 font-medium"><?= $hasTech ? h($t['tech_name']) : 'ยังไม่มีผู้รับงาน' ?></strong></span>
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                             </div>
 
                             <!-- Enhanced Visual Stepper Component -->
@@ -2289,11 +1909,7 @@ $hasFilter = ($filter !== '' || $search !== '');
                                         <div class="visual-step <?= $stepClass ?>">
                                             <div class="visual-step-node">
                                                 <?php if ($step['now']): ?>
-<<<<<<< HEAD
                                                     <i class="fa-solid fa-circle-dot text-[11px]" aria-hidden="true"></i><span class="sr-only">ขั้นตอนปัจจุบัน</span>
-=======
-                                                    <i class="fa-solid fa-spinner fa-spin text-[10px]" aria-hidden="true"></i>
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                                                 <?php elseif ($step['on']): ?>
                                                     <i class="fa-solid fa-check text-[10px]" aria-hidden="true"></i>
                                                 <?php else: ?>
@@ -2310,7 +1926,6 @@ $hasFilter = ($filter !== '' || $search !== '');
                             </div>
 
                             <!-- Minimalist Card Actions -->
-<<<<<<< HEAD
                             <div class="flex flex-wrap items-center justify-between gap-2 mt-4 pt-3 border-t border-neutral-100 text-sm">
                                 <button type="button" class="inline-flex items-center gap-1.5 min-h-[44px] text-neutral-600 hover:text-neutral-900 border-0 bg-transparent px-0 cursor-pointer transition" data-hist aria-expanded="false" aria-controls="<?= $histId ?>">
                                     <i class="fa-solid fa-clock-rotate-left text-[11px] text-neutral-500" aria-hidden="true"></i>
@@ -2327,25 +1942,6 @@ $hasFilter = ($filter !== '' || $search !== '');
                                     <?php if ($can_cancel): ?>
                                         <button type="button" class="inline-flex items-center gap-1.5 min-h-[44px] px-4 rounded-lg border border-rose-200 bg-white text-rose-700 hover:bg-rose-50 cursor-pointer transition" data-cancel data-id="<?= (int)$t['ticket_id'] ?>" data-no="<?= h($t['ticket_no']) ?>">
                                             ยกเลิกใบงาน
-=======
-                            <div class="flex items-center justify-between mt-4 pt-3 border-t border-neutral-100 text-xs">
-                                <button type="button" class="inline-flex items-center gap-1.5 text-neutral-500 hover:text-neutral-900 border-0 bg-transparent p-0 cursor-pointer transition" data-hist aria-expanded="false" aria-controls="<?= $histId ?>">
-                                    <i class="fa-solid fa-clock-rotate-left text-[11px] text-neutral-400" aria-hidden="true"></i>
-                                    <span>ประวัติสถานะ (<?= count($timeline) ?>)</span>
-                                    <i class="fa-solid fa-chevron-down text-[9px] text-neutral-400 transition-transform duration-200" data-hist-icon aria-hidden="true"></i>
-                                </button>
-
-                                <div class="flex items-center gap-3">
-                                    <?php if ($can_edit): ?>
-                                        <button type="button" class="text-neutral-600 hover:text-neutral-900 border-0 bg-transparent p-0 cursor-pointer transition" data-edit data-id="<?= (int)$t['ticket_id'] ?>" data-no="<?= h($t['ticket_no']) ?>" data-category="<?= (int)$t['category_id'] ?>" data-category-name="<?= h($t['category_name'] ?? 'ไม่ระบุหมวดหมู่') ?>" data-location="<?= h($t['location_name']) ?>" data-symptoms="<?= h($t['symptoms']) ?>" data-urgency="<?= h($t['urgency']) ?>" data-created="<?= h(fmt($t['created_at'])) ?>">
-                                            แก้ไข
-                                        </button>
-                                    <?php endif; ?>
-                                    <?php if ($can_cancel): ?>
-                                        <?php if ($can_edit): ?><span class="text-neutral-200">·</span><?php endif; ?>
-                                        <button type="button" class="text-rose-500 hover:text-rose-700 border-0 bg-transparent p-0 cursor-pointer transition" data-cancel data-id="<?= (int)$t['ticket_id'] ?>" data-no="<?= h($t['ticket_no']) ?>">
-                                            ยกเลิก
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                                         </button>
                                     <?php endif; ?>
                                 </div>
@@ -2354,11 +1950,7 @@ $hasFilter = ($filter !== '' || $search !== '');
                             <!-- Status Log Drawer (Vertical Stepper) -->
                             <div class="hidden mt-3 p-4 bg-neutral-50 rounded-xl border border-neutral-200" id="<?= $histId ?>">
                                 <div class="font-medium text-neutral-800 text-xs mb-3 flex items-center gap-2">
-<<<<<<< HEAD
                                     <i class="fa-solid fa-timeline text-neutral-500" aria-hidden="true"></i>
-=======
-                                    <i class="fa-solid fa-timeline text-neutral-400" aria-hidden="true"></i>
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                                     <span>ประวัติสถานะ</span>
                                 </div>
                                 <ol class="log-stepper">
@@ -2390,7 +1982,6 @@ $hasFilter = ($filter !== '' || $search !== '');
                 </div>
             <?php endif; ?>
 
-<<<<<<< HEAD
             <?php if ($recent_done !== [] && $filter === '' && $search === ''): ?>
                 <section class="mt-6 bg-white rounded-2xl border border-emerald-200 p-4 sm:p-5" aria-labelledby="done-heading">
                     <h3 id="done-heading" class="text-base font-semibold text-neutral-900 flex items-center gap-2">
@@ -2421,42 +2012,13 @@ $hasFilter = ($filter !== '' || $search !== '');
             <div class="mt-4 overflow-hidden rounded-2xl border border-neutral-200 bg-white">
                 <?php pager_render('dashboard.php', $total_filtered, $page, TICKETS_PER_PAGE, TICKETS_PER_PAGE_OPTIONS, static fn(int $p): string => page_url(['status' => $filter, 'q' => $search, 'page' => $p]), ['status' => $filter, 'q' => $search], 'เปลี่ยนหน้าใบงาน'); ?>
             </div>
-=======
-            <!-- Pagination -->
-            <?php if ($max_pages > 1): ?>
-                <div class="flex items-center justify-between p-4 bg-white rounded-2xl border border-neutral-200 mt-4 font-mono text-xs text-neutral-500">
-                    <span>หน้า <?= $page ?> / <?= $max_pages ?></span>
-                    <div class="flex items-center gap-3">
-                        <?php if ($page > 1): ?>
-                            <a href="<?= h(page_url(['status' => $filter, 'q' => $search, 'page' => $page - 1])) ?>" class="text-neutral-900 hover:underline">← ก่อนหน้า</a>
-                        <?php else: ?>
-                            <span class="text-neutral-300">← ก่อนหน้า</span>
-                        <?php endif; ?>
-
-                        <?php if ($page < $max_pages): ?>
-                            <a href="<?= h(page_url(['status' => $filter, 'q' => $search, 'page' => $page + 1])) ?>" class="text-neutral-900 hover:underline">ถัดไป →</a>
-                        <?php else: ?>
-                            <span class="text-neutral-300">ถัดไป →</span>
-                        <?php endif; ?>
-                    </div>
-                </div>
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
             <?php endif; ?>
 
         </section>
 
     </main>
 
-<<<<<<< HEAD
     <?php $footerBase = ''; $footerVariant = 'light'; require __DIR__ . '/includes/site_footer.php'; ?>
-=======
-    <footer class="reps-footer">
-        <div class="reps-footer-inner">
-            <span>REPS · แผนกเทคโนโลยีธุรกิจดิจิทัล</span>
-            <span>User Workspace</span>
-        </div>
-    </footer>
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 
     <!-- Modal: Edit Ticket -->
     <dialog id="editDialog" class="edit-modal" aria-labelledby="editDialogTitle" aria-describedby="editDialogDescription">
@@ -2468,11 +2030,7 @@ $hasFilter = ($filter !== '' || $search !== '');
             <div class="edit-modal-header">
                 <div class="edit-modal-title-row">
                     <div>
-<<<<<<< HEAD
                         
-=======
-                        <div class="edit-modal-eyebrow">Repair request · edit workspace</div>
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                         <h2 id="editDialogTitle" class="edit-modal-title">แก้ไขใบแจ้งซ่อม <span class="edit-modal-ticket-no" data-fill="no"></span></h2>
                         <p id="editDialogDescription" class="edit-modal-subtitle">ตรวจสอบและปรับปรุงข้อมูลให้ทีมช่างเข้าใจปัญหาได้ตรงจุด</p>
                     </div>
@@ -2549,14 +2107,8 @@ $hasFilter = ($filter !== '' || $search !== '');
                      <div class="urgency-selector-grid">
                            <?php
                            $urgencyDescs = [
-<<<<<<< HEAD
                               'urgent' => 'ต้องแก้ไขภายในวันนี้',
                               'normal' => 'ดำเนินการตามคิว',
-=======
-                              'urgent' => 'ต้องแก้ไขเร่งด่วน',
-                              'normal' => 'ดำเนินการตามคิว',
-                              'low'    => 'แจ้งไว้ล่วงหน้าได้',
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                            ];
                            foreach (URGENCY_LABELS as $val => $lbl):
                            ?>
@@ -2573,23 +2125,16 @@ $hasFilter = ($filter !== '' || $search !== '');
                            <?php endforeach; ?>
                      </div>
                   </fieldset>
-<<<<<<< HEAD
                   <label class="block mt-3 text-xs text-neutral-600" for="editUrgencyReason">เหตุผลที่ต้องแก้ไขภายในวันนี้ (กรอกเมื่อเลือก "ด่วน" · เว้นว่างเพื่อใช้เหตุผลเดิม)</label>
                   <input type="text" id="editUrgencyReason" name="urgency_reason" maxlength="500" class="edit-modal-control mt-1 w-full">
                   <p class="mt-1 text-[11px] text-rose-700">เลือก "ด่วน" เฉพาะกรณีจำเป็นจริง ๆ ที่ต้องแก้ไขภายในวันนี้</p>
-=======
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                </section>
             </div>
 
             <div class="edit-modal-footer">
                 <p class="edit-modal-footer-note"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i><span>แก้ไขได้เฉพาะใบงานของคุณที่ยังรอรับเรื่อง</span></p>
                 <div class="edit-modal-actions">
-<<<<<<< HEAD
                     <button type="button" class="admin-btn admin-btn-secondary" data-close>ปิดโดยไม่บันทึก</button>
-=======
-                    <button type="button" class="admin-btn admin-btn-secondary" data-close>ยกเลิก</button>
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                     <button type="submit" class="admin-btn edit-modal-submit" data-submit>
                         <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i>
                         <span data-submit-label>บันทึกการแก้ไข</span>
@@ -2607,31 +2152,18 @@ $hasFilter = ($filter !== '' || $search !== '');
             <input type="hidden" name="ticket_id" value="">
             <div class="flex items-center justify-between border-b border-neutral-100 px-6 py-4">
                 <h2 class="text-sm font-semibold text-rose-600">ยกเลิกใบงาน <span class="font-mono font-normal" data-fill="no"></span></h2>
-<<<<<<< HEAD
                 <button type="button" class="text-neutral-500 hover:text-neutral-900 border-0 bg-transparent cursor-pointer" data-close aria-label="ปิด"><i class="fa-solid fa-xmark text-base" aria-hidden="true"></i></button>
-=======
-                <button type="button" class="text-neutral-400 hover:text-neutral-900 border-0 bg-transparent cursor-pointer" data-close aria-label="ปิด"><i class="fa-solid fa-xmark text-base" aria-hidden="true"></i></button>
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
             </div>
             <div class="space-y-4 px-6 py-5 text-xs">
                 <p class="text-neutral-500">ใบงานที่ยกเลิกแล้วจะไม่สามารถนำกลับมาแก้ไขได้อีก โปรดระบุเหตุผลในการยกเลิก</p>
                 <div class="flex flex-wrap gap-1.5">
                     <?php foreach (['แจ้งผิดรายการ' => 'แจ้งผิดรายการ', 'แจ้งซ้ำกับใบงานอื่น' => 'แจ้งซ้ำ', 'ปัญหาหายแล้ว ไม่ต้องซ่อม' => 'แก้ไขได้เองแล้ว'] as $reason => $chipLabel): ?>
-<<<<<<< HEAD
                         <button type="button" class="min-h-[40px] rounded-full border border-neutral-300 px-3.5 text-sm text-neutral-700 hover:border-neutral-900 hover:text-neutral-900 transition bg-white cursor-pointer" data-reason="<?= h($reason) ?>"><?= h($chipLabel) ?></button>
                     <?php endforeach; ?>
                 </div>
                 <div>
                     <label for="cancelReasonInput" class="block font-medium text-neutral-700 mb-1">เหตุผลการยกเลิก <span class="text-rose-600">*</span></label>
                     <textarea id="cancelReasonInput" name="cancel_reason" rows="3" maxlength="<?= CANCEL_REASON_MAX_LENGTH ?>" required class="w-full rounded-lg border border-neutral-300 px-3 py-2 text-xs text-neutral-900 focus:border-neutral-900 focus:outline-none" placeholder="ระบุเหตุผลสั้นๆ..."></textarea>
-=======
-                        <button type="button" class="rounded-full border border-neutral-200 px-2.5 py-1 text-[11px] text-neutral-600 hover:border-neutral-900 hover:text-neutral-900 transition bg-white cursor-pointer" data-reason="<?= h($reason) ?>"><?= h($chipLabel) ?></button>
-                    <?php endforeach; ?>
-                </div>
-                <div>
-                    <label class="block font-medium text-neutral-700 mb-1">เหตุผลการยกเลิก <span class="text-rose-600">*</span></label>
-                    <textarea name="cancel_reason" rows="3" maxlength="<?= CANCEL_REASON_MAX_LENGTH ?>" required class="w-full rounded-lg border border-neutral-300 px-3 py-2 text-xs text-neutral-900 focus:border-neutral-900 focus:outline-none" placeholder="ระบุเหตุผลสั้นๆ..."></textarea>
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
                 </div>
             </div>
             <div class="flex items-center justify-end gap-2 border-t border-neutral-100 px-6 py-4 bg-neutral-50 rounded-b-2xl">

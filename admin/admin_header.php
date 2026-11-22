@@ -1,6 +1,5 @@
 <?php
 require_once __DIR__ . '/../includes/admin_auth.php';
-<<<<<<< HEAD
 require_once __DIR__ . '/../includes/icons.php';
 require_once __DIR__ . '/../includes/stock_alert.php';
 require_once __DIR__ . '/../includes/notifications.php';
@@ -11,17 +10,12 @@ require_once __DIR__ . '/../includes/site_menu.php';
 $current_page = $current_page ?? 'dashboard';
 // หน้าที่อยู่นอกโฟลเดอร์ admin (เช่น staff/inventory.php) ต้องอ้างลิงก์เมนูด้วย ../admin/
 $adminLinkBase = basename(dirname((string)($_SERVER['SCRIPT_NAME'] ?? ''))) === 'admin' ? '' : '../admin/';
-=======
-
-$current_page = $current_page ?? 'dashboard';
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 $headerUserName = trim((string)($_SESSION['user_name'] ?? ''));
 if ($headerUserName === '') {
    $headerUserName = 'ผู้ดูแลระบบ';
 }
 $headerUserRole = ($_SESSION['u_role'] ?? '') === 'admin' ? 'ผู้ดูแลระบบ' : (string)($_SESSION['u_role'] ?? '');
 $headerSections = [
-<<<<<<< HEAD
    'dashboard'     => tr('แดชบอร์ด', 'Dashboard'),
    'request'       => tr('จัดการคำขอซ่อม', 'Repair requests'),
    'users'         => tr('จัดการผู้ใช้', 'Users'),
@@ -52,17 +46,6 @@ if (isset($conn) && $conn instanceof mysqli) {
    }
 }
 $headerSection = $headerSections[$current_page] ?? tr('ภาพรวมระบบ', 'Overview');
-=======
-   'dashboard'     => 'แดชบอร์ด',
-   'request'       => 'จัดการคำขอซ่อม',
-   'users'         => 'จัดการผู้ใช้',
-   'reports'       => 'รายงาน',
-   'notifications' => 'การแจ้งเตือน',
-   'history'       => 'ประวัติ',
-   'system'        => 'ตรวจระบบ',
-];
-$headerSection = $headerSections[$current_page] ?? 'ภาพรวมระบบ';
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 
 $headerInitial = mb_strtoupper(mb_substr(trim($headerUserName), 0, 1, 'UTF-8'), 'UTF-8');
 if ($headerInitial === '') {
@@ -71,13 +54,9 @@ if ($headerInitial === '') {
 
 $thaiDayShort = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
 $thaiMonthShort = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
-<<<<<<< HEAD
 $headerDateLabel = app_lang() === 'en'
    ? date('D j M Y')
    : $thaiDayShort[(int)date('w')] . ' ' . (int)date('j') . ' ' . $thaiMonthShort[(int)date('n') - 1] . ' ' . ((int)date('Y') + 543);
-=======
-$headerDateLabel = $thaiDayShort[(int)date('w')] . ' ' . (int)date('j') . ' ' . $thaiMonthShort[(int)date('n') - 1] . ' ' . ((int)date('Y') + 543);
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 ?>
 <!DOCTYPE html>
 <html lang="th">
@@ -93,11 +72,7 @@ $headerDateLabel = $thaiDayShort[(int)date('w')] . ' ' . (int)date('j') . ' ' . 
    <!-- Shared admin fonts -->
    <link rel="preconnect" href="https://fonts.googleapis.com">
    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<<<<<<< HEAD
    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-=======
-   <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
    <style>
       * {
          box-sizing: border-box;
@@ -105,11 +80,7 @@ $headerDateLabel = $thaiDayShort[(int)date('w')] . ' ' . (int)date('j') . ' ' . 
 
       /* Shared admin typography */
       body, h1, h2, h3, h4, h5, h6, span {
-<<<<<<< HEAD
          font-family: 'Kanit', sans-serif;
-=======
-         font-family: 'Inter', 'Kanit', sans-serif;
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
       }
 
       /* Sidebar nav — ตัวชี้เหลือ/เข้มของเมนูทำตาม .nav-link ของ dashboard.php
@@ -154,32 +125,20 @@ $headerDateLabel = $thaiDayShort[(int)date('w')] . ' ' . (int)date('j') . ' ' . 
          /* โทนเดียวกับ .dash ใน admin_dashboard.php — พื้นหลังอ่อนเกือบขาว */
          --admin-bg: #FAFAF8;
          --admin-sidebar: #F7F6F4;
-<<<<<<< HEAD
          --admin-tray: #F5F4F1;
-=======
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
          --admin-tray-line: #EAE8E4;
          --admin-card: #FFFFFF;
          --admin-line: #ECEAE6;
          --admin-line-strong: #D9D6D0;
          --admin-ink: #161616;
-<<<<<<< HEAD
          --admin-muted: #6B6862;
          --admin-soft: #F5F4F1;
-=======
-         --admin-muted: #8E8B85;
-         --admin-soft: #F7F6F4;
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
       }
 
       body.admin-shell {
          background: var(--admin-bg);
          color: var(--admin-ink);
-<<<<<<< HEAD
          font-family: 'Kanit', sans-serif;
-=======
-         font-family: 'Inter', 'Kanit', sans-serif;
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
       }
 
       body.admin-shell,
@@ -187,11 +146,7 @@ $headerDateLabel = $thaiDayShort[(int)date('w')] . ' ' . (int)date('j') . ' ' . 
       body.admin-shell input,
       body.admin-shell select,
       body.admin-shell textarea {
-<<<<<<< HEAD
          font-family: 'Kanit', sans-serif;
-=======
-         font-family: 'Inter', 'Kanit', sans-serif;
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
       }
 
       .admin-topbar {
@@ -228,13 +183,8 @@ $headerDateLabel = $thaiDayShort[(int)date('w')] . ' ' . (int)date('j') . ' ' . 
       .admin-brand-label {
          display: block;
          color: var(--admin-ink);
-<<<<<<< HEAD
          font-family: 'Kanit', sans-serif;
          font-size: 11px;
-=======
-         font-family: 'JetBrains Mono', 'Kanit', monospace;
-         font-size: 10.5px;
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
          font-weight: 600;
          letter-spacing: .14em;
          text-transform: uppercase;
@@ -245,13 +195,8 @@ $headerDateLabel = $thaiDayShort[(int)date('w')] . ' ' . (int)date('j') . ' ' . 
          display: block;
          margin-top: 2px;
          color: var(--admin-muted);
-<<<<<<< HEAD
          font-family: 'Kanit', sans-serif;
          font-size: 11px;
-=======
-         font-family: 'JetBrains Mono', 'Kanit', monospace;
-         font-size: 9px;
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
          font-weight: 400;
          letter-spacing: .12em;
       }
@@ -266,13 +211,8 @@ $headerDateLabel = $thaiDayShort[(int)date('w')] . ' ' . (int)date('j') . ' ' . 
 
       .admin-topbar .admin-topbar-eyebrow {
          color: var(--admin-muted);
-<<<<<<< HEAD
          font-family: 'Kanit', sans-serif;
          font-size: 11px;
-=======
-         font-family: 'JetBrains Mono', 'Kanit', monospace;
-         font-size: 9px;
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
          font-weight: 500;
          letter-spacing: .14em;
          text-transform: uppercase;
@@ -328,32 +268,6 @@ $headerDateLabel = $thaiDayShort[(int)date('w')] . ' ' . (int)date('j') . ' ' . 
             display: block;
          }
       }
-<<<<<<< HEAD
-=======
-
-      .admin-topbar .admin-clock-date {
-         display: block;
-         color: var(--admin-muted);
-         font-family: 'JetBrains Mono', 'Kanit', monospace;
-         font-size: 10px;
-         font-weight: 400;
-         letter-spacing: .1em;
-         text-transform: uppercase;
-         white-space: nowrap;
-      }
-
-      .admin-topbar .admin-clock-time {
-         display: block;
-         margin-top: 2px;
-         color: var(--admin-ink);
-         font-family: 'JetBrains Mono', 'Kanit', monospace;
-         font-size: 13px;
-         font-weight: 600;
-         letter-spacing: .02em;
-         font-variant-numeric: tabular-nums;
-      }
-
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
       .admin-topbar .admin-user-name {
          color: var(--admin-ink);
          font-size: 13px;
@@ -362,13 +276,8 @@ $headerDateLabel = $thaiDayShort[(int)date('w')] . ' ' . (int)date('j') . ' ' . 
 
       .admin-topbar .admin-user-role {
          color: var(--admin-muted);
-<<<<<<< HEAD
          font-family: 'Kanit', sans-serif;
          font-size: 11px;
-=======
-         font-family: 'JetBrains Mono', 'Kanit', monospace;
-         font-size: 9.5px;
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
          letter-spacing: .1em;
          text-transform: uppercase;
       }
@@ -377,11 +286,7 @@ $headerDateLabel = $thaiDayShort[(int)date('w')] . ' ' . (int)date('j') . ' ' . 
          background: var(--admin-soft);
          border-color: var(--admin-line);
          color: #55534F;
-<<<<<<< HEAD
          font-family: 'Kanit', sans-serif;
-=======
-         font-family: 'JetBrains Mono', 'Kanit', monospace;
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
          font-size: 13px;
          font-weight: 600;
          text-transform: uppercase;
@@ -413,21 +318,13 @@ $headerDateLabel = $thaiDayShort[(int)date('w')] . ' ' . (int)date('j') . ' ' . 
       }
 
       .admin-sidebar .admin-side-brand .admin-brand-label {
-<<<<<<< HEAD
          font-size: 11px;
-=======
-         font-size: 10px;
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
          letter-spacing: .1em;
          white-space: nowrap;
       }
 
       .admin-sidebar .admin-side-brand .admin-brand-sub {
-<<<<<<< HEAD
          font-size: 11px;
-=======
-         font-size: 8.5px;
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
          letter-spacing: .08em;
          white-space: nowrap;
       }
@@ -459,22 +356,13 @@ $headerDateLabel = $thaiDayShort[(int)date('w')] . ' ' . (int)date('j') . ' ' . 
       }
 
       .admin-sidebar > nav {
-<<<<<<< HEAD
          padding: 12px 16px 0;
-=======
-         padding: 18px 16px 0;
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
       }
 
       .admin-sidebar .admin-nav-label {
          color: var(--admin-muted);
-<<<<<<< HEAD
          font-family: 'Kanit', sans-serif;
          font-size: 11px;
-=======
-         font-family: 'JetBrains Mono', 'Kanit', monospace;
-         font-size: 10px;
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
          font-weight: 500;
          letter-spacing: .12em;
          padding: 0 10px;
@@ -484,7 +372,6 @@ $headerDateLabel = $thaiDayShort[(int)date('w')] . ' ' . (int)date('j') . ' ' . 
          border-left: 0;
          display: flex;
          flex-direction: column;
-<<<<<<< HEAD
          gap: 1px;
       }
 
@@ -601,20 +488,13 @@ $headerDateLabel = $thaiDayShort[(int)date('w')] . ' ' . (int)date('j') . ' ' . 
       @media (pointer: coarse) {
          .admin-sidebar .admin-foot-icon { width: 44px; height: 44px; }
          .admin-sidebar .admin-nav-head { min-height: 40px; }
-=======
-         gap: 2px;
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
       }
 
       .admin-sidebar .side-nav a {
          display: flex;
          align-items: center;
          margin-left: 0;
-<<<<<<< HEAD
          padding: 7px 10px;
-=======
-         padding: 9px 10px;
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
          border: 1px solid transparent;
          border-left: 1px solid transparent;
          border-radius: 10px;
@@ -625,7 +505,6 @@ $headerDateLabel = $thaiDayShort[(int)date('w')] . ' ' . (int)date('j') . ' ' . 
          transition: color .15s ease, background-color .15s ease, border-color .15s ease, box-shadow .15s ease;
       }
 
-<<<<<<< HEAD
       /* ชื่อเมนูบรรทัดเดียวเสมอ (ชื่อยาวที่ตั้งเองตัดด้วย … และดูชื่อเต็มได้จาก title) */
       .admin-sidebar .side-nav a > span:not(.stock-alert__tab) {
          min-width: 0;
@@ -636,9 +515,6 @@ $headerDateLabel = $thaiDayShort[(int)date('w')] . ' ' . (int)date('j') . ' ' . 
 
       .admin-sidebar .side-nav a > i {
          flex: none;
-=======
-      .admin-sidebar .side-nav a > i {
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
          width: 16px;
          font-size: 12px;
          opacity: .75;
@@ -677,31 +553,20 @@ $headerDateLabel = $thaiDayShort[(int)date('w')] . ' ' . (int)date('j') . ' ' . 
          flex: none;
       }
 
-<<<<<<< HEAD
       /* ปุ่มออกจากระบบติดขอบล่างของแถบข้างเสมอ (เมนูด้านบนเลื่อนได้เมื่อจอเตี้ย) */
       .admin-sidebar .admin-side-foot {
          position: sticky;
          bottom: 0;
          z-index: 1;
-=======
-      .admin-sidebar .admin-side-foot {
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
          flex: none;
          margin: 12px 0 0;
          padding: 10px 16px 14px;
          border-top: 1px solid var(--admin-line);
-<<<<<<< HEAD
          background: var(--admin-sidebar);
       }
 
       .admin-sidebar .admin-logout {
          color: #5F5C57;
-=======
-      }
-
-      .admin-sidebar .admin-logout {
-         color: #77736D;
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
          border: 1px solid transparent;
          border-radius: 10px;
          transition: color .15s ease, background-color .15s ease, border-color .15s ease;
@@ -839,11 +704,7 @@ $headerDateLabel = $thaiDayShort[(int)date('w')] . ' ' . (int)date('j') . ' ' . 
          border-radius: 10px;
          background: #FFFFFF;
          color: var(--admin-ink);
-<<<<<<< HEAD
          font: 400 15px/1.5 'Kanit', sans-serif;
-=======
-         font: 400 15px/1.5 'Inter', 'Kanit', sans-serif;
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
          text-align: left;
          cursor: pointer;
          transition: border-color .15s ease, box-shadow .15s ease, background-color .15s ease;
@@ -919,11 +780,7 @@ $headerDateLabel = $thaiDayShort[(int)date('w')] . ' ' . (int)date('j') . ' ' . 
          border-radius: 8px;
          background: transparent;
          color: var(--admin-ink);
-<<<<<<< HEAD
          font: 400 15px/1.4 'Kanit', sans-serif;
-=======
-         font: 400 15px/1.4 'Inter', 'Kanit', sans-serif;
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
          text-align: left;
          cursor: pointer;
          transition: background-color .12s ease, color .12s ease;
@@ -962,13 +819,8 @@ $headerDateLabel = $thaiDayShort[(int)date('w')] . ' ' . (int)date('j') . ' ' . 
 
       .admin-content table thead th {
          color: var(--admin-muted);
-<<<<<<< HEAD
          font-family: 'Kanit', sans-serif;
          font-size: 11px;
-=======
-         font-family: 'JetBrains Mono', 'Kanit', monospace;
-         font-size: 10.5px;
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
          font-weight: 500;
          letter-spacing: .07em;
          text-transform: uppercase;
@@ -1030,11 +882,7 @@ $headerDateLabel = $thaiDayShort[(int)date('w')] . ' ' . (int)date('j') . ' ' . 
          gap: 8px;
          margin-bottom: 10px;
          color: var(--admin-muted);
-<<<<<<< HEAD
          font-family: 'Kanit', sans-serif;
-=======
-         font-family: 'Kanit', monospace;
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
          font-size: 13px;
          font-weight: 400;
       }
@@ -1050,11 +898,7 @@ $headerDateLabel = $thaiDayShort[(int)date('w')] . ' ' . (int)date('j') . ' ' . 
       }
 
       .admin-crumb i {
-<<<<<<< HEAD
          font-size: 11px;
-=======
-         font-size: 8px;
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
          opacity: .55;
       }
 
@@ -1080,11 +924,7 @@ $headerDateLabel = $thaiDayShort[(int)date('w')] . ' ' . (int)date('j') . ' ' . 
          gap: 10px;
          padding: 8px 12px 10px;
          color: var(--admin-muted);
-<<<<<<< HEAD
          font-family: 'Kanit', sans-serif;
-=======
-         font-family: 'JetBrains Mono', 'Kanit', monospace;
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
          font-size: 11px;
          font-weight: 500;
          line-height: 1.4;
@@ -1131,11 +971,7 @@ $headerDateLabel = $thaiDayShort[(int)date('w')] . ' ' . (int)date('j') . ' ' . 
          align-items: center;
          gap: 7px;
          color: var(--admin-muted);
-<<<<<<< HEAD
          font-family: 'Kanit', sans-serif;
-=======
-         font-family: 'JetBrains Mono', 'Kanit', monospace;
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
          font-size: 12px;
          font-weight: 400;
          letter-spacing: .06em;
@@ -1154,11 +990,7 @@ $headerDateLabel = $thaiDayShort[(int)date('w')] . ' ' . (int)date('j') . ' ' . 
       .admin-stat-value {
          margin-top: 6px;
          color: var(--admin-ink);
-<<<<<<< HEAD
          font-family: 'Kanit', sans-serif;
-=======
-         font-family: 'JetBrains Mono', 'Kanit', monospace;
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
          font-size: 26px;
          font-weight: 600;
          line-height: 1.1;
@@ -1190,13 +1022,8 @@ $headerDateLabel = $thaiDayShort[(int)date('w')] . ' ' . (int)date('j') . ' ' . 
       .admin-content .admin-toolbar > label,
       .admin-content .admin-toolbar .admin-field-label {
          color: var(--admin-muted);
-<<<<<<< HEAD
          font-family: 'Kanit', sans-serif;
          font-size: 11px;
-=======
-         font-family: 'JetBrains Mono', 'Kanit', monospace;
-         font-size: 10px;
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
          font-weight: 500;
          letter-spacing: .06em;
          text-transform: uppercase;
@@ -1238,11 +1065,7 @@ $headerDateLabel = $thaiDayShort[(int)date('w')] . ' ' . (int)date('j') . ' ' . 
          border-radius: 999px;
          background: var(--admin-soft);
          color: #55534F;
-<<<<<<< HEAD
          font-family: 'Kanit', sans-serif;
-=======
-         font-family: 'Inter', 'Kanit', sans-serif;
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
          font-size: 11.5px;
          font-weight: 500;
          line-height: 1.5;
@@ -1259,11 +1082,7 @@ $headerDateLabel = $thaiDayShort[(int)date('w')] . ' ' . (int)date('j') . ' ' . 
       }
 
       .admin-chip i {
-<<<<<<< HEAD
          font-size: 11px;
-=======
-         font-size: 9.5px;
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
       }
 
       .admin-chip.is-urgent {
@@ -1318,7 +1137,6 @@ $headerDateLabel = $thaiDayShort[(int)date('w')] . ' ' . (int)date('j') . ' ' . 
       }
 
       .st-pending { --c: #D97706; }
-<<<<<<< HEAD
       .st-in_progress,
       .st-accepted,
       .st-awaiting_intake_sign,
@@ -1333,13 +1151,6 @@ $headerDateLabel = $thaiDayShort[(int)date('w')] . ' ' . (int)date('j') . ' ' . 
       .st-active { --c: #12A150; }
       .st-cancelled,
       .st-disabled { --c: #6B6862; }
-=======
-      .st-in_progress { --c: #2563EB; }
-      .st-completed,
-      .st-active { --c: #12A150; }
-      .st-cancelled,
-      .st-disabled { --c: #8E8B85; }
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 
       /* ===== Buttons ===== */
       .admin-content .admin-btn {
@@ -1402,7 +1213,6 @@ $headerDateLabel = $thaiDayShort[(int)date('w')] . ' ' . (int)date('j') . ' ' . 
          box-shadow: none;
       }
 
-<<<<<<< HEAD
       /* เนื้อหาหลัก + คอลัมน์ฟอร์มด้านขวา (หน้าคะแนนสตาฟ ภาคเรียน) — ไม่พึ่ง class แบบ arbitrary ของ Tailwind */
       .admin-split {
          display: grid;
@@ -1420,8 +1230,6 @@ $headerDateLabel = $thaiDayShort[(int)date('w')] . ' ' . (int)date('j') . ' ' . 
          }
       }
 
-=======
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
       .admin-content .admin-btn-danger-outline:hover {
          background: #FEF3F2;
          border-color: #E7B4AD;
@@ -1470,11 +1278,7 @@ $headerDateLabel = $thaiDayShort[(int)date('w')] . ' ' . (int)date('j') . ' ' . 
          border-radius: 50%;
          background: var(--admin-soft);
          color: #55534F;
-<<<<<<< HEAD
          font-family: 'Kanit', sans-serif;
-=======
-         font-family: 'JetBrains Mono', 'Kanit', monospace;
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
          font-size: 24px;
          font-weight: 600;
          box-shadow: inset 0 0 0 3px #FFFFFF;
@@ -1491,13 +1295,8 @@ $headerDateLabel = $thaiDayShort[(int)date('w')] . ' ' . (int)date('j') . ' ' . 
          align-items: center;
          gap: 8px;
          color: var(--admin-muted);
-<<<<<<< HEAD
          font-family: 'Kanit', sans-serif;
          font-size: 11px;
-=======
-         font-family: 'JetBrains Mono', 'Kanit', monospace;
-         font-size: 10.5px;
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
          font-weight: 500;
          letter-spacing: .06em;
          text-transform: uppercase;
@@ -1615,11 +1414,7 @@ $headerDateLabel = $thaiDayShort[(int)date('w')] . ' ' . (int)date('j') . ' ' . 
 
       /* ===== ยุบ/กาง sidebar บนเดสก์ท็อป (กดปุ่ม toggle ที่ topbar) ===== */
       .admin-content {
-<<<<<<< HEAD
          background: var(--admin-bg);
-=======
-         transition: margin-left .2s ease-in-out;
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
       }
 
       @media (min-width: 1024px) {
@@ -1632,14 +1427,11 @@ $headerDateLabel = $thaiDayShort[(int)date('w')] . ' ' . (int)date('j') . ' ' . 
          }
       }
    </style>
-<<<<<<< HEAD
    <link rel="stylesheet" href="../assets/css/admin-system.css?v=1">
    <link rel="stylesheet" href="../assets/css/base.css?v=18">
    <?= app_icon_js() ?>
    <?= $admin_extra_head ?? '' ?>
    <link rel="stylesheet" href="../assets/css/staff-workspace.css?v=4">
-=======
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 </head>
 
 <body class="admin-shell min-h-screen text-muted antialiased">
@@ -1656,32 +1448,14 @@ $headerDateLabel = $thaiDayShort[(int)date('w')] . ' ' . (int)date('j') . ' ' . 
          </button>
 
          <div class="admin-topbar-titles min-w-0">
-<<<<<<< HEAD
-=======
-            <span class="admin-topbar-eyebrow">REPS Console</span>
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
             <span class="admin-topbar-section"><?= htmlspecialchars($headerSection, ENT_QUOTES, 'UTF-8') ?></span>
          </div>
       </div>
 
       <div class="flex items-center gap-3 ml-auto">
-<<<<<<< HEAD
          <?php $headerStockAlert = isset($conn) && $conn instanceof mysqli ? stock_alert_load($conn) : ['count' => 0, 'items' => []]; ?>
          <?= isset($conn) && $conn instanceof mysqli ? notif_bell($conn, '../') : '' ?>
          <?= isset($conn) && $conn instanceof mysqli ? user_menu_render($conn, '../', true, false) : '' ?>
-=======
-         <div class="admin-topbar-clock">
-            <span class="admin-clock-date"><?= htmlspecialchars($headerDateLabel, ENT_QUOTES, 'UTF-8') ?></span>
-            <span class="admin-clock-time" id="adminClock"><?= date('H:i') ?></span>
-         </div>
-         <div class="text-right min-w-0">
-            <div class="admin-user-name leading-tight truncate max-w-[140px] sm:max-w-none"><?= htmlspecialchars($headerUserName, ENT_QUOTES, 'UTF-8') ?></div>
-            <div class="admin-user-role leading-tight mt-0.5"><?= htmlspecialchars($headerUserRole, ENT_QUOTES, 'UTF-8') ?></div>
-         </div>
-         <div class="admin-user-avatar w-[38px] h-[38px] rounded-full bg-slate-100 text-slate-500 border border-line flex items-center justify-center text-sm flex-none">
-            <?= htmlspecialchars($headerInitial, ENT_QUOTES, 'UTF-8') ?>
-         </div>
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
       </div>
    </header>
 
@@ -1690,11 +1464,7 @@ $headerDateLabel = $thaiDayShort[(int)date('w')] . ' ' . (int)date('j') . ' ' . 
       class="admin-sidebar fixed top-header left-0 h-[calc(100vh-64px)] w-sidebar border-r border-line bg-white flex flex-col overflow-y-auto z-[1100]
                -translate-x-full lg:translate-x-0 transition-transform duration-200 ease-in-out">
       <div class="admin-side-brand">
-<<<<<<< HEAD
          <a href="<?= $adminLinkBase ?>admin_dashboard.php" class="admin-brand flex items-center gap-2.5 group focus:outline-none min-w-0">
-=======
-         <a href="admin_dashboard.php" class="admin-brand flex items-center gap-2.5 group focus:outline-none min-w-0">
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
             <img src="../assets/images/logo/reps-logo.svg" alt="REPS" class="h-6 w-auto flex-none">
             <!-- <span class="admin-brand-divider" aria-hidden="true"></span>
             <span class="admin-brand-copy">
@@ -1709,7 +1479,6 @@ $headerDateLabel = $thaiDayShort[(int)date('w')] . ' ' . (int)date('j') . ' ' . 
          </button>
       </div>
 
-<<<<<<< HEAD
       <nav class="flex-1" aria-label="<?= tr('เมนูผู้ดูแลระบบ', 'Admin menu') ?>">
          <?php
          // เมนูจาก includes/site_menu.php (admin ปรับชื่อ ลำดับ การแสดงได้ที่หน้า ปรับแต่งเว็บ)
@@ -1745,66 +1514,19 @@ $headerDateLabel = $thaiDayShort[(int)date('w')] . ' ' . (int)date('j') . ' ' . 
             </div>
          </div>
          <?php endforeach; ?>
-=======
-      <nav class="flex-1" aria-label="เมนูผู้ดูแลระบบ">
-         <div class="admin-nav-label">ภาพรวม</div>
-
-         <div class="side-nav flex flex-col mt-2">
-            <a href="admin_dashboard.php"<?= $current_page === 'dashboard' ? ' aria-current="page"' : ''; ?>>
-               <i class="fa-solid fa-chart-pie" aria-hidden="true"></i>
-               <span>แดชบอร์ด</span>
-            </a>
-         </div>
-
-         <div class="admin-nav-label mt-6 mb-0">การจัดการ</div>
-
-         <div class="side-nav flex flex-col mt-2">
-            <a href="admin_manage_request.php"<?= $current_page === 'request' ? ' aria-current="page"' : ''; ?>>
-               <i class="fa-solid fa-clipboard-list" aria-hidden="true"></i>
-               <span>จัดการคำขอซ่อม</span>
-            </a>
-            <a href="admin_manage_user.php"<?= $current_page === 'users' ? ' aria-current="page"' : ''; ?>>
-               <i class="fa-solid fa-users" aria-hidden="true"></i>
-               <span>จัดการผู้ใช้</span>
-            </a>
-         </div>
-
-         <div class="admin-nav-label mt-6 mb-0">การติดตาม</div>
-
-         <div class="side-nav flex flex-col mt-2">
-            <a href="admin_reports.php"<?= $current_page === 'reports' ? ' aria-current="page"' : ''; ?>>
-               <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
-               <span>รายงาน</span>
-            </a>
-            <a href="admin_notifications.php"<?= $current_page === 'notifications' ? ' aria-current="page"' : ''; ?>>
-               <i class="fa-solid fa-bell" aria-hidden="true"></i>
-               <span>การแจ้งเตือน</span>
-            </a>
-            <a href="admin_history.php"<?= $current_page === 'history' ? ' aria-current="page"' : ''; ?>>
-               <i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i>
-               <span>ประวัติ</span>
-            </a>
-         </div>
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
       </nav>
 
       <div class="admin-side-foot">
          <a href="../logout.php" class="admin-logout flex items-center gap-2.5 px-2.5 py-2 rounded-md text-gray-500 no-underline text-sm">
             <i class="fa-solid fa-right-from-bracket text-xs"></i>
-<<<<<<< HEAD
             <span><?= tr('ออกจากระบบ', 'Sign out') ?></span>
          </a>
          <a href="<?= $adminLinkBase ?>admin_settings.php" class="admin-foot-icon" title="<?= tr('ตั้งค่าระบบ', 'Settings') ?>" aria-label="<?= tr('ตั้งค่าระบบ', 'Settings') ?>"<?= ($current_page ?? '') === 'settings' ? ' aria-current="page"' : '' ?>><i class="fa-solid fa-sliders" aria-hidden="true"></i></a>
          <a href="<?= $adminLinkBase ?>admin_site.php" class="admin-foot-icon" title="<?= tr('ปรับแต่งเว็บ', 'Customize site') ?>" aria-label="<?= tr('ปรับแต่งเว็บ', 'Customize site') ?>"<?= ($current_page ?? '') === 'site' ? ' aria-current="page"' : '' ?>><i class="fa-solid fa-palette" aria-hidden="true"></i></a>
-=======
-            <span>ออกจากระบบ</span>
-         </a>
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
       </div>
    </aside>
 
    <script>
-<<<<<<< HEAD
       /* กลุ่มเมนูพับได้: กดหัวกลุ่มเพื่อพับ/กาง (จำกลุ่มที่พับเองไว้) · ถ้าเมนูยาวเกินจอ พับกลุ่มจากล่างขึ้นบน
          ยกเว้นกลุ่มของหน้าปัจจุบันและกลุ่มที่เพิ่งกดเปิด จึงไม่ต้องมีแถบเลื่อน */
       (function () {
@@ -1859,8 +1581,6 @@ $headerDateLabel = $thaiDayShort[(int)date('w')] . ' ' . (int)date('j') . ' ' . 
    </script>
 
    <script>
-=======
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
       const sidebar = document.getElementById('sidebar');
       const sidebarToggle = document.getElementById('sidebarToggle');
       const sidebarToggleIcon = document.getElementById('sidebarToggleIcon');
@@ -2190,8 +1910,4 @@ $headerDateLabel = $thaiDayShort[(int)date('w')] . ' ' . (int)date('j') . ' ' . 
 
    <!-- Page wrapper: content starts after sidebar + header -->
    <div class="admin-content lg:ml-sidebar pt-header min-h-screen flex flex-col">
-<<<<<<< HEAD
       <div class="p-6 flex-1">
-=======
-      <div class="p-6 flex-1">
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff

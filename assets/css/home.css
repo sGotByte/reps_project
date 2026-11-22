@@ -9,11 +9,7 @@ html {
 }
 
 body {
-<<<<<<< HEAD
    font-family: 'Kanit', sans-serif;
-=======
-   font-family: 'Google Sans', 'Kanit', sans-serif;
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
    line-height: 1.6;
 }
 
@@ -31,11 +27,7 @@ h1, h2, h3, h4, h5, h6 { font-family: 'Kanit', sans-serif; }
    #contact .contact-eyebrow { right: 0; }
 }
 
-<<<<<<< HEAD
 /* สี muted ของหน้า public (app.css ใช้ #6B6862 สำหรับ admin ซึ่ง contrast ต่ำบนพื้นขาว) */
-=======
-/* สี muted ของหน้า public (app.css ใช้ #8E8B85 สำหรับ admin ซึ่ง contrast ต่ำบนพื้นขาว) */
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 .public-page .text-muted { color: var(--muted); }
 
 /* Scrollspy */
@@ -58,12 +50,8 @@ h1, h2, h3, h4, h5, h6 { font-family: 'Kanit', sans-serif; }
 :root {
    --dash: #C4C4C4;
    --plus: #737373;
-<<<<<<< HEAD
    /* ต้องตรงกับกรอบเนื้อหา: max-w-6xl (72rem) + px-6 (1.5rem ต่อข้าง) — ใช้ rem เหมือนกัน เส้นจึงไม่เคลื่อนเมื่อผู้ใช้ปรับขนาดตัวอักษรของเบราว์เซอร์ */
    --rail-w: min(72rem, calc(100% - 3rem));
-=======
-   --rail-w: min(1152px, calc(100% - 3rem));
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
 }
 
 main#main { position: relative; }
@@ -385,11 +373,7 @@ footer.footer-dashed .footer-base {
 
 .feature-arrow {
    display: inline-block;
-<<<<<<< HEAD
    font-family: 'Kanit', sans-serif;
-=======
-   font-family: system-ui, sans-serif;
->>>>>>> c08963be28603300a3a15f3774c665c05d933fff
    font-size: .95rem;
    color: #111827;
    transition: transform .25s cubic-bezier(0.22, 1, 0.36, 1);
